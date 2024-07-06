@@ -1,24 +1,22 @@
-node_modules
+# Compiler files
+cache/
+out/
+cache_forge/
+
+# Ignores development broadcast logs
+broadcast/
+
+# Docs
+docs/
+
+# Dotenv file
 .env
-coverage
-coverage.json
-typechain
-typechain-types
 
-# Hardhat files
-cache
-artifacts
+node_modules/
+/.idea
+*.tsbuildinfo
 
-
-# LayerZero specific files
-.layerzero
-
-# foundry test compilation files
-out
-
-# pnpm
-pnpm-error.log
-
-# Editor and OS files
+# VS Code workspace config
+workspace.code-workspace
+.vscode/
 .DS_Store
-.idea
