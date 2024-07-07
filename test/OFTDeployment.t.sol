@@ -20,9 +20,12 @@ import "../utils/Constants.sol";
 import "forge-std/Test.sol";
 
 contract OFTDeploymentTest is Test, Constants {
-     using OptionsBuilder for bytes;
+    using OptionsBuilder for bytes;
 
     function testGnosisMainnet() public {
+        if (DEPLOYMENT_OFT == address(0)) {
+            return;
+        }
         console.log("Tesing peer transactions for mainnet");
         vm.createSelectFork(L1_RPC_URL);
         vm.deal(L1_CONTRACT_CONTROLLER, 100 ether);
@@ -41,7 +44,7 @@ contract OFTDeploymentTest is Test, Constants {
 
         console.log("Confirming that the OFT for mainnet has added the deployment as a peer");
         MintableOFTUpgradeable adapter = MintableOFTUpgradeable(L1_OFT_ADAPTER);
-        assertTrue(adapter.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT_PROXY)));
+        assertTrue(adapter.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 1), hex"000301001101000000000000000000000000000f4240");
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
@@ -54,6 +57,9 @@ contract OFTDeploymentTest is Test, Constants {
     }
 
     function testGnosisL2() public {
+        if (DEPLOYMENT_OFT == address(0)) {
+            return;
+        }
         for (uint i = 0; i < L2s.length; i++) {
             console.log("Testing gnosis peer transactions for %s", L2s[i].NAME);
             string memory l2Name = L2s[i].NAME;
@@ -76,7 +82,7 @@ contract OFTDeploymentTest is Test, Constants {
 
             console.log("Confirming that the OFT for %s has added the deployment as a peer", L2s[i].NAME);
             MintableOFTUpgradeable oft = MintableOFTUpgradeable(L2s[i].L2_OFT);
-            assertTrue(oft.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT_PROXY)));
+            assertTrue(oft.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
             (,,uint256 limit, uint256 window) = oft.rateLimits(DEPLOYMENT_EID);
             assertEq(limit, 200 ether);
             assertEq(window, 4 hours);
@@ -93,10 +99,13 @@ contract OFTDeploymentTest is Test, Constants {
     }
 
     function testDeployedOFT() public {
+        if (DEPLOYMENT_OFT == address(0)) {
+            return;
+        }
         // Confirm that the deployment chain is properly configured
 
         vm.createSelectFork(DEPLOYMENT_RPC_URL);
-        MintableOFTUpgradeable oft = MintableOFTUpgradeable(DEPLOYMENT_OFT_PROXY);
+        MintableOFTUpgradeable oft = MintableOFTUpgradeable(DEPLOYMENT_OFT);
 
         console.log("confirming that L2 -> L1 configuration is correct");
         assertTrue(oft.isPeer(L1_EID, _toBytes32(L1_OFT_ADAPTER)));
@@ -108,8 +117,8 @@ contract OFTDeploymentTest is Test, Constants {
         assertEq(oft.enforcedOptions(L1_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT);
-        assertEq(endpoint.getConfig(DEPLOYMENT_OFT_PROXY, DEPLOYMENT_SEND_LID_302, L1_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
-        assertEq(endpoint.getConfig(DEPLOYMENT_OFT_PROXY, DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+        assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302, L1_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+        assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
 
         for (uint i = 0; i < L2s.length; i++) {
             console.log("confirming that deployment -> %s configuration is correct", L2s[i].NAME);
@@ -122,20 +131,20 @@ contract OFTDeploymentTest is Test, Constants {
             assertEq(oft.enforcedOptions(L2s[i].L2_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
 
-            assertEq(endpoint.getConfig(DEPLOYMENT_OFT_PROXY, DEPLOYMENT_SEND_LID_302, L2s[i].L2_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
-            assertEq(endpoint.getConfig(DEPLOYMENT_OFT_PROXY, DEPLOYMENT_RECEIVE_LIB_302, L2s[i].L2_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302, L2s[i].L2_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, L2s[i].L2_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
         }
 
         console.log("Testing successful cross chains");
-        _sendCrossChain(L1_EID, DEPLOYMENT_OFT_PROXY, 0.000001 ether, false);
+        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 0.000001 ether, false);
         for (uint i = 0; i < L2s.length; i++) {
-            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT_PROXY, 0.000001 ether, false);
+            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 0.000001 ether, false);
         }
 
         console.log("Testing failed sends do to rate limit increase");
-        _sendCrossChain(L1_EID, DEPLOYMENT_OFT_PROXY, 1 ether, true);
+        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 1 ether, true);
         for (uint i = 0; i < L2s.length; i++) {
-            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT_PROXY, 1 ether, true);
+            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 1 ether, true);
         }
 
         console.log("Executing transaction to increase rate limits");
@@ -159,14 +168,18 @@ contract OFTDeploymentTest is Test, Constants {
             assertEq(limit, 200 ether);
             assertEq(window, 4 hours);
         }
-        _sendCrossChain(L1_EID, DEPLOYMENT_OFT_PROXY, 10 ether, false);
+        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 10 ether, false);
         for (uint i = 0; i < L2s.length; i++) {
-            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT_PROXY, 10 ether, false);
+            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 10 ether, false);
         }
     }
 
     // A helper function to send weETH cross chain
     function _sendCrossChain(uint32 dstEid, address oft, uint256 amount, bool expectRevert) public {
+        if (DEPLOYMENT_OFT == address(0)) {
+            return;
+        }
+
        // Generate address and fund with ETH and weETH
         address weETH = oft;
         if (block.chainid == 1) { 
