@@ -7,5 +7,5 @@ $ yarn build
 ### Test
 
 ```shell
-$ yarn test
+$ forge test
 ```
