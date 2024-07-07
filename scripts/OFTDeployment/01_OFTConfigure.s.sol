@@ -14,6 +14,7 @@ import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/lib
 
 import "../../contracts/MintableOFTUpgradeable.sol";
 import "../../utils/Constants.sol";
+import "../../utils/LayerZeroHelpers.sol";
 
 struct OFTDeployment {
     address adminAddress;
@@ -22,7 +23,7 @@ struct OFTDeployment {
     MintableOFTUpgradeable tokenContract;
 }
 
-contract DeployOFTScript is Script, Constants {
+contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     address scriptDeployer;
@@ -73,12 +74,12 @@ contract DeployOFTScript is Script, Constants {
         console.log("Configuring rate limits...");
         // Individual rate limits must be set for each chain
 
-        // Set rate limits for L1
-        rateLimitConfigs.push(_getRateLimitConfig(L1_EID));
+        // setting standby rate limits for L1
+        rateLimitConfigs.push(_getRateLimitConfig(L1_EID, STANDBY_LIMIT, STANDBY_WINDOW));
 
-        // Iterate over each L2 and get the rate limit config
+        // Iterate over each L2 and add the standby rate limit config
         for (uint256 i = 0; i < L2s.length; i++) {
-            rateLimitConfigs.push(_getRateLimitConfig(L2s[i].L2_EID));
+            rateLimitConfigs.push(_getRateLimitConfig(L2s[i].L2_EID, STANDBY_LIMIT, STANDBY_WINDOW));
         }
 
         oftDeployment.tokenContract.setRateLimits(rateLimitConfigs);
@@ -122,11 +123,6 @@ contract DeployOFTScript is Script, Constants {
         oftDeployment.tokenContract.setEnforcedOptions(enforcedOptions);
     }
 
-    // Helper function to convert an address to bytes32
-    function _toBytes32(address addr) internal pure returns (bytes32) {
-        return bytes32(uint256(uint160(addr)));
-    }
-
     // Configures the deployment chain's DVN for the given destination chain
     function _setDVN(uint32 dstEid) internal {
         SetConfigParam[] memory params = new SetConfigParam[](1);
@@ -154,16 +150,6 @@ contract DeployOFTScript is Script, Constants {
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(oftDeployment.proxyAddress, DEPLOYMENT_SEND_LID_302, params);
 
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(oftDeployment.proxyAddress, DEPLOYMENT_RECEIVE_LIB_302, params);
-    }
-
-    // Gets the rate limit config for this destination chain
-    function _getRateLimitConfig(uint32 dstEId) internal pure returns (RateLimiter.RateLimitConfig memory) {
-       return RateLimiter.RateLimitConfig({ 
-        dstEid: dstEId,
-        // standby rate limits till we are ready to go live
-        limit: 0.0001 ether,
-        window: 1 minutes
-       });
     }
 
     // Configures the enforced options for the given destination chain

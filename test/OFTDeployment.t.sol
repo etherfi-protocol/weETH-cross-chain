@@ -16,10 +16,11 @@ import { SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interface
 
 import "../contracts/MintableOFTUpgradeable.sol";
 import "../utils/Constants.sol";
+import "../utils/LayerZeroHelpers.sol";
 
 import "forge-std/Test.sol";
 
-contract OFTDeploymentTest is Test, Constants {
+contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     function testGnosisMainnet() public {
@@ -215,34 +216,5 @@ contract OFTDeploymentTest is Test, Constants {
             fee,
             sender
         );
-    }
-
-    // Helper function to convert an address to bytes32
-    function _toBytes32(address addr) internal pure returns (bytes32) {
-        return bytes32(uint256(uint160(addr)));
-    }
-
-    // Helper functin to decode bytes into a UlnConfig struct
-    function _getExpectedUln(address lzDvn, address nethermindDvn) public pure returns (bytes memory) {
-        address[] memory requiredDVNs = new address[](2);
-
-        if (lzDvn > nethermindDvn) {
-            requiredDVNs[0] = nethermindDvn;
-            requiredDVNs[1] = lzDvn;
-        } else {
-            requiredDVNs[0] = lzDvn;
-            requiredDVNs[1] = nethermindDvn;
-        }
-
-        UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
-            requiredDVNCount: 2,
-            optionalDVNCount: 0,
-            optionalDVNThreshold: 0,
-            requiredDVNs: requiredDVNs,
-            optionalDVNs: new address[](0)
-        });
-
-        return abi.encode(ulnConfig);
     }
 }

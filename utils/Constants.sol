@@ -75,20 +75,27 @@ contract Constants {
     string constant TOKEN_NAME = "Wrapped eETH";
     string constant TOKEN_SYMBOL = "weETH";
 
-    // Mainnet Constants
-    string L1_RPC_URL = "https://mainnet.gateway.tenderly.co";
-    uint32 L1_EID = 30101;
-    address L1_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
-    address ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address L1_CONTRACT_CONTROLLER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
+    // Global Production Rate Limits
+    uint256 constant LIMIT = 200 ether;
+    uint256 constant WINDOW = 4 hours;
+    // Global Stand by Rate Limits
+    uint256 constant STANDBY_LIMIT = 0.0001 ether;
+    uint256 constant STANDBY_WINDOW = 1 minutes;
 
-    address L1_SYNC_POOL_ADDRESS = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
-    address L1_OFT_ADAPTER = 0xFE7fe01F8B9A76803aF3750144C2715D9bcf7D0D;
-    address L1_SEND_302 = 0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1;
-    address L1_RECEIVE_302 = 0xc02Ab410f0734EFa3F14628780e6e695156024C2;
+    // Mainnet Constants
+    string constant L1_RPC_URL = "https://mainnet.gateway.tenderly.co";
+    uint32 constant L1_EID = 30101;
+    address constant L1_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
+    address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address constant L1_CONTRACT_CONTROLLER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
+
+    address constant L1_SYNC_POOL_ADDRESS = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
+    address constant L1_OFT_ADAPTER = 0xFE7fe01F8B9A76803aF3750144C2715D9bcf7D0D;
+    address constant L1_SEND_302 = 0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1;
+    address constant L1_RECEIVE_302 = 0xc02Ab410f0734EFa3F14628780e6e695156024C2;
     address[2] L1_DVN = [0x589dEDbD617e0CBcB916A9223F4d1300c294236b, 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5];
 
-    address L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
+    address constant L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
 
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;

@@ -7,8 +7,9 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 
 import "../../contracts/MintableOFTUpgradeable.sol";
 import "../../utils/Constants.sol";
+import "../../utils/LayerZeroHelpers.sol";
 
-contract SetRateLimits is Script, Constants {
+contract SetRateLimits is Script, Constants, LayerZeroHelpers {
     RateLimiter.RateLimitConfig[] public deploymentRateLimitConfigs;
 
     function run() public {
@@ -23,21 +24,13 @@ contract SetRateLimits is Script, Constants {
         MintableOFTUpgradeable oft = new MintableOFTUpgradeable(DEPLOYMENT_OFT);
 
         // Set rate limits for L1
-        deploymentRateLimitConfigs.push(_getProdRateLimitConfig(L1_EID));
+        deploymentRateLimitConfigs.push(_getRateLimitConfig(L1_EID, LIMIT, WINDOW));
 
         // Iterate over each L2 and get the rate limit config
         for (uint256 i = 0; i < L2s.length; i++) {
-            deploymentRateLimitConfigs.push(_getProdRateLimitConfig(L2s[i].L2_EID));
+            deploymentRateLimitConfigs.push(_getRateLimitConfig(L2s[i].L2_EID, LIMIT, WINDOW));
         }
 
         oft.setRateLimits(deploymentRateLimitConfigs);
-    }
-
-    function _getProdRateLimitConfig(uint32 dstEId) internal pure returns (RateLimiter.RateLimitConfig memory) {
-       return RateLimiter.RateLimitConfig({ 
-        dstEid: dstEId,
-        limit: 200 ether,
-        window: 4 hours
-       });
     }
 }

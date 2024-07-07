@@ -18,18 +18,17 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import "../../contracts/MintableOFTUpgradeable.sol";
 import "forge-std/Test.sol";
 import "../../utils/Constants.sol";
+import "../../utils/LayerZeroHelpers.sol";
 
-contract CrossChainSend is Script, Constants {
+contract CrossChainSend is Script, Constants, LayerZeroHelpers {
 
 
     function run() public {
-        address scriptDeployer;
-        
+        // script deployer is both the sender and the recipient of this cross-chain send
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        scriptDeployer = vm.addr(privateKey);
+        address scriptDeployer = vm.addr(privateKey);
 
         vm.startBroadcast(privateKey);
-
 
         /*//////////////////////////////////////////////////////////////
                          Current Send Parameters
@@ -49,12 +48,11 @@ contract CrossChainSend is Script, Constants {
         if (block.chainid != 1) {
             SENDING_OFT = IOFT(L1_OFT_ADAPTER);
         }
-
     
-        // Define the SendParam struct
+        // Define the SendParam struct (script deployer is the recipient)
         SendParam memory param = SendParam({
             dstEid: DST_EID,
-            to: 0x000000000000000000000000C83bb94779c5577AF1D48dF8e2A113dFf0cB127c,
+            to: _toBytes32(scriptDeployer),
             amountLD: 5600000000000,
             minAmountLD: 5000000000000,
             extraOptions: "",
@@ -67,7 +65,7 @@ contract CrossChainSend is Script, Constants {
         try SENDING_OFT.send{value: fee.nativeFee }(
             param, 
             fee,
-            0xC83bb94779c5577AF1D48dF8e2A113dFf0cB127c
+            scriptDeployer
         ) {
             console.log("Success");
         } catch Error(string memory reason) {

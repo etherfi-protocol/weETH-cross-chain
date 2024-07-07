@@ -13,8 +13,9 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 
 import "../../contracts/MintableOFTUpgradeable.sol";
 import "../../utils/Constants.sol";
+import "../../utils/LayerZeroHelpers.sol";
 
-contract UpdateOFTPeersTransactions is Script, Constants {
+contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     string setPeerDataString;
@@ -29,7 +30,7 @@ contract UpdateOFTPeersTransactions is Script, Constants {
         setPeerDataString = iToHex(setPeerData);
 
         RateLimiter.RateLimitConfig[] memory rateLimitConfigs = new RateLimiter.RateLimitConfig[](1);
-        rateLimitConfigs[0] = _getProdRateLimitConfig(DEPLOYMENT_EID);
+        rateLimitConfigs[0] = _getRateLimitConfig(DEPLOYMENT_EID, LIMIT, WINDOW);
         bytes memory setRateLimitData = abi.encodeWithSignature("setRateLimits((uint32,uint256,uint256)[])", rateLimitConfigs);
         setRateLimitDataString = iToHex(setRateLimitData);
 
@@ -93,12 +94,12 @@ contract UpdateOFTPeersTransactions is Script, Constants {
     function _deployment_rate_limit_increase() internal returns (string memory) {
         string memory ProdRateLimitJson = _getGnosisHeader(DEPLOYMENT_CHAIN_ID);
 
-        // Set rate limits for L1
-        deploymentRateLimitConfigs.push(_getProdRateLimitConfig(L1_EID));
+        // Set production rate limits for L1
+        deploymentRateLimitConfigs.push(_getRateLimitConfig(L1_EID, LIMIT, WINDOW));
 
-        // Iterate over each L2 and get the rate limit config
+        // Iterate over each L2 and ad the production rate limit config
         for (uint256 i = 0; i < L2s.length; i++) {
-            deploymentRateLimitConfigs.push(_getProdRateLimitConfig(L2s[i].L2_EID));
+            deploymentRateLimitConfigs.push(_getRateLimitConfig(L2s[i].L2_EID, LIMIT, WINDOW));
         }
 
         bytes memory setRateLimitData = abi.encodeWithSignature("setRateLimits((uint32,uint256,uint256)[])", deploymentRateLimitConfigs);
@@ -124,20 +125,6 @@ contract UpdateOFTPeersTransactions is Script, Constants {
             string memory L2Json = _build_configuration_transaction_L2(L2s[i]);
             vm.writeJson(L2Json, string.concat("./output/", L2s[i].NAME, ".json"));
         }
-    }
-
-    // Helper function to convert an address to bytes32
-    function _toBytes32(address addr) internal pure returns (bytes32) {
-        return bytes32(uint256(uint160(addr)));
-    }
-
-    // Gets the rate limit config for a given destination EID
-    function _getProdRateLimitConfig(uint32 dstEId) internal pure returns (RateLimiter.RateLimitConfig memory) {
-       return RateLimiter.RateLimitConfig({ 
-        dstEid: dstEId,
-        limit: 200 ether,
-        window: 4 hours
-       });
     }
 
     // Gets the DVN config for a set of lzDvns. `EID` is the EID of the OFT that is currently being deployed
