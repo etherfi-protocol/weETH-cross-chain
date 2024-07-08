@@ -14,7 +14,7 @@ import { MessagingFee } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interf
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import { SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
-import "../contracts/MintableOFTUpgradeable.sol";
+import "../contracts/PausableMintableOFTUpgradeable.sol";
 import "../utils/Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
 
@@ -44,7 +44,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
         }
 
         console.log("Confirming that the OFT for mainnet has added the deployment as a peer");
-        MintableOFTUpgradeable adapter = MintableOFTUpgradeable(L1_OFT_ADAPTER);
+        PausableMintableOFTUpgradeable adapter = PausableMintableOFTUpgradeable(L1_OFT_ADAPTER);
         assertTrue(adapter.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 1), hex"000301001101000000000000000000000000000f4240");
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 2), hex"000301001101000000000000000000000000000f4240");
@@ -82,7 +82,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
             }
 
             console.log("Confirming that the OFT for %s has added the deployment as a peer", L2s[i].NAME);
-            MintableOFTUpgradeable oft = MintableOFTUpgradeable(L2s[i].L2_OFT);
+            PausableMintableOFTUpgradeable oft = PausableMintableOFTUpgradeable(L2s[i].L2_OFT);
             assertTrue(oft.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
             (,,uint256 limit, uint256 window) = oft.rateLimits(DEPLOYMENT_EID);
             assertEq(limit, 200 ether);
@@ -106,7 +106,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
         // Confirm that the deployment chain is properly configured
 
         vm.createSelectFork(DEPLOYMENT_RPC_URL);
-        MintableOFTUpgradeable oft = MintableOFTUpgradeable(DEPLOYMENT_OFT);
+        PausableMintableOFTUpgradeable oft = PausableMintableOFTUpgradeable(DEPLOYMENT_OFT);
 
         console.log("confirming that L2 -> L1 configuration is correct");
         assertTrue(oft.isPeer(L1_EID, _toBytes32(L1_OFT_ADAPTER)));
