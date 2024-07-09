@@ -95,7 +95,6 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
         for (uint256 i = 0; i < L2s.length; i++) {
             oftDeployment.tokenContract.setPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT));
         }
-
     }
 
     function configureDVN() internal {
