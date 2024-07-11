@@ -39,7 +39,7 @@ contract DummyAccountanceFix is Test, Constants {
         console.log("blastSupplyBefore", blastSupplyBefore);
         console.log("lineaSupplyBefore", lineaSupplyBefore);
 
-        // Currently the owner of the dummy token address the deployer NEED TO CHANGE TO L1_CONTRACT_CONTROLLER
+        // Currently the owner of the dummy token address is the deployer NEED TO CHANGE TO L1_CONTRACT_CONTROLLER
         vm.prank(0xf8a86ea1Ac39EC529814c377Bd484387D395421e);
         lineaDummyTokenProxyAdmin.transferOwnership(L1_CONTRACT_CONTROLLER);
 
