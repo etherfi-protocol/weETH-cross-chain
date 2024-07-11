@@ -65,4 +65,13 @@ contract DummyTokenUpgradeable is ERC20Upgradeable, AccessControlUpgradeable, ID
     function burn(uint256 amount) external virtual override {
         _burn(msg.sender, amount);
     }
+
+    /**
+     * @dev Burn function that can only be called by the admin to burn any account's tokens
+     * @param target The account to burn the tokens from
+     * @param amount The amount of tokens to burn
+     */
+    function burnFrom(address target, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE){
+        _burn(target, amount);
+    }
 }
