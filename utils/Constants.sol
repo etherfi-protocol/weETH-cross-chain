@@ -51,16 +51,16 @@ contract Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://mainnet.era.zksync.io";
-    string constant DEPLOYMENT_CHAIN_ID = "324";
-    uint32 constant DEPLOYMENT_EID = 30165;
-
+    string constant DEPLOYMENT_RPC_URL = "";
+    string constant DEPLOYMENT_CHAIN_ID = "";
+    
     // LayerZero addresses
-    address constant DEPLOYMENT_SEND_LID_302 = 0x07fD0e370B49919cA8dA0CE842B8177263c0E12c;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x04830f6deCF08Dec9eD6C3fCAD215245B78A59e1;
-    address constant DEPLOYMENT_LZ_DVN = 0x620A9DF73D2F1015eA75aea1067227F9013f5C51;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0xb183c2b91cf76cAd13602b32ADa2Fd273f19009C;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0xd07C30aF3Ff30D96BDc9c6044958230Eb797DDBF;
+    uint32 constant DEPLOYMENT_EID = 0;
+    address constant DEPLOYMENT_SEND_LID_302 = address(0);
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
+    address constant DEPLOYMENT_LZ_DVN = address(0);
+    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
+    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
 
     // OFT deployment addresses
     address constant DEPLOYMENT_OFT = address(0);
@@ -107,6 +107,7 @@ contract Constants {
         L2s.push(OP);
         L2s.push(SCROLL);
         L2s.push(LINEA);
+        L2s.push(ZKSYNC);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -327,6 +328,39 @@ contract Constants {
         L2_OFT: 0x01f0a31698C4d065659b9bdC21B3610292a1c506,
         L2_CONTRACT_CONTROLLER_SAFE: 0x3cD08f51D0EA86ac93368DE31822117cd70CECA3,
         L2_OFT_PROXY_ADMIN: 0x99fef08aEF9D6955138B66AD16Ab314DB17878ee,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+        L2_PRICE_ORACLE_HEART_BEAT: 0,
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
+    ConfigPerL2 ZKSYNC = ConfigPerL2({
+        NAME: "zksync",
+        RPC_URL: "https://mainnet.era.zksync.io",
+        CHAIN_ID: "324",
+
+        L2_EID: 30165,
+        L2_ENDPOINT: 0xd07C30aF3Ff30D96BDc9c6044958230Eb797DDBF,
+        SEND_302: 0x07fD0e370B49919cA8dA0CE842B8177263c0E12c,
+        RECEIVE_302: 0x04830f6deCF08Dec9eD6C3fCAD215245B78A59e1,
+        LZ_EXECUTOR: 0x664e390e672A811c12091db8426cBb7d68D5D8A6,
+        LZ_DVN: [0x620A9DF73D2F1015eA75aea1067227F9013f5C51, 0xb183c2b91cf76cAd13602b32ADa2Fd273f19009C],
+
+        L2_OFT: 0xc1Fa6E2E8667d9bE0Ca938a54c7E0285E9Df924a,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x8b9836176900A8EE62Dbe98066976D6CE829C53e,
+        L2_OFT_PROXY_ADMIN: 0x908245fAA919eD7cF69d3f9ab75ED0F30d91D301,
 
         L2_SYNC_POOL: address(0),
         L2_SYNC_POOL_RATE_LIMITER: address(0),
