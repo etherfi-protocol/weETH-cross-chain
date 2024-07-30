@@ -16,7 +16,7 @@ contract EtherFiOFTAdapterUpgradeable is OFTAdapterUpgradeable {
 
     /**
      * @dev Initializes the contract
-     * @param _owner The owner and LZ delegate
+     * @param _owner The contract owner and LZ delegate
      */
     function initialize(address _owner) external virtual initializer {
         __OFTAdapter_init(_owner);
