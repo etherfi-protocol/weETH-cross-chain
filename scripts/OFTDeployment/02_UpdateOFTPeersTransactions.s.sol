@@ -54,7 +54,6 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
         // Get hex strings from the address vars
         string memory l1OftAdapterString = iToHex(abi.encodePacked(L1_OFT_ADAPTER));
         string memory l1EndpointString = iToHex(abi.encodePacked(L1_ENDPOINT));
-
         string memory MainnetJson = _getGnosisHeader("1");
 
         // Adding the transactions to update the OFT adapter

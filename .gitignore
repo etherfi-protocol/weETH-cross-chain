@@ -20,3 +20,5 @@ node_modules/
 workspace.code-workspace
 .vscode/
 .DS_Store
+
+output/

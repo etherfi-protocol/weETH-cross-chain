@@ -55,17 +55,19 @@ contract Constants {
     string constant DEPLOYMENT_CHAIN_ID = "";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 0;
-    address constant DEPLOYMENT_SEND_LID_302 = address(0);
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
-    address constant DEPLOYMENT_LZ_DVN = address(0);
-    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
-    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
+    uint32 constant DEPLOYMENT_EID = 30110;
+    address constant DEPLOYMENT_SEND_LID_302 = 0x975bcD720be66659e3EB3C0e4F1866a3020E493A;
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x7B9E184e07a6EE1aC23eAe0fe8D6Be2f663f05e6;
+    address constant DEPLOYMENT_LZ_DVN = 0x2f55C492897526677C5B68fb199ea31E2c126416;
+    address constant DEPLOYMENT_NETHERMIND_DVN = 0xa7b5189bcA84Cd304D8553977c7C614329750d99;
+    address constant DEPLOYMENT_LZ_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
 
     // OFT deployment addresses
     address constant DEPLOYMENT_OFT = address(0);
     address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0);
     address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0);
+
+    address constant DEPLOYMENT_OFT_ADAPTER = address(0);
 
     /*//////////////////////////////////////////////////////////////
                     
@@ -87,14 +89,19 @@ contract Constants {
     uint32 constant L1_EID = 30101;
     address constant L1_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
     address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address constant L1_WEETH = 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee;
     address constant L1_CONTRACT_CONTROLLER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
+    address constant L1_TIMELOCK = 0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A;
 
     address constant L1_SYNC_POOL_ADDRESS = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
     address constant L1_OFT_ADAPTER = 0xFE7fe01F8B9A76803aF3750144C2715D9bcf7D0D;
     address constant L1_VAMP = 0x9FFDF407cDe9a93c47611799DA23924Af3EF764F;
     address constant L1_SEND_302 = 0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1;
     address constant L1_RECEIVE_302 = 0xc02Ab410f0734EFa3F14628780e6e695156024C2;
+    address constant L1_LZ_DVN = 0x589dEDbD617e0CBcB916A9223F4d1300c294236b;
+    address constant L1_NETHERMIND_DVN = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
     address[2] L1_DVN = [0x589dEDbD617e0CBcB916A9223F4d1300c294236b, 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5];
+
 
     address constant L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
 
