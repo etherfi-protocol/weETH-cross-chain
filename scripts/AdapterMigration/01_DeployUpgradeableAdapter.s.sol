@@ -25,26 +25,27 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
         address scriptDeployer = vm.addr(privateKey);
 
         vm.startBroadcast(privateKey);
-        EtherFiOFTAdapterUpgradeable upgradeableAdapter = new EtherFiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT);
-        adapterProxy = address(
+        address adapterImpl = new EtherFiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT);
+        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(address(
             new TransparentUpgradeableProxy(
                 address(upgradeableAdapter),
-                // give upgrader role to the time lock
                 L1_CONTRACT_CONTROLLER,
-                abi.encodeWithSelector( // delegate and owner stay with the deployer
-                    EtherFiOFTAdapterUpgradeable.initialize.selector, scriptDeployer 
+                abi.encodeWithSelector( // delegate and owner stay with the deployer for now
+                    EtherFiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
                 )
-            )
-        );
+            )));
 
         console.log("Adapter Deployed at: ", adapterProxy);
+
+        address owner = upgradeableAdapter.owner();
+        console.log("Owner: ", owner);
         
         console.log("Setting L2s as peers...");
         for (uint256 i = 0; i < L2s.length; i++) {
             upgradeableAdapter.setPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT));
         }
 
-        console.log("Setting DVN config for each L...");
+        console.log("Setting DVN config for each L2...");
         for (uint256 i = 0; i < L2s.length; i++) {
             _setMainnetDVN(L2s[i].L2_EID);
         }
@@ -86,7 +87,6 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
         params[0] = SetConfigParam(dstEid, 2, abi.encode(ulnConfig));
 
         ILayerZeroEndpointV2(L1_ENDPOINT).setConfig(adapterProxy, L1_SEND_302, params);
-
         ILayerZeroEndpointV2(L1_ENDPOINT).setConfig(adapterProxy, L1_RECEIVE_302, params);
     }
 

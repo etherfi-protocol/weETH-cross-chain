@@ -23,17 +23,46 @@ contract MigrationOFT is OFT {
         address _initialOwner,
         address _targetOFTAdapter
     ) OFT(_name, _symbol, _lzEndpoint, _initialOwner) Ownable(_initialOwner) { 
+        if (_targetOFTAdapter == address(0)) {
+            revert("MigrationOFT: target OFT adapter cannot be the zero address");
+        }
         TARGET_OFT_ADAPTER = _targetOFTAdapter;
     }
 
     /**
-     * @dev sends a migration message to mainnet
+    * @dev Sends a migration message to mainnet.
+    * @param _amount The amount of tokens to be sent to the new OFT adaptor.
+    * @notice The `msg.value` should be set to the cross-chain fee computed from `quoteMigrationMessage`.
+    */
+    function sendMigrationMessage(uint256 _amount) external payable onlyOwner {
+        // Minting the amount of tokens to send cross-chain to this contract
+        _mint(address(this), _amount);
+
+        SendParam memory param = SendParam({
+            dstEid: DST_EID,
+            to: _toBytes32(TARGET_OFT_ADAPTER),
+            amountLD: _amount,
+            minAmountLD: _removeDust(_amount),
+            extraOptions: "",
+            composeMsg: "",
+            oftCmd: ""
+        });
+
+        MessagingFee memory fee = MessagingFee({
+            nativeFee: msg.value,
+            lzTokenFee: 0
+        });
+
+        // send migration message, set refund address to owner
+        this.send{value: fee.nativeFee }(param, fee, this.owner());
+    }
+
+    /**
+     * @dev returns a quoted fee for the migration message
      * @param _amount The amount of tokens to be sent to the new OFT adaptor
      */
-    function sendMigrationMessage(uint256 _amount) external onlyOwner {
-        // Minting the amount amount of tokens to migrate to the owner
-        _mint(this.owner(), _amount);
-
+    function quoteMigrationMessage(uint256 _amount) public view returns (uint256) {
+        // Minting the amount of tokens to send cross-chain to this contract
         SendParam memory param = SendParam({
             dstEid: DST_EID,
             to: _toBytes32(TARGET_OFT_ADAPTER),
@@ -46,10 +75,14 @@ contract MigrationOFT is OFT {
 
         MessagingFee memory fee = this.quoteSend(param, false);
 
-        // send migration message, set refund address to owner
-        this.send{value: fee.nativeFee }(param, fee, this.owner());
+        return (fee.nativeFee * 3) / 2; // 1.5x the quoted fee
     }
 
+    /**
+     * @dev Converts an address to bytes32
+     * @param addr The address to convert
+     * @return The address as bytes32
+     */
     function _toBytes32(address addr) public pure returns (bytes32) {
         return bytes32(uint256(uint160(addr)));
     }

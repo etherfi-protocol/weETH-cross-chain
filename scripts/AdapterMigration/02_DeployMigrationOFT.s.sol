@@ -22,10 +22,11 @@ contract DeployMigrationOFT is Script, Constants, LayerZeroHelpers {
 
     function run() public {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        address scriptDeployer = vm.addr(privateKey);
 
         vm.startBroadcast(privateKey);
 
-        MigrationOFT migrationOFT = new MigrationOFT("Migration Token", "MT", DEPLOYMENT_LZ_ENDPOINT, DEPLOYMENT_CONTRACT_CONTROLLER, DEPLOYMENT_OFT_ADAPTER);
+        MigrationOFT migrationOFT = new MigrationOFT("Migration Token", "MT", DEPLOYMENT_LZ_ENDPOINT, scriptDeployer, DEPLOYMENT_OFT_ADAPTER);
         migrationOFTAddress = address(migrationOFT);
         console.log("MigrationOFT: ", migrationOFTAddress);
 
@@ -34,6 +35,8 @@ contract DeployMigrationOFT is Script, Constants, LayerZeroHelpers {
         _appendEnforcedOptions(L1_EID);
 
         migrationOFT.setEnforcedOptions(enforcedOptions);
+
+        migrationOFT.transferOwnership(DEPLOYMENT_CONTRACT_CONTROLLER);
         vm.stopBroadcast();
     }
 
@@ -62,7 +65,6 @@ contract DeployMigrationOFT is Script, Constants, LayerZeroHelpers {
         params[0] = SetConfigParam(dstEid, 2, abi.encode(ulnConfig));
 
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(migrationOFTAddress, DEPLOYMENT_SEND_LID_302, params);
-
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(migrationOFTAddress, DEPLOYMENT_RECEIVE_LIB_302, params);
     }
 
