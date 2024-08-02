@@ -17,7 +17,6 @@ import "../../utils/LayerZeroHelpers.sol";
 contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
     
-    address public adapterProxy;
     EnforcedOptionParam[] public enforcedOptions;
 
     function run() public {
@@ -25,10 +24,10 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
         address scriptDeployer = vm.addr(privateKey);
 
         vm.startBroadcast(privateKey);
-        address adapterImpl = new EtherFiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT);
+        address adapterImpl = address(new EtherFiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
         EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(address(
             new TransparentUpgradeableProxy(
-                address(upgradeableAdapter),
+                address(adapterImpl),
                 L1_CONTRACT_CONTROLLER,
                 abi.encodeWithSelector( // delegate and owner stay with the deployer for now
                     EtherFiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
@@ -37,12 +36,12 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
 
         console.log("Adapter Deployed at: ", adapterProxy);
 
-        address owner = upgradeableAdapter.owner();
+        address owner = adapter.owner();
         console.log("Owner: ", owner);
         
         console.log("Setting L2s as peers...");
         for (uint256 i = 0; i < L2s.length; i++) {
-            upgradeableAdapter.setPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT));
+            adapter.setPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT));
         }
 
         console.log("Setting DVN config for each L2...");
@@ -54,11 +53,11 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
         for (uint256 i = 0; i < L2s.length; i++) {
             _appendEnforcedOptions(L2s[i].L2_EID);
         }
-        upgradeableAdapter.setEnforcedOptions(enforcedOptions);
+        adapter.setEnforcedOptions(enforcedOptions);
 
         console.log("Transfering ownership to the gnosis...");
-        upgradeableAdapter.transferOwnership(L1_CONTRACT_CONTROLLER);
-        upgradeableAdapter.setDelegate(L1_CONTRACT_CONTROLLER);
+        adapter.transferOwnership(L1_CONTRACT_CONTROLLER);
+        adapter.setDelegate(L1_CONTRACT_CONTROLLER);
 
         vm.stopBroadcast();
     }
