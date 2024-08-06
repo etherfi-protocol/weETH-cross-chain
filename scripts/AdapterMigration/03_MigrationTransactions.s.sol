@@ -23,14 +23,14 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
     function run() public {
         console.log("Building transactions for mainnet:");
 
-        vm.writeJson(_disconnectMainnetTransaction(), "./transactions/01_pauseCrossChain/disconnect-mainnet.json");
-        vm.writeJson(_mainnetMigrationPeer(), "./transactions/02_migration/connnect-migration-peer.json");
+        vm.writeJson(_disconnectMainnetTransaction(), "./transactions/02_pauseCrossChain/disconnect-mainnet.json");
+        vm.writeJson(_mainnetMigrationPeer(), "./transactions/01_migrationSetup/connnect-migration-peer.json");
 
 
         for (uint256 i = 0; i < L2s.length; i++) {
             console.log("Building transactions for:", L2s[i].NAME);
             
-            vm.writeJson(_disconnectPeerTransaction(L2s[i]), string.concat("./transactions/01_pauseCrossChain/disconnect-", L2s[i].NAME, ".json"));
+            vm.writeJson(_disconnectPeerTransaction(L2s[i]), string.concat("./transactions/02_pauseCrossChain/disconnect-", L2s[i].NAME, ".json"));
             vm.writeJson(_reconnectPeerTransaction(L2s[i]), string.concat("./transactions/03_unpauseCrossChain/reconnect-", L2s[i].NAME, ".json"));
         }
     }
@@ -38,7 +38,7 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
     // Pauses all outbound transfers from this L2
     function _disconnectPeerTransaction(ConfigPerL2 memory _l2) internal view returns (string memory) { 
         string memory transactionJson = _getGnosisHeader(_l2.CHAIN_ID);
-        string memory l2EndpointString = iToHex(abi.encodePacked(_l2.L2_OFT));
+        string memory l2EndpointString = iToHex(abi.encodePacked(_l2.L2_ENDPOINT));
 
         string memory setLZConfigSend = "";
         for (uint256 i = 0; i < L2s.length; i++) {
@@ -59,7 +59,7 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
     function _reconnectPeerTransaction(ConfigPerL2 memory _l2) internal view returns (string memory) {
         string memory transactionJson = _getGnosisHeader(_l2.CHAIN_ID);
         string memory l2OftString = iToHex(abi.encodePacked(_l2.L2_OFT));
-        string memory l2EndpointString = iToHex(abi.encodePacked(_l2.L2_OFT));
+        string memory l2EndpointString = iToHex(abi.encodePacked(_l2.L2_ENDPOINT));
 
         string memory setPeer = iToHex(abi.encodeWithSignature("setPeer(uint32,bytes32)", L1_EID, _toBytes32(DEPLOYMENT_OFT_ADAPTER)));
         transactionJson = string.concat(transactionJson, _getGnosisTransaction(l2OftString, setPeer, false));
@@ -70,7 +70,7 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
                 continue;
             }
             setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", _l2.L2_OFT, _l2.SEND_302, _getDVNConfig(_l2.LZ_DVN, L2s[i].L2_EID)));
-            transactionJson = string.concat(setLZConfigSend, _getGnosisTransaction(l2EndpointString, setLZConfigSend, false));
+            transactionJson = string.concat(transactionJson, _getGnosisTransaction(l2EndpointString, setLZConfigSend, false));
         }
         setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", _l2.L2_OFT, _l2.SEND_302, _getDVNConfig(_l2.LZ_DVN, L1_EID)));
         transactionJson = string.concat(transactionJson, _getGnosisTransaction(l2EndpointString, setLZConfigSend, true));
@@ -104,7 +104,7 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setEnforcedOptionsString, false));
 
         // Transactions to update the corresponding chains LZ endpoint
-        string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_SEND_302, _getDVNConfig(L1_DVN, DEPLOYMENT_EID)));
+        string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_RECEIVE_302, _getDVNConfig(L1_DVN, DEPLOYMENT_EID)));
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1EndpointString, setLZConfigSend, true));
 
         return MainnetJson;
@@ -113,15 +113,15 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
     // Disconnects all outbound transfers from the mainnet OFT adapter
     function _disconnectMainnetTransaction() internal view returns (string memory) {
         string memory MainnetJson = _getGnosisHeader("1");
-        string memory l1OftAdapterString = iToHex(abi.encodePacked(L1_OFT_ADAPTER));
+        string memory l1EndpointString = iToHex(abi.encodePacked(L1_ENDPOINT));
 
         string memory setLZConfigSend = "";
         for (uint256 i = 0; i < L2s.length; i++) {
-            setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_SEND_302, _getDeadDVNConfig(L1_EID)));
+            setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_SEND_302, _getDeadDVNConfig(L2s[i].L2_EID))); 
             if (i == L2s.length - 1) {
-                MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setLZConfigSend, true));
+                MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1EndpointString, setLZConfigSend, true));
             } else {
-                MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setLZConfigSend, false));
+                MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1EndpointString, setLZConfigSend, false));
             }
         }
 

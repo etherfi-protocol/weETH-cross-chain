@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/console.sol";
 import "forge-std/Script.sol";
+import "forge-std/Test.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
@@ -18,12 +19,15 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
     
     EnforcedOptionParam[] public enforcedOptions;
+    address public adapterProxy;
 
-    function run() public {
-        uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        address scriptDeployer = vm.addr(privateKey);
+    function run() public returns (address) {
+        
+        // TODO: replace with the deployer's private key for actual deployment
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        address scriptDeployer = vm.addr(1);
+        vm.startBroadcast(scriptDeployer);
 
-        vm.startBroadcast(privateKey);
         address adapterImpl = address(new EtherFiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
         EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(address(
             new TransparentUpgradeableProxy(
@@ -32,8 +36,11 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
                 abi.encodeWithSelector( // delegate and owner stay with the deployer for now
                     EtherFiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
                 )
-            )));
-
+            ))
+        );
+        
+    
+        adapterProxy = address(adapter);
         console.log("Adapter Deployed at: ", adapterProxy);
 
         address owner = adapter.owner();
@@ -56,10 +63,11 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
         adapter.setEnforcedOptions(enforcedOptions);
 
         console.log("Transfering ownership to the gnosis...");
-        adapter.transferOwnership(L1_CONTRACT_CONTROLLER);
         adapter.setDelegate(L1_CONTRACT_CONTROLLER);
+        adapter.transferOwnership(L1_CONTRACT_CONTROLLER);
 
         vm.stopBroadcast();
+        return adapterProxy;
     }
 
     function _setMainnetDVN(uint32 dstEid) public {
