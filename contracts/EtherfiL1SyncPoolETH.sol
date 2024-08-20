@@ -235,7 +235,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
             actualAmountOut = amountOut;
         }
 
-        _handleAnticipatedDeposit(origin.srcEid, guid, actualAmountOut, amountOut);
+        _handleAnticipatdeDeposit(origin.srcEid, guid, actualAmountOut, amountOut);
     }
 
 }
