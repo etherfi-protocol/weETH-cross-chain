@@ -231,7 +231,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
         // socialize native minting losses with the protocol
         if (actualAmountOut < amountOut) {
             uint256 unbackedAmount = amountOut - actualAmountOut;
-            liquidityPool.depositToRecipient(unbackedAmount);
+            liquidityPool.depositToSyncPool(unbackedAmount);
             actualAmountOut = amountOut;
         }
 
