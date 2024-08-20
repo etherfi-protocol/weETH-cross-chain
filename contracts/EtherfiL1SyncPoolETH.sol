@@ -230,9 +230,20 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
 
         // socialize native minting losses with the protocol
         if (actualAmountOut < amountOut) {
-            uint256 unbackedAmount = amountOut - actualAmountOut;
-            liquidityPool.depositToSyncPool(unbackedAmount);
-            actualAmountOut = amountOut;
+            IERC20 tokenOut = IERC20(getTokenOut());
+            uint256 balanceBefore = tokenOut.balanceOf(address(this));
+
+            uint256 unbackedAmountWeETH = amountOut - actualAmountOut;
+            uint256 unbackedAmountEETH = IWeEth(address(tokenIn)).getEETHByWeETH(unbackedAmountWeETH);
+            liquidityPool.depositToSyncPool(unbackedAmountEETH);
+
+            uint256 eEthBalance = _eEth.balanceOf(address(this));
+            _eEth.approve(address(tokenOut), eEthBalance);
+            IWeEth(address(tokenOut)).wrap(eEthBalance);
+
+            uint256 additionalAmountOut = tokenOut.balanceOf(address(this)) - balanceBefore;
+
+            actualAmountOut += additionalAmountOut;
         }
 
         _handleAnticipatedDeposit(origin.srcEid, guid, actualAmountOut, amountOut);
