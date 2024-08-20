@@ -7,6 +7,8 @@ import {IDummyToken} from "../interfaces/IDummyToken.sol";
 import {L1BaseSyncPoolUpgradeable, Constants} from "./L1BaseSyncPoolUpgradeable.sol";
 import {ILiquifier} from "../interfaces/ILiquifier.sol";
 import {IWeEth} from "../interfaces/IWeEth.sol";
+import {Origin} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {ILiquidityPool} from "../interfaces/ILiquidityPool.sol";
 
 contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     error EtherfiL1SyncPoolETH__OnlyETH();
@@ -17,6 +19,8 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     IERC20 private _eEth;
 
     mapping(uint32 => IDummyToken) private _dummyTokens;
+
+    ILiquidityPool public liquidityPool;
 
     event LiquifierSet(address liquifier);
     event EEthSet(address eEth);
@@ -45,6 +49,12 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
 
         _setLiquifier(liquifier);
         _setEEth(eEth);
+    }
+
+    function initializeV2(address _liquidityPool) external onlyOwner {
+        require(address(_liquidityPool) == address(0x00), "already initialized");
+        
+        liquidityPool = ILiquidityPool(_liquidityPool);
     }
 
     /**
@@ -202,4 +212,30 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
 
         dummyToken.burn(swapAmount);
     }
+
+    /**
+     * @dev Internal function called when a LZ message is received
+     * @param origin Origin
+     * @param guid Message GUID
+     * @param message Message
+     */
+    function _lzReceive(Origin calldata origin, bytes32 guid, bytes calldata message, address, bytes calldata)
+        internal
+        virtual
+        override
+    {
+        (address tokenIn, uint256 amountIn, uint256 amountOut) = abi.decode(message, (address, uint256, uint256));
+
+        uint256 actualAmountOut = _anticipatedDeposit(origin.srcEid, guid, tokenIn, amountIn, amountOut);
+
+        // socialize native minting losses with the protocol
+        if (actualAmountOut < amountOut) {
+            uint256 unbackedAmount = amountOut - actualAmountOut;
+            liquidityPool.depositToRecipient(unbackedAmount);
+            actualAmountOut = amountOut;
+        }
+
+        _handleAnticipatedDeposit(origin.srcEid, guid, actualAmountOut, amountOut);
+    }
+
 }

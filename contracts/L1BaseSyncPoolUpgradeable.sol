@@ -199,24 +199,6 @@ abstract contract L1BaseSyncPoolUpgradeable is OAppReceiverUpgradeable, Reentran
     }
 
     /**
-     * @dev Internal function called when a LZ message is received
-     * @param origin Origin
-     * @param guid Message GUID
-     * @param message Message
-     */
-    function _lzReceive(Origin calldata origin, bytes32 guid, bytes calldata message, address, bytes calldata)
-        internal
-        virtual
-        override
-    {
-        (address tokenIn, uint256 amountIn, uint256 amountOut) = abi.decode(message, (address, uint256, uint256));
-
-        uint256 actualAmountOut = _anticipatedDeposit(origin.srcEid, guid, tokenIn, amountIn, amountOut);
-
-        _handleAnticipatedDeposit(origin.srcEid, guid, actualAmountOut, amountOut);
-    }
-
-    /**
      * @dev Internal function to set the main token address
      * @param tokenOut Address of the main token
      */
