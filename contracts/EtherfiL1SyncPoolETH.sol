@@ -230,6 +230,11 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
 
         // socialize native minting losses with the protocol
         if (actualAmountOut < amountOut) {
+
+            if (actualAmountOut < (amountOut * 9995) / 10000) {
+                revert("EtherfiL1SyncPoolETH: minting loss too high");
+            }
+
             IERC20 tokenOut = IERC20(getTokenOut());
             uint256 balanceBefore = tokenOut.balanceOf(address(this));
 
