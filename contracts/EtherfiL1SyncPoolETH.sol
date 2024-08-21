@@ -231,7 +231,8 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
         // socialize native minting losses with the protocol
         if (actualAmountOut < amountOut) {
 
-            if (actualAmountOut < (amountOut * 9995) / 10000) {
+            // if the minting loss is higher than 50 bps, revert
+            if (actualAmountOut < (amountOut * 995) / 1000) {
                 revert("EtherfiL1SyncPoolETH: minting loss too high");
             }
 
