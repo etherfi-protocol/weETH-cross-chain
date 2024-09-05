@@ -50,22 +50,25 @@ contract Constants {
                         CURRENT DEPLOYMENT CONSTANTS
     //////////////////////////////////////////////////////////////*/
 
+    address constant DEPLOYER_ADDRESS = 0xaFa61D537A1814DE82776BF600cb10Ff26342208;
+
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "";
-    string constant DEPLOYMENT_CHAIN_ID = "";
+    string constant DEPLOYMENT_RPC_URL = "https://zircuit-mainnet.drpc.org";
+    string constant DEPLOYMENT_CHAIN_ID = "48900";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 0;
-    address constant DEPLOYMENT_SEND_LID_302 = address(0);
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
-    address constant DEPLOYMENT_LZ_DVN = address(0);
-    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
-    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
+    uint32 constant DEPLOYMENT_EID = 30303;
+    address constant DEPLOYMENT_SEND_LID_302 = 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7;
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043;
+    address constant DEPLOYMENT_LZ_DVN = 0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842;
+    address constant DEPLOYMENT_NETHERMIND_DVN = 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B;
+    address constant DEPLOYMENT_LZ_ENDPOINT = 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B;
 
     // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = address(0);
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0);
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0);
+    address constant DEPLOYMENT_OFT = 0x3A7DE2095BDE2657Eef8066cC702ebc8A4A21172;
+    address constant DEPLOYMENT_OFT_IMPL = 0x5E0f4F410971755095555086b382d24E0d43Fe29;
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x97fd52E4A0cf760a352122e9CD7d37d166384831;
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0xe21e83F3dcB8b6875D75aF9F3AD8C6160E805dae;
 
     /*//////////////////////////////////////////////////////////////
                     
