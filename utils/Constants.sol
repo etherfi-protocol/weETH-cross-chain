@@ -50,8 +50,6 @@ contract Constants {
                         CURRENT DEPLOYMENT CONSTANTS
     //////////////////////////////////////////////////////////////*/
 
-    address constant DEPLOYER_ADDRESS = 0xaFa61D537A1814DE82776BF600cb10Ff26342208;
-
     // General chain constants
     string constant DEPLOYMENT_RPC_URL = "https://zircuit-mainnet.drpc.org";
     string constant DEPLOYMENT_CHAIN_ID = "48900";
@@ -65,15 +63,16 @@ contract Constants {
     address constant DEPLOYMENT_LZ_ENDPOINT = 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B;
 
     // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = 0x3A7DE2095BDE2657Eef8066cC702ebc8A4A21172;
-    address constant DEPLOYMENT_OFT_IMPL = 0x5E0f4F410971755095555086b382d24E0d43Fe29;
+    address constant DEPLOYMENT_OFT = 0x88A19F30E1254B37b66899893ab1F73aD82BD2C3;
     address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x97fd52E4A0cf760a352122e9CD7d37d166384831;
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0xe21e83F3dcB8b6875D75aF9F3AD8C6160E805dae;
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0xae7bAFf56EEFB191052190DFEC345E7385a3A878;
 
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
 
+    address constant DEPLOYER_ADDRESS = 0xaFa61D537A1814DE82776BF600cb10Ff26342208;
+    
     // OFT Token Constants
     string constant TOKEN_NAME = "Wrapped eETH";
     string constant TOKEN_SYMBOL = "weETH";

@@ -33,39 +33,18 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
 
     function run() public {
 
-        
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        scriptDeployer = vm.addr(privateKey);
+        vm.startBroadcast(privateKey);
 
+        deployOFT();
 
+        configureRateLimits();
+        configurePeer();
+        configureEnforcedOptions();
+        configureDVN();
 
-        bytes memory initializerData = abi.encodeWithSelector(
-            MintableOFTUpgradeable.initialize.selector, 
-            TOKEN_NAME, 
-            TOKEN_SYMBOL, 
-            DEPLOYER_ADDRESS
-        );
-
-        bytes memory constructorData = abi.encode(
-            DEPLOYMENT_OFT_IMPL,    // Implementation address
-            DEPLOYER_ADDRESS,       // Admin address
-            initializerData         // Encoded initializer call data
-        );
-
-        console.logBytes(constructorData);
-
-
-        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        // scriptDeployer = vm.addr(privateKey);
-
-        // vm.startBroadcast(privateKey);
-
-        // deployOFT();
-
-        // configureRateLimits();
-        // configurePeer();
-        // configureEnforcedOptions();
-        // configureDVN();
-
-        // vm.stopBroadcast();
+        vm.stopBroadcast();
     }
 
     function deployOFT() internal {

@@ -24,9 +24,6 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     function testGnosisMainnet() public {
-        if (DEPLOYMENT_OFT == address(0)) {
-            return;
-        }
         console.log("Tesing peer transactions for mainnet");
         vm.createSelectFork(L1_RPC_URL);
         vm.deal(L1_CONTRACT_CONTROLLER, 100 ether);
@@ -58,10 +55,13 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
     }
 
     function testGnosisL2() public {
-        if (DEPLOYMENT_OFT == address(0)) {
-            return;
-        }
         for (uint i = 0; i < L2s.length; i++) {
+
+            if ( L2s[i].L2_EID == 30165) {
+                // zksync has a different execution environment and we can't simulate against it here
+                continue;
+            }
+
             console.log("Testing gnosis peer transactions for %s", L2s[i].NAME);
             string memory l2Name = L2s[i].NAME;
             vm.createSelectFork(L2s[i].RPC_URL);
@@ -85,7 +85,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
             MintableOFTUpgradeable oft = MintableOFTUpgradeable(L2s[i].L2_OFT);
             assertTrue(oft.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
             (,,uint256 limit, uint256 window) = oft.rateLimits(DEPLOYMENT_EID);
-            assertEq(limit, 200 ether);
+            assertEq(limit, 2000 ether);
             assertEq(window, 4 hours);
             assertEq(oft.enforcedOptions(DEPLOYMENT_EID, 1), hex"000301001101000000000000000000000000000f4240");
             assertEq(oft.enforcedOptions(DEPLOYMENT_EID, 2), hex"000301001101000000000000000000000000000f4240");
@@ -100,9 +100,6 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
     }
 
     function testDeployedOFT() public {
-        if (DEPLOYMENT_OFT == address(0)) {
-            return;
-        }
         // Confirm that the deployment chain is properly configured
 
         vm.createSelectFork(DEPLOYMENT_RPC_URL);
@@ -166,7 +163,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
         for (uint i = 0; i < L2s.length; i++) {
             (,,limit, window) = oft.rateLimits(L2s[i].L2_EID);
             // PROD rate limits
-            assertEq(limit, 200 ether);
+            assertEq(limit, 2000 ether);
             assertEq(window, 4 hours);
         }
         _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 10 ether, false);
@@ -177,10 +174,6 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
 
     // A helper function to send weETH cross chain
     function _sendCrossChain(uint32 dstEid, address oft, uint256 amount, bool expectRevert) public {
-        if (DEPLOYMENT_OFT == address(0)) {
-            return;
-        }
-
        // Generate address and fund with ETH and weETH
         address weETH = oft;
         if (block.chainid == 1) { 
