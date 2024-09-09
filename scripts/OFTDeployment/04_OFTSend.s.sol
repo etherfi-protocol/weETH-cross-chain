@@ -35,18 +35,20 @@ contract CrossChainSend is Script, Constants, LayerZeroHelpers {
         //////////////////////////////////////////////////////////////*/
         
         // Initializing the sending OFT (only set if sending from L2)
-        IOFT SENDING_OFT = IOFT(address(0));
+        IOFT SENDING_OFT = IOFT(DEPLOYMENT_OFT);
+        IERC20 SENDING_ERC20 = IERC20(DEPLOYMENT_OFT);
 
         // Desintation EID
-        uint32 DST_EID = 30184;
+        uint32 DST_EID = 30101;
 
         /*//////////////////////////////////////////////////////////////
                     
         //////////////////////////////////////////////////////////////*/
 
         // If sending from L1, the OFT adapter is the OFT
-        if (block.chainid != 1) {
+        if (block.chainid == 1) {
             SENDING_OFT = IOFT(L1_OFT_ADAPTER);
+            SENDING_ERC20 = IERC20(0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee);
         }
     
         // Define the SendParam struct (script deployer is the recipient)
@@ -61,6 +63,7 @@ contract CrossChainSend is Script, Constants, LayerZeroHelpers {
         });
 
         MessagingFee memory fee = SENDING_OFT.quoteSend(param, false);
+        SENDING_ERC20.approve(address(SENDING_OFT), 5600000000000);
 
         try SENDING_OFT.send{value: fee.nativeFee }(
             param, 
