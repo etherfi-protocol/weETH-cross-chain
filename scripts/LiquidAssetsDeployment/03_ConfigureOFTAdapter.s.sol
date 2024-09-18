@@ -85,10 +85,10 @@ contract DeployOFT is Script, LiquidConstants, LayerZeroHelpers {
             optionalDVNs: new address[](0)
         });
 
-        params[0] = SetConfigParam(L1_EID, 2, abi.encode(ulnConfig));
+        params[0] = SetConfigParam(SCROLL_EID, 2, abi.encode(ulnConfig));
 
-        ILayerZeroEndpointV2(L1_SEND_302).setConfig(DEPLOYMENT_OFT_ADAPTER, L1_SEND_302, params);
-        ILayerZeroEndpointV2(L1_RECEIVE_302).setConfig(DEPLOYMENT_OFT_ADAPTER, L1_RECEIVE_302, params);
+        ILayerZeroEndpointV2(L1_LZ_ENDPOINT).setConfig(DEPLOYMENT_OFT_ADAPTER, L1_SEND_302, params);
+        ILayerZeroEndpointV2(L1_LZ_ENDPOINT).setConfig(DEPLOYMENT_OFT_ADAPTER, L1_RECEIVE_302, params);
     }
 
     function _appendEnforcedOptions(uint32 dstEid) internal {
