@@ -6,7 +6,7 @@ import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 
 import "./Constants.sol";
 
-contract LayerZeroHelpers is Constants {
+contract LayerZeroHelpers {
     // TODO: move all layerzero helper functions here
 
     // Converts an address to bytes32
