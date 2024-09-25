@@ -32,9 +32,9 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     EnforcedOptionParam[] public enforcedOptions;
 
     function run() public {
+
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         scriptDeployer = vm.addr(privateKey);
-
         vm.startBroadcast(privateKey);
 
         deployOFT();

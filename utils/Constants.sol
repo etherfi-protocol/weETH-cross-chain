@@ -75,12 +75,14 @@ contract Constants {
                     
     //////////////////////////////////////////////////////////////*/
 
+    address constant DEPLOYER_ADDRESS = 0xaFa61D537A1814DE82776BF600cb10Ff26342208;
+    
     // OFT Token Constants
     string constant TOKEN_NAME = "Wrapped eETH";
     string constant TOKEN_SYMBOL = "weETH";
 
     // Global Production Rate Limits
-    uint256 constant LIMIT = 200 ether;
+    uint256 constant LIMIT = 2000 ether;
     uint256 constant WINDOW = 4 hours;
     // Global Stand by Rate Limits
     uint256 constant STANDBY_LIMIT = 0.0001 ether;
