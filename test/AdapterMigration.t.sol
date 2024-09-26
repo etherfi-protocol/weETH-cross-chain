@@ -3,19 +3,16 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-
 import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 import "../scripts/AdapterMigration/01_DeployUpgradeableAdapter.s.sol";
 
 import "../utils/Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
-
 import "../contracts/MigrationOFT.sol";
 import "../contracts/EtherFiOFTAdapter.sol";    
 import "../contracts/EtherFiOFTAdapterUpgradeable.sol";
@@ -58,7 +55,6 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
 
         DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployUpgradeableOFTAdapter();
         address upgradeableOFTAdapter  = upgradeableOFTDeployment.run();
-
         EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(upgradeableOFTAdapter);
 
         for (uint256 i = 0; i < L2s.length; i++) {
@@ -137,6 +133,22 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
                 
             }
         }
+    }
+
+    function test_SetProxyAdmin() public {
+        vm.createSelectFork(L1_RPC_URL);
+
+        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
+
+        DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployUpgradeableOFTAdapter();
+        address upgradeableOFTAdapter  = upgradeableOFTDeployment.run();
+        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(upgradeableOFTAdapter);
+
+        // ADMIN_SLOT, specified by EIP1967, that stores the proxy admin address
+        address proxyAdminAddress = address(uint160(uint256(vm.load(upgradeableOFTAdapter, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
+        ProxyAdmin proxyAdmin = ProxyAdmin(proxyAdminAddress);
+
+        assert(proxyAdmin.owner() == L1_TIMELOCK);
     }
 
     /**
