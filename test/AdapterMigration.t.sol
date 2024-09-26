@@ -3,15 +3,15 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
+import "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/Errors.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../scripts/AdapterMigration/01_DeployUpgradeableAdapter.s.sol";
+import "../scripts/AdapterMigration/01_DeployUpgradeableAdapter.s.sol" as DeployOFTAdapter;
+import "../scripts/AdapterMigration/02_DeployMigrationOFT.s.sol" as DeployMigrationOFT;
 
 import "../utils/Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
@@ -23,13 +23,21 @@ import "../contracts/MintableOFTUpgradeable.sol";
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
+// allows us to interface with the delegates map that isn't defined in the ILayerZeroEndpointV2 inteface
+interface EndpointDelegates {
+    function delegates(address) external view returns (address);
+}
 
 contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
     
     // Send a migration message on arbitrum and ensures access control is enforced
     function test_MigrationSend() public {
         vm.createSelectFork("https://arb1.arbitrum.io/rpc");
-        MigrationOFT migrationOFT = MigrationOFT(DEPLOYMENT_OFT);
+
+        DeployMigrationOFT.DeployMigrationOFT migrationOFTDeployment = new DeployMigrationOFT.DeployMigrationOFT();
+        address migrationOFTAddress = migrationOFTDeployment.run();
+
+        MigrationOFT migrationOFT = MigrationOFT(migrationOFTAddress);
 
         // ensure that the arb gnosis has sufficient funds for cross chain send
         startHoax(DEPLOYMENT_CONTRACT_CONTROLLER);
@@ -47,7 +55,39 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
         vm.expectRevert(
             abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, alice)
         );
+
         migrationOFT.sendMigrationMessage{value: fee}(10 ether);
+    }
+
+    function test_VerifyMigrationOFTDelegate() public {
+         vm.createSelectFork("https://arb1.arbitrum.io/rpc");
+
+        DeployMigrationOFT.DeployMigrationOFT migrationOFTDeployment = new DeployMigrationOFT.DeployMigrationOFT();
+        address migrationOFTAddress = migrationOFTDeployment.run();
+
+        MigrationOFT migrationOFT = MigrationOFT(migrationOFTAddress);
+        EndpointDelegates endpoint = EndpointDelegates(DEPLOYMENT_LZ_ENDPOINT);
+
+        address migrationOFTDelegate = endpoint.delegates(address(migrationOFT));
+
+        assertEq(migrationOFTDelegate, DEPLOYMENT_CONTRACT_CONTROLLER);
+    }
+
+    function test_MigrationOFTReceive() public {
+        vm.createSelectFork("https://arb1.arbitrum.io/rpc");
+
+
+        DeployMigrationOFT.DeployMigrationOFT migrationOFTDeployment = new DeployMigrationOFT.DeployMigrationOFT();
+        address migrationOFTAddress = migrationOFTDeployment.run();
+
+        MigrationOFT migrationOFT = MigrationOFT(migrationOFTAddress);
+        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT);
+
+        endpoint.getConfig(address(migrationOFT), DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2);
+        endpoint.getConfig(address(migrationOFT), DEPLOYMENT_SEND_LID_302, L1_EID, 2);
+
+        assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_SEND_LID_302, L1_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+        assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2), _getDeadUln());
     }
     
     // Deplooys new upgradeable adapter and sends cross chain messages to all L2s
@@ -56,7 +96,7 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
 
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
 
-        DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployUpgradeableOFTAdapter();
+        DeployOFTAdapter.DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployOFTAdapter.DeployUpgradeableOFTAdapter();
         address upgradeableOFTAdapter  = upgradeableOFTDeployment.run();
 
         EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(upgradeableOFTAdapter);
