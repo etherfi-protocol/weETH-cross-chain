@@ -128,6 +128,8 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
 
         // Assert that the endpoint is properly configured to __receive__ messages from the migration peer
         assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), _getExpectedUln(L1_DVN[0], L1_DVN[1]));
+
+        _sendCrossChain(DEPLOYMENT_EID, L1_OFT_ADAPTER, 1 ether, true);
     }
 
     // Simulates execution of the pausing/unpausing cross-chain messages on each chain
@@ -182,7 +184,7 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
 
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
 
-        DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployUpgradeableOFTAdapter();
+        DeployOFTAdapter.DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployOFTAdapter.DeployUpgradeableOFTAdapter();
         address upgradeableOFTAdapter  = upgradeableOFTDeployment.run();
         EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(upgradeableOFTAdapter);
 
