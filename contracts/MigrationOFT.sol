@@ -54,7 +54,7 @@ contract MigrationOFT is OFT {
         });
 
         // send migration message, set refund address to owner
-        this.send{value: fee.nativeFee }(param, fee, this.owner());
+        this.send{value: fee.nativeFee }(param, fee, msg.sender);
     }
 
     /**
