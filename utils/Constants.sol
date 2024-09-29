@@ -106,6 +106,9 @@ contract Constants {
     address constant L1_NETHERMIND_DVN = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
     address[2] L1_DVN = [0x589dEDbD617e0CBcB916A9223F4d1300c294236b, 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5];
 
+    // https://docs.layerzero.network/v2/developers/solana/configuration/oapp-config#dead-dvn
+    address constant DEAD_DVN = 0x000000000000000000000000000000000000dEaD;
+
 
     address constant L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
 
