@@ -95,7 +95,7 @@ contract Constants {
     address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address constant L1_WEETH = 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee;
     address constant L1_CONTRACT_CONTROLLER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
-    address constant L1_TIMELOCK = 0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A;
+    address constant L1_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
 
     address constant L1_SYNC_POOL_ADDRESS = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
     address constant L1_OFT_ADAPTER = 0xFE7fe01F8B9A76803aF3750144C2715D9bcf7D0D;
@@ -105,6 +105,9 @@ contract Constants {
     address constant L1_LZ_DVN = 0x589dEDbD617e0CBcB916A9223F4d1300c294236b;
     address constant L1_NETHERMIND_DVN = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
     address[2] L1_DVN = [0x589dEDbD617e0CBcB916A9223F4d1300c294236b, 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5];
+
+    // https://docs.layerzero.network/v2/developers/solana/configuration/oapp-config#dead-dvn
+    address constant DEAD_DVN = 0x000000000000000000000000000000000000dEaD;
 
 
     address constant L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;

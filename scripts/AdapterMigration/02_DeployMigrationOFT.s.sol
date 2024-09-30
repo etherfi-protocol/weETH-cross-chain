@@ -20,11 +20,12 @@ contract DeployMigrationOFT is Script, Constants, LayerZeroHelpers {
     address public migrationOFTAddress;
     EnforcedOptionParam[] public enforcedOptions;
 
-    function run() public {
-        uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        address scriptDeployer = vm.addr(privateKey);
+    function run() public returns (address) {
 
-        vm.startBroadcast(privateKey);
+        // TODO: replace with the deployer's private key for actual deployment
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        address scriptDeployer = vm.addr(1);
+        vm.startBroadcast(scriptDeployer);
 
         MigrationOFT migrationOFT = new MigrationOFT("Migration Token", "MT", DEPLOYMENT_LZ_ENDPOINT, scriptDeployer, DEPLOYMENT_OFT_ADAPTER);
         migrationOFTAddress = address(migrationOFT);
@@ -35,12 +36,17 @@ contract DeployMigrationOFT is Script, Constants, LayerZeroHelpers {
         _appendEnforcedOptions(L1_EID);
 
         migrationOFT.setEnforcedOptions(enforcedOptions);
-
+        migrationOFT.setDelegate(DEPLOYMENT_CONTRACT_CONTROLLER);
         migrationOFT.transferOwnership(DEPLOYMENT_CONTRACT_CONTROLLER);
+
         vm.stopBroadcast();
+
+        return migrationOFTAddress;
     }
 
-    // Configures the deployment chain's DVN for the given destination chain
+    // sets the specific DVN confgiuration we need for the migration OFT
+    // - standard config for the send library to allow the migration OFT to send migration messages
+    // - a dead DVN config for the receive library to block any incoming messages
     function _setDVN(uint32 dstEid) internal {
         SetConfigParam[] memory params = new SetConfigParam[](1);
         address[] memory requiredDVNs = new address[](2);
@@ -65,6 +71,19 @@ contract DeployMigrationOFT is Script, Constants, LayerZeroHelpers {
         params[0] = SetConfigParam(dstEid, 2, abi.encode(ulnConfig));
 
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(migrationOFTAddress, DEPLOYMENT_SEND_LID_302, params);
+
+        address[] memory deadDVN = new address[](1);
+        deadDVN[0] = DEAD_DVN;
+        ulnConfig = UlnConfig({
+            confirmations: 64,
+            requiredDVNCount: 1,
+            optionalDVNCount: 0,
+            optionalDVNThreshold: 0,
+            requiredDVNs: deadDVN,
+            optionalDVNs: new address[](0)
+        });
+
+        params[0] = SetConfigParam(dstEid, 2, abi.encode(ulnConfig));
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(migrationOFTAddress, DEPLOYMENT_RECEIVE_LIB_302, params);
     }
 

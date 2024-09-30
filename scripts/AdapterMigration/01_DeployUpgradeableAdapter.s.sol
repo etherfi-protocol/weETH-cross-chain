@@ -32,19 +32,19 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
         EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(address(
             new TransparentUpgradeableProxy(
                 address(adapterImpl),
-                L1_CONTRACT_CONTROLLER,
+                L1_TIMELOCK,
                 abi.encodeWithSelector( // delegate and owner stay with the deployer for now
                     EtherFiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
                 )
             ))
         );
-        
     
         adapterProxy = address(adapter);
         console.log("Adapter Deployed at: ", adapterProxy);
 
-        address owner = adapter.owner();
-        console.log("Owner: ", owner);
+        address proxyAdminAddress = address(uint160(uint256(vm.load(address(adapter), 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
+        ProxyAdmin proxyAdmin = ProxyAdmin(proxyAdminAddress);
+        console.log("Proxy Admin Owner: ", proxyAdmin.owner());
         
         console.log("Setting L2s as peers...");
         for (uint256 i = 0; i < L2s.length; i++) {
