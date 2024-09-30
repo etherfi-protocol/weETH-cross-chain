@@ -124,7 +124,7 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     }
 
     // Configures the deployment chain's DVN for the given destination chain
-    function _setDVN(uint32 dstEid) internal {
+    function _setDVN(uint32 dstEid) public {
         SetConfigParam[] memory params = new SetConfigParam[](1);
         address[] memory requiredDVNs = new address[](2);
 

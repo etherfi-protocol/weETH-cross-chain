@@ -48,4 +48,22 @@ contract LayerZeroHelpers {
         return abi.encode(ulnConfig);
     }
 
+    // get a dead ULN (unreachable path)
+    function _getDeadUln() public pure returns (bytes memory) {
+        address[] memory requiredDVNs = new address[](1);
+        requiredDVNs[0] = 0x000000000000000000000000000000000000dEaD;
+        
+
+        UlnConfig memory ulnConfig = UlnConfig({
+            confirmations: 64,
+            requiredDVNCount: 1,
+            optionalDVNCount: 0,
+            optionalDVNThreshold: 0,
+            requiredDVNs: requiredDVNs,
+            optionalDVNs: new address[](0)
+        });
+
+        return abi.encode(ulnConfig);
+    }
+
 }
