@@ -169,14 +169,8 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
     function test_SetProxyAdmin() public {
         vm.createSelectFork(L1_RPC_URL);
 
-        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
-
-        DeployOFTAdapter.DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployOFTAdapter.DeployUpgradeableOFTAdapter();
-        address upgradeableOFTAdapter  = upgradeableOFTDeployment.run();
-        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(upgradeableOFTAdapter);
-
         // ADMIN_SLOT, specified by EIP1967, that stores the proxy admin address
-        address proxyAdminAddress = address(uint160(uint256(vm.load(upgradeableOFTAdapter, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
+        address proxyAdminAddress = address(uint160(uint256(vm.load(DEPLOYMENT_OFT_ADAPTER, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
         ProxyAdmin proxyAdmin = ProxyAdmin(proxyAdminAddress);
 
         assert(proxyAdmin.owner() == L1_TIMELOCK);
