@@ -33,10 +33,7 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
     function test_MigrationSend() public {
         vm.createSelectFork("https://arb1.arbitrum.io/rpc");
 
-        DeployMigrationOFT.DeployMigrationOFT migrationOFTDeployment = new DeployMigrationOFT.DeployMigrationOFT();
-        address migrationOFTAddress = migrationOFTDeployment.run();
-
-        MigrationOFT migrationOFT = MigrationOFT(migrationOFTAddress);
+        MigrationOFT migrationOFT = MigrationOFT(DEPLOYMENT_OFT);
 
         // ensure that the arb gnosis has sufficient funds for cross chain send
         startHoax(DEPLOYMENT_CONTRACT_CONTROLLER);
@@ -61,10 +58,7 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
     function test_VerifyMigrationOFTDelegate() public {
          vm.createSelectFork("https://arb1.arbitrum.io/rpc");
 
-        DeployMigrationOFT.DeployMigrationOFT migrationOFTDeployment = new DeployMigrationOFT.DeployMigrationOFT();
-        address migrationOFTAddress = migrationOFTDeployment.run();
-
-        MigrationOFT migrationOFT = MigrationOFT(migrationOFTAddress);
+        MigrationOFT migrationOFT = MigrationOFT(DEPLOYMENT_OFT);
         EndpointDelegates endpoint = EndpointDelegates(DEPLOYMENT_LZ_ENDPOINT);
 
         address migrationOFTDelegate = endpoint.delegates(address(migrationOFT));
@@ -75,11 +69,7 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
     function test_MigrationOFTReceive() public {
         vm.createSelectFork("https://arb1.arbitrum.io/rpc");
 
-
-        DeployMigrationOFT.DeployMigrationOFT migrationOFTDeployment = new DeployMigrationOFT.DeployMigrationOFT();
-        address migrationOFTAddress = migrationOFTDeployment.run();
-
-        MigrationOFT migrationOFT = MigrationOFT(migrationOFTAddress);
+        MigrationOFT migrationOFT = MigrationOFT(DEPLOYMENT_OFT);
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT);
 
         endpoint.getConfig(address(migrationOFT), DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2);
@@ -94,21 +84,18 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
         vm.createSelectFork(L1_RPC_URL);
 
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
-
-        DeployOFTAdapter.DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployOFTAdapter.DeployUpgradeableOFTAdapter();
-        address upgradeableOFTAdapter  = upgradeableOFTDeployment.run();
-        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(upgradeableOFTAdapter);
+        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(DEPLOYMENT_OFT_ADAPTER);
 
         for (uint256 i = 0; i < L2s.length; i++) {
             // ensuring outbound transfers execute successfully
-            _sendCrossChain(L2s[i].L2_EID, upgradeableOFTAdapter,  1 ether, false);
+            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT_ADAPTER,  1 ether, false);
 
             // confirm all configuration variables for this L2
             assertTrue(adapter.isPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT)));
             assertEq(adapter.enforcedOptions(L2s[i].L2_EID, 1), hex"000301001101000000000000000000000000000f4240");
             assertEq(adapter.enforcedOptions(L2s[i].L2_EID, 2), hex"000301001101000000000000000000000000000f4240");
-            assertEq(endpoint.getConfig(upgradeableOFTAdapter, L1_SEND_302, L2s[i].L2_EID, 2), _getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
-            assertEq(endpoint.getConfig(upgradeableOFTAdapter, L1_RECEIVE_302, L2s[i].L2_EID, 2), _getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(DEPLOYMENT_OFT_ADAPTER, L1_SEND_302, L2s[i].L2_EID, 2), _getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(DEPLOYMENT_OFT_ADAPTER, L1_RECEIVE_302, L2s[i].L2_EID, 2), _getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
         }
 
     }
@@ -182,14 +169,8 @@ contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
     function test_SetProxyAdmin() public {
         vm.createSelectFork(L1_RPC_URL);
 
-        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
-
-        DeployOFTAdapter.DeployUpgradeableOFTAdapter upgradeableOFTDeployment = new DeployOFTAdapter.DeployUpgradeableOFTAdapter();
-        address upgradeableOFTAdapter  = upgradeableOFTDeployment.run();
-        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(upgradeableOFTAdapter);
-
         // ADMIN_SLOT, specified by EIP1967, that stores the proxy admin address
-        address proxyAdminAddress = address(uint160(uint256(vm.load(upgradeableOFTAdapter, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
+        address proxyAdminAddress = address(uint160(uint256(vm.load(DEPLOYMENT_OFT_ADAPTER, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
         ProxyAdmin proxyAdmin = ProxyAdmin(proxyAdminAddress);
 
         assert(proxyAdmin.owner() == L1_TIMELOCK);

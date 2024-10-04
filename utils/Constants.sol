@@ -63,13 +63,12 @@ contract Constants {
     address constant DEPLOYMENT_LZ_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
 
     // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = 0x5f30cAa66A85969ad6A63Da2a7edB457d6a087cC; // test deployment arb mainnet
+    address constant DEPLOYMENT_OFT = 0x703956BEa5F198D63379F28A2d6179cbd9C1c9c5;
     address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x0c6ca434756EeDF928a55EBeAf0019364B279732;
     address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0); // migration OFT is non-upgradeable hence no proxy admin
 
-    // Didn't want to test cross-chain sends with the zero address, using mainnet gnosis as target for now
-    // TODO: Update once the mainnet test adapter is deployed
-    address constant DEPLOYMENT_OFT_ADAPTER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
+    // the new upgradeable version of the OFT adapter
+    address constant DEPLOYMENT_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
 
     /*//////////////////////////////////////////////////////////////
                     
