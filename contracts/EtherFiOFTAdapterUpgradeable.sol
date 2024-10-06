@@ -4,8 +4,9 @@ pragma solidity ^0.8.20;
 import {OFTAdapterUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTAdapterUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {RateLimiter} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 
-contract EtherFiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpgradeable, PausableUpgradeable {
+contract EtherFiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpgradeable, PausableUpgradeable, RateLimiter {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
@@ -34,6 +35,7 @@ contract EtherFiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
         uint256 _minAmountLD,
         uint32 _dstEid
     ) internal virtual override whenNotPaused() returns (uint256 amountSentLD, uint256 amountReceivedLD) {
+        _checkAndUpdateRateLimit(_dstEid, _amountLD);
         return super._debit(_amountLD, _minAmountLD, _dstEid);
     }
 
