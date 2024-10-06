@@ -7,7 +7,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 
 import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
 import {IMintableERC20} from "../interfaces/IMintableERC20.sol";
-import { RateLimiter } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
+import {RateLimiter} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 
 /**
  * @title Mintable OFT
@@ -78,7 +78,7 @@ contract MintableOFTUpgradeable is RateLimiter, OFTUpgradeable, AccessControlUpg
         _pause();
     }
 
-    function unpauseBridge() public onlyOwner {
+    function unpauseBridge() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
 
