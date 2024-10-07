@@ -11,7 +11,7 @@ import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
 /**
  * @title Etherfi mintable upgradeable OFT token
- * @dev An OFT token that can be minted by a minter
+ * @dev Extend OFTUpgradeable with pausing and rate limiting functionality
  */
 contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");

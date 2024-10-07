@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 /**
  * @title Rate Limiter
- * @dev Extends LayerZero's evm-oapp v2 RateLimiter contract. The original contract 
- *
-*/
+ * @dev Extends LayerZero's evm-oapp v2 RateLimiter contract. The original contract only supports rate limiting for outbound messages.
+ * This contract adds support for rate limiting inbound messages.
+ */
 
 abstract contract PairwiseRateLimiter {
     /**
@@ -47,7 +47,8 @@ abstract contract PairwiseRateLimiter {
      * - `limit`: This represents the maximum allowed amount within a given window.
      * - `window`: Defines the duration of the rate limiting window.
      */
-    event RateLimitsChanged(RateLimitConfig[] rateLimitConfigs);
+    event OutboundRateLimitsChanged(RateLimitConfig[] rateLimitConfigs);
+    event InboundRateLimitsChanged(RateLimitConfig[] rateLimitConfigs);
 
     /**
      * @notice Error that is thrown when an amount exceeds the rate_limit.
@@ -101,7 +102,7 @@ abstract contract PairwiseRateLimiter {
                 rl.window = _rateLimitConfigs[i].window;
             }
         }
-        emit RateLimitsChanged(_rateLimitConfigs);
+        emit OutboundRateLimitsChanged(_rateLimitConfigs);
     }
 
     /**
@@ -124,7 +125,7 @@ abstract contract PairwiseRateLimiter {
                 rl.window = _rateLimitConfigs[i].window;
             }
         }
-        emit RateLimitsChanged(_rateLimitConfigs);
+        emit InboundRateLimitsChanged(_rateLimitConfigs);
     }
 
     /**
