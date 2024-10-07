@@ -5,8 +5,9 @@ import "forge-std/Test.sol";
 
 import "../utils/Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
-import "../contracts/MintableOFTUpgradeable.sol";
-import "../contracts/EtherFiOFTAdapterUpgradeable.sol";
+import "../contracts/EtherfiOFTUpgradeable.sol";
+import "../contracts/PairwiseRateLimiter.sol";
+import "../contracts/EtherfiOFTAdapterUpgradeable.sol";
 
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import { Origin } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
@@ -23,46 +24,75 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
     ConfigPerL2 public TEST_L2;
     address public pauser;
-    MintableOFTUpgradeable public oft;
-    EtherFiOFTAdapterUpgradeable public oftAdapter;
+    EtherfiOFTUpgradeable public oft;
+    EtherfiOFTAdapterUpgradeable public oftAdapter;
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
+
+    enum Status {
+        Success,
+        PauseRevert,
+        InboundRateLimitRevert,
+        OutboundRateLimitRevert
+    }
 
     function setUpMainnet() public {
         TEST_L2 = BASE;
         pauser = vm.addr(123);
-        oftAdapter = EtherFiOFTAdapterUpgradeable(L1_UPGRADEABLE_OFT_ADAPTER);
+        oftAdapter = EtherfiOFTAdapterUpgradeable(L1_UPGRADEABLE_OFT_ADAPTER);
         vm.createSelectFork(L1_RPC_URL);
 
         // upgrade the OFTAdapter to pauseable version
         ProxyAdmin proxyAdmin = ProxyAdmin(L1_UPGRADEABLE_OFT_ADAPTER_PROXY_ADMIN);
-        address newImpl = address(new EtherFiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
+        address newImpl = address(new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
         vm.prank(L1_TIMELOCK);
         proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(L1_UPGRADEABLE_OFT_ADAPTER), newImpl, "");
         oftAdapter.initialize(L1_CONTRACT_CONTROLLER, L1_CONTRACT_CONTROLLER);
 
-        deal(L1_WEETH, L1_UPGRADEABLE_OFT_ADAPTER, 100 ether);
+        // premigration our upgradeable OFTAdapter has no funds
+        deal(L1_WEETH, L1_UPGRADEABLE_OFT_ADAPTER, 100_000 ether);
+
+        vm.startPrank(L1_CONTRACT_CONTROLLER);
+        // set rate limits
+        PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfigArray = new PairwiseRateLimiter.RateLimitConfig[](1);
+        rateLimitConfigArray[0] = PairwiseRateLimiter.RateLimitConfig({
+            peerEid: TEST_L2.L2_EID,
+            limit: LIMIT,
+            window: WINDOW
+        });
+        oftAdapter.setOutboundRateLimits(rateLimitConfigArray);
+        oftAdapter.setInboundRateLimits(rateLimitConfigArray);
 
         // set pauser role
-        vm.prank(L1_CONTRACT_CONTROLLER);
         oftAdapter.grantRole(PAUSER_ROLE, pauser);
+        vm.stopPrank();
     }
 
     function setUpL2() public {
         TEST_L2 = BASE;
         pauser = vm.addr(123);
-        oft = MintableOFTUpgradeable(TEST_L2.L2_OFT);
+        oft = EtherfiOFTUpgradeable(TEST_L2.L2_OFT);
         vm.createSelectFork(TEST_L2.RPC_URL);
 
         // upgrade existing OFT contract to pauseable version
         ProxyAdmin proxyAdmin = ProxyAdmin(TEST_L2.L2_OFT_PROXY_ADMIN);
-        address newImpl = address(new MintableOFTUpgradeable(TEST_L2.L2_ENDPOINT));
-        vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+        address newImpl = address(new EtherfiOFTUpgradeable(TEST_L2.L2_ENDPOINT));
+        vm.startPrank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
         proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(TEST_L2.L2_OFT), newImpl, "");
 
+        // set inbound rate limits (outbound is already set)
+        PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfigArray = new PairwiseRateLimiter.RateLimitConfig[](1);
+        rateLimitConfigArray[0] = PairwiseRateLimiter.RateLimitConfig({
+            peerEid: L1_EID,
+            limit: LIMIT,
+            window: WINDOW
+        });
+        oft.setInboundRateLimits(rateLimitConfigArray);
+
         // set pauser role
-        vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE); 
         oft.grantRole(PAUSER_ROLE, pauser);
+
+        vm.stopPrank();
     }
 
     function test_pauseAccessControl() public {
@@ -109,30 +139,83 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         setUpL2();
 
         // simulate outbound cross chain transfers
-        _sendCrossChain(false);
+        _sendCrossChain(1 ether, Status.Success);
 
         vm.prank(pauser);
         oft.pauseBridge();
 
-        _sendCrossChain(true);
+        _sendCrossChain(1 ether, Status.PauseRevert);
 
         vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
         oft.unpauseBridge();
 
-        _sendCrossChain(false);
+        _sendCrossChain(1 ether, Status.Success);
 
         // simulate inbound cross chain transfers
-        _mockCrossChainReceive(false);
+        _mockCrossChainReceive(1 ether, Status.Success);
 
         vm.prank(pauser);
         oft.pauseBridge();
 
-        _mockCrossChainReceive(true);
+        _mockCrossChainReceive(1 ether, Status.PauseRevert);
 
         vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
         oft.unpauseBridge();
 
-        _mockCrossChainReceive(false);
+        _mockCrossChainReceive(1 ether, Status.Success);
+    }
+
+    function test_rateLimitOFT() public {
+        setUpL2();
+
+        (uint256 outboundAmountInFlight, uint256 amountCanBeSent) = oft.getAmountCanBeSent(L1_EID);
+        _sendCrossChain(10 ether, Status.Success);
+        (uint256 outboundAmountInFlightAfter, uint256 amountCanBeSentAfter) = oft.getAmountCanBeSent(L1_EID);
+
+        assertEq(outboundAmountInFlight + 10 ether, outboundAmountInFlightAfter);
+        assertEq(amountCanBeSent - 10 ether, amountCanBeSentAfter);
+
+        _mockCrossChainReceive(2 ether, Status.Success);
+        (uint256 inboundAmountInFlight, uint256 amountCanBeReceived) = oft.getAmountCanBeReceived(L1_EID);
+
+        assertEq(inboundAmountInFlight, 2 ether);
+        assertEq(amountCanBeReceived, 1998 ether);
+
+        _sendCrossChain(1995 ether, Status.OutboundRateLimitRevert);
+        _mockCrossChainReceive(1995 ether, Status.Success);
+        _mockCrossChainReceive(5 ether, Status.InboundRateLimitRevert);
+
+        // warp forward 4 hours
+        vm.warp(block.timestamp + 14400);
+
+        _sendCrossChain(1995 ether, Status.Success);
+        _mockCrossChainReceive(1995 ether, Status.Success);
+    }
+
+    function test_rateLimitOFTAdapter() public {
+        setUpMainnet();
+
+        _sendCrossChain(10 ether, Status.Success);
+        (uint256 outboundAmountInFlightAfter, uint256 amountCanBeSentAfter) = oftAdapter.getAmountCanBeSent(TEST_L2.L2_EID);
+
+        assertEq(10 ether, outboundAmountInFlightAfter);
+        assertEq(1990 ether, amountCanBeSentAfter);
+
+        _mockCrossChainReceive(2 ether, Status.Success);
+        (uint256 inboundAmountInFlight, uint256 amountCanBeReceived) = oftAdapter.getAmountCanBeReceived(TEST_L2.L2_EID);
+
+        assertEq(inboundAmountInFlight, 2 ether);
+        assertEq(amountCanBeReceived, 1998 ether);
+
+        _sendCrossChain(1995 ether, Status.OutboundRateLimitRevert);
+        _mockCrossChainReceive(1995 ether, Status.Success);
+        _mockCrossChainReceive(5 ether, Status.InboundRateLimitRevert);
+
+        // warp forward 4 hours
+        vm.warp(block.timestamp + 14400);
+
+        _sendCrossChain(1995 ether, Status.Success);
+        _mockCrossChainReceive(1995 ether, Status.Success);
     }
 
     // testing the pausing functionality of the OFT adapter against cross chain transfers
@@ -140,34 +223,34 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         setUpMainnet();
 
         // simulate outbound cross chain transfers
-        _sendCrossChain(false);
+        _sendCrossChain(1 ether, Status.Success);
 
         vm.prank(pauser);
         oftAdapter.pauseBridge();
 
-        _sendCrossChain(true);
+        _sendCrossChain(1 ether, Status.PauseRevert);
 
         vm.prank(L1_CONTRACT_CONTROLLER);
         oftAdapter.unpauseBridge();
 
-        _sendCrossChain(false);
+        _sendCrossChain(1 ether, Status.Success);
 
         // simulate inbound cross chain transfers
-        _mockCrossChainReceive(false);
+        _mockCrossChainReceive(1 ether, Status.Success);
 
         vm.prank(pauser);
         oftAdapter.pauseBridge();
 
-        _mockCrossChainReceive(true);
+        _mockCrossChainReceive(1 ether, Status.PauseRevert);
 
         vm.prank(L1_CONTRACT_CONTROLLER);
         oftAdapter.unpauseBridge();
 
-        _mockCrossChainReceive(false);
+        _mockCrossChainReceive(1 ether, Status.Success);
     }
 
     // mock an inbound cross chain transfer
-    function _mockCrossChainReceive(bool expectRevert) internal {
+    function _mockCrossChainReceive(uint256 amount, Status status) internal {
         // setting params based on our current chain
         address peerAddress = L1_OFT_ADAPTER;
         address lzEndpoint = TEST_L2.L2_ENDPOINT;
@@ -188,13 +271,18 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         });
         bytes32 _guid = 0x1fb4f4c346dd3904d20a62a68ba66df159e012db8526b776cd5bb07b2f80f20e;
         bytes32 _sendTo = _toBytes32(receiver);
-        // 2 weETH to be received in lz's 6 decimal standard
-        uint64 _amountShared = 1_000_000;
+        
+        // converting the amount to be received to LZs 6 decimal standand
+        uint64 _amountShared =  uint64(amount / 10e11);
         bytes memory _message = abi.encodePacked(_sendTo, _amountShared);
 
         vm.prank(lzEndpoint);
-        if (expectRevert) {
+        if (status == Status.PauseRevert) {
             vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        } else if (status == Status.OutboundRateLimitRevert) {
+            vm.expectRevert(PairwiseRateLimiter.OutboundRateLimitExceeded.selector);
+        } else if (status == Status.InboundRateLimitRevert) {
+            vm.expectRevert(PairwiseRateLimiter.InboundRateLimitExceeded.selector);
         }
         if (block.chainid == 1) {
             oftAdapter.lzReceive(origin, _guid, _message, address(0), "");
@@ -204,9 +292,8 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
     }
 
     // helper function to simulate outbound cross chain transfers 
-    function _sendCrossChain(bool expectRevert) internal {
+    function _sendCrossChain(uint256 amount, Status status) internal {
         address sender = vm.addr(1);
-        uint256 amount = 1 ether;
 
         // configuring based on our current chain
         address weETH = address(oft);
@@ -218,7 +305,7 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
             dstEid = TEST_L2.L2_EID;
         }
 
-        vm.deal(sender, 100 ether);
+        vm.deal(sender, amount);
         deal(address(weETH), address(sender), amount);
 
         vm.prank(sender);
@@ -236,8 +323,12 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         IOFT oftInterface = IOFT(localOFTContract);
         MessagingFee memory fee = oftInterface.quoteSend(param, false);
 
-        if (expectRevert) {
+        if (status == Status.PauseRevert) {
             vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        } else if (status == Status.OutboundRateLimitRevert) {
+            vm.expectRevert(PairwiseRateLimiter.OutboundRateLimitExceeded.selector);
+        } else if (status == Status.InboundRateLimitRevert) {
+            vm.expectRevert(PairwiseRateLimiter.InboundRateLimitExceeded.selector);
         }
         vm.prank(sender);
         oftInterface.send{value: fee.nativeFee}(
@@ -246,6 +337,5 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
             sender
         );
     }
-
 }
 
