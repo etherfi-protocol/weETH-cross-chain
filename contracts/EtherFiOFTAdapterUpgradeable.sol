@@ -8,6 +8,7 @@ import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
 contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
 
     /**
      * @dev Constructor for EtherfiOFTAdapterUpgradeable
@@ -48,19 +49,34 @@ contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
         return super._credit(_to, _amountLD, 0);
     }
 
-    function setOutboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setOutboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {
         _setOutboundRateLimits(_rateLimitConfigs);
     }
 
-    function setInboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setInboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {
         _setInboundRateLimits(_rateLimitConfigs);
     }
 
-    function pauseBridge() external onlyRole(PAUSER_ROLE) {
+
+   function pauseBridge() public onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    function unpauseBridge() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unpauseBridge() external onlyRole(UNPAUSER_ROLE) {
         _unpause();
+    }
+
+    /**
+     * @dev Overrides the role admin logic from AccessControlUpgradeable to restrict granting roles to the owner
+     */
+    function grantRole(bytes32 role, address account) public override onlyOwner() {
+        _grantRole(role, account);
+    }
+
+    /**
+     * @dev Overrides the role admin logic from AccessControlUpgradeable to restrict revoking roles to the owner
+     */
+    function revokeRole(bytes32 role, address account) public override onlyOwner() {
+        _revokeRole(role, account);
     }
 }

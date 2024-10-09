@@ -24,9 +24,12 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
     ConfigPerL2 public TEST_L2;
     address public pauser;
+    address public unpauser;
     EtherfiOFTUpgradeable public oft;
     EtherfiOFTAdapterUpgradeable public oftAdapter;
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
     enum Status {
@@ -38,7 +41,8 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
 
     function setUpMainnet() public {
         TEST_L2 = BASE;
-        pauser = vm.addr(123);
+        pauser = vm.addr(1);
+        unpauser = vm.addr(2);
         oftAdapter = EtherfiOFTAdapterUpgradeable(L1_UPGRADEABLE_OFT_ADAPTER);
         vm.createSelectFork(L1_RPC_URL);
 
@@ -64,13 +68,14 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         oftAdapter.setInboundRateLimits(rateLimitConfigArray);
 
         // set pauser role
+        oftAdapter.grantRole(UNPAUSER_ROLE, unpauser);
         oftAdapter.grantRole(PAUSER_ROLE, pauser);
         vm.stopPrank();
     }
 
     function setUpL2() public {
         TEST_L2 = BASE;
-        pauser = vm.addr(123);
+        pauser = vm.addr(1);
         oft = EtherfiOFTUpgradeable(TEST_L2.L2_OFT);
         vm.createSelectFork(TEST_L2.RPC_URL);
 
@@ -90,7 +95,77 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         oft.setInboundRateLimits(rateLimitConfigArray);
 
         // set pauser role
+        oft.grantRole(UNPAUSER_ROLE, unpauser);
         oft.grantRole(PAUSER_ROLE, pauser);
+
+        vm.stopPrank();
+    }
+
+    function test_onlyOwnerAccessControl() public {
+        setUpL2();
+
+        address defaultAdmin = vm.addr(3);
+
+        // making owner and default admin different addresses
+        vm.startPrank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+        oft.grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        oft.renounceRole(DEFAULT_ADMIN_ROLE, TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+        vm.stopPrank();
+
+        // ensure that default admin can't do things
+        vm.startPrank(defaultAdmin);
+
+        PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfigArray = new PairwiseRateLimiter.RateLimitConfig[](1);
+        rateLimitConfigArray[0] = PairwiseRateLimiter.RateLimitConfig({
+            peerEid: L1_EID,
+            limit: STANDBY_LIMIT,
+            window: STANDBY_WINDOW
+        });
+        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+        oft.setInboundRateLimits(rateLimitConfigArray);
+
+        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+        oft.setOutboundRateLimits(rateLimitConfigArray);
+
+        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+        oft.grantRole(MINTER_ROLE, pauser);
+
+        // ensure the owner can do things
+        vm.startPrank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+
+        oft.setInboundRateLimits(rateLimitConfigArray);
+        oft.setOutboundRateLimits(rateLimitConfigArray);
+        oft.grantRole(MINTER_ROLE, pauser);
+        oft.revokeRole(MINTER_ROLE, pauser);
+        vm.stopPrank();
+        
+        setUpMainnet();
+
+        // making the owner and default admin different addresses
+        vm.startPrank(L1_CONTRACT_CONTROLLER);
+        oftAdapter.grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        oftAdapter.renounceRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
+        vm.stopPrank();
+
+        // ensure that default admin can't do things
+        vm.startPrank(defaultAdmin);
+
+        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+        oftAdapter.setInboundRateLimits(rateLimitConfigArray);
+
+        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+        oftAdapter.setOutboundRateLimits(rateLimitConfigArray);
+
+        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+        oftAdapter.grantRole(UNPAUSER_ROLE, pauser);
+
+        // ensure the owner can do things
+        vm.startPrank(L1_CONTRACT_CONTROLLER);
+
+        oftAdapter.setInboundRateLimits(rateLimitConfigArray);
+        oftAdapter.setOutboundRateLimits(rateLimitConfigArray);
+        oftAdapter.grantRole(UNPAUSER_ROLE, pauser);
+        oftAdapter.revokeRole(UNPAUSER_ROLE, pauser);
 
         vm.stopPrank();
     }
@@ -99,38 +174,33 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         setUpL2();
 
         vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
-        vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, TEST_L2.L2_CONTRACT_CONTROLLER_SAFE, PAUSER_ROLE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, TEST_L2.L2_CONTRACT_CONTROLLER_SAFE, PAUSER_ROLE));
         oft.pauseBridge();
 
         vm.prank(pauser);
         oft.pauseBridge();
 
         vm.prank(pauser);
-        vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, pauser, DEFAULT_ADMIN_ROLE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, pauser, UNPAUSER_ROLE));
         oft.unpauseBridge();
 
-        vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+        vm.prank(unpauser);
         oft.unpauseBridge();
 
         setUpMainnet();
 
         vm.prank(L1_CONTRACT_CONTROLLER);
-        vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, L1_CONTRACT_CONTROLLER, PAUSER_ROLE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, L1_CONTRACT_CONTROLLER, PAUSER_ROLE));
         oftAdapter.pauseBridge();
 
         vm.prank(pauser);
         oftAdapter.pauseBridge();
 
         vm.prank(pauser);
-        vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, pauser, DEFAULT_ADMIN_ROLE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, pauser, UNPAUSER_ROLE));
+        oftAdapter.unpauseBridge();
+
+        vm.prank(unpauser);
         oftAdapter.unpauseBridge();
     }
 
@@ -146,7 +216,7 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
 
         _sendCrossChain(1 ether, Status.PauseRevert);
 
-        vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+        vm.prank(unpauser);
         oft.unpauseBridge();
 
         _sendCrossChain(1 ether, Status.Success);
@@ -159,8 +229,39 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
 
         _mockCrossChainReceive(1 ether, Status.PauseRevert);
 
-        vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+        vm.prank(unpauser);
         oft.unpauseBridge();
+
+        _mockCrossChainReceive(1 ether, Status.Success);
+    }
+
+    // testing the pausing functionality of the OFT adapter against cross chain transfers
+    function test_pauseOFTAdapter() public {
+        setUpMainnet();
+
+        // simulate outbound cross chain transfers
+        _sendCrossChain(1 ether, Status.Success);
+
+        vm.prank(pauser);
+        oftAdapter.pauseBridge();
+
+        _sendCrossChain(1 ether, Status.PauseRevert);
+
+        vm.prank(unpauser);
+        oftAdapter.unpauseBridge();
+
+        _sendCrossChain(1 ether, Status.Success);
+
+        // simulate inbound cross chain transfers
+        _mockCrossChainReceive(1 ether, Status.Success);
+
+        vm.prank(pauser);
+        oftAdapter.pauseBridge();
+
+        _mockCrossChainReceive(1 ether, Status.PauseRevert);
+
+        vm.prank(unpauser);
+        oftAdapter.unpauseBridge();
 
         _mockCrossChainReceive(1 ether, Status.Success);
     }
@@ -218,41 +319,10 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         _mockCrossChainReceive(1995 ether, Status.Success);
     }
 
-    // testing the pausing functionality of the OFT adapter against cross chain transfers
-    function test_pauseOFTAdapter() public {
-        setUpMainnet();
-
-        // simulate outbound cross chain transfers
-        _sendCrossChain(1 ether, Status.Success);
-
-        vm.prank(pauser);
-        oftAdapter.pauseBridge();
-
-        _sendCrossChain(1 ether, Status.PauseRevert);
-
-        vm.prank(L1_CONTRACT_CONTROLLER);
-        oftAdapter.unpauseBridge();
-
-        _sendCrossChain(1 ether, Status.Success);
-
-        // simulate inbound cross chain transfers
-        _mockCrossChainReceive(1 ether, Status.Success);
-
-        vm.prank(pauser);
-        oftAdapter.pauseBridge();
-
-        _mockCrossChainReceive(1 ether, Status.PauseRevert);
-
-        vm.prank(L1_CONTRACT_CONTROLLER);
-        oftAdapter.unpauseBridge();
-
-        _mockCrossChainReceive(1 ether, Status.Success);
-    }
-
     // mock an inbound cross chain transfer
     function _mockCrossChainReceive(uint256 amount, Status status) internal {
         // setting params based on our current chain
-        address peerAddress = L1_OFT_ADAPTER;
+        address peerAddress = L1_UPGRADEABLE_OFT_ADAPTER;
         address lzEndpoint = TEST_L2.L2_ENDPOINT;
         uint32 srcEid = L1_EID;
         if (block.chainid == 1) {

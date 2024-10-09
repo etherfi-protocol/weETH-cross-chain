@@ -16,6 +16,7 @@ import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
 
     /**
      * @dev Constructor for MintableOFT
@@ -57,7 +58,8 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, Paus
     }
 
     /**
-     * @dev Mint function that can only be called by a minter
+     * @notice Mint function that can only be called by a minter
+     * @dev Used by the SyncPool contract in the native minting flow
      * @param _account The account to mint the tokens to
      * @param _amount The amount of tokens to mint
      */
@@ -65,26 +67,41 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, Paus
         _mint(_account, _amount);
     }
     
-    function setOutboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setOutboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {
         _setOutboundRateLimits(_rateLimitConfigs);
     }
 
-    function setInboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setInboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {
         _setInboundRateLimits(_rateLimitConfigs);
     }
 
-    function updateTokenSymbol(string memory name_, string memory symbol_) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        ERC20Storage storage $ = getERC20Storage();
-        $._name = name_;
-        $._symbol = symbol_;
-    }
 
    function pauseBridge() public onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    function unpauseBridge() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unpauseBridge() external onlyRole(UNPAUSER_ROLE) {
         _unpause();
+    }
+
+    /**
+     * @dev Overrides the role admin logic from AccessControlUpgradeable to restrict granting roles to the owner
+     */
+    function grantRole(bytes32 role, address account) public override onlyOwner() {
+        _grantRole(role, account);
+    }
+
+    /**
+     * @dev Overrides the role admin logic from AccessControlUpgradeable to restrict revoking roles to the owner
+     */
+    function revokeRole(bytes32 role, address account) public override onlyOwner() {
+        _revokeRole(role, account);
+    }
+
+    function updateTokenSymbol(string memory name_, string memory symbol_) external onlyOwner() {
+        ERC20Storage storage $ = getERC20Storage();
+        $._name = name_;
+        $._symbol = symbol_;
     }
 
     function getERC20Storage() internal pure returns (ERC20Storage storage $) {
