@@ -15,12 +15,12 @@ import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/lib
 import { SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 import "../contracts/MintableOFTUpgradeable.sol";
-import "../utils/Constants.sol";
+import "../utils/L2Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
 
 import "forge-std/Test.sol";
 
-contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
+contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     function testGnosisMainnet() public {

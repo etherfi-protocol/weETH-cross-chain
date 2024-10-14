@@ -13,9 +13,9 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAp
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 
 import "../../contracts/EtherFiOFTAdapterUpgradeable.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
-contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
+contract DeployUpgradeableOFTAdapter is Script, L2Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
     
     EnforcedOptionParam[] public enforcedOptions;

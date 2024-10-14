@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 
-import "./Constants.sol";
+import "./L2Constants.sol";
 
 contract LayerZeroHelpers {
     // TODO: move all layerzero helper functions here

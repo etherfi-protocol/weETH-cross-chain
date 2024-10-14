@@ -15,6 +15,10 @@ import {Constants} from "../../../libraries/Constants.sol";
 contract L1ScrollReceiverETHUpgradeable is L1BaseReceiverUpgradeable {
     error L1ScrollReceiverETH__OnlyETH();
 
+    constructor() {
+        _disableInitializers();
+    }
+
     /**
      * @dev Initializer for L1 Mode Receiver ETH
      * @param l1SyncPool Address of the L1 sync pool
