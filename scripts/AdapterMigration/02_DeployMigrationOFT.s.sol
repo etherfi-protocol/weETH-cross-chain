@@ -19,6 +19,8 @@ contract DeployMigrationOFT is Script, L2Constants, LayerZeroHelpers {
 
     address public migrationOFTAddress;
     EnforcedOptionParam[] public enforcedOptions;
+    
+    address constant DEPLOYMENT_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
 
     function run() public returns (address) {
 
