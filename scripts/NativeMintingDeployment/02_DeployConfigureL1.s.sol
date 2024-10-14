@@ -33,7 +33,6 @@ contract L1NativeMintingScript is Script, Constants, LayerZeroHelpers {
         );
 
         console.log("DummyToken deployed at: ", dummyTokenProxy);
-
-        // todo 
+        
     }
 }
