@@ -5,6 +5,7 @@ import "forge-std/console.sol";
 import "forge-std/Script.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
@@ -12,22 +13,10 @@ import "../../contracts/NativeMinting/EtherfiL2ExchangeRateProvider.sol";
 import "../../contracts/NativeMinting/L2SyncPoolContracts/L2ScrollSyncPoolETHUpgradeable.sol";
 import "../../contracts/NativeMinting/BucketRateLimiter.sol";
 import "../../utils/L2Constants.sol";
+import "../../utils/LayerZeroHelpers.sol";
 
 
-contract L1NativeMintingScript is Script, L2Constants {
-
-
-    /*//////////////////////////////////////////////////////////////
-                    Current Deployment Parameters
-    //////////////////////////////////////////////////////////////*/
-    
-    ConfigPerL2 public DEPLOYMENT_L2 = SCROLL;
-    address constant WEETH_RATE_PROVIDER = 0x57bd9E614f542fB3d6FeF2B744f3B813f0cc1258;
-    address constant L2_MESSENGER = 0x781e90f1c8Fc4611c9b7497C3B47F99Ef6969CbC;
-
-    /*//////////////////////////////////////////////////////////////
-                
-    //////////////////////////////////////////////////////////////*/
+contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers {
 
     function run() public {
 
@@ -78,9 +67,30 @@ contract L1NativeMintingScript is Script, L2Constants {
                 )
             )
         );
+        L2ScrollSyncPoolETHUpgradeable syncPool = L2ScrollSyncPoolETHUpgradeable(syncPoolProxy);
         console.log("Sync Pool deployed at: ", syncPoolProxy);
 
         bucketRateLimiter.updateConsumer(syncPoolProxy);
         bucketRateLimiter.transferOwnership(DEPLOYMENT_L2.L2_CONTRACT_CONTROLLER_SAFE);
+
+        // setting OFT config for the L2 sync pool
+        syncPool.setPeer(L1_EID, _toBytes32(L1_SYNC_POOL));
+
+        ILayerZeroEndpointV2(DEPLOYMENT_L2.L2_ENDPOINT).setConfig(syncPoolProxy, DEPLOYMENT_SEND_LID_302, params);
+
+        SetConfigParam[] memory params = new SetConfigParam[](1);
+    
+        UlnConfig memory ulnConfig = UlnConfig({
+            confirmations: 64,
+            requiredDVNCount: 2,
+            optionalDVNCount: 0,
+            optionalDVNThreshold: 0,
+            requiredDVNs: DEPLOYMENT_L2.L2_DVNS,
+            optionalDVNs: new address[](0)
+        });
+
+        params[0] = SetConfigParam(dstEid, 2, abi.encode(ulnConfig));
+        ILayerZeroEndpointV2(DEPLOYMENT_L2.L2_ENDPOINT).setConfig(oftDeployment.proxyAddress, DEPLOYMENT_L2.SEND_302, params);
+
     }
 }

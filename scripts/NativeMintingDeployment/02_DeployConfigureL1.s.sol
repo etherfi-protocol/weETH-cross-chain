@@ -13,19 +13,7 @@ import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
 contract L1NativeMintingScript is Script, Constants, LayerZeroHelpers {
-
-    /*//////////////////////////////////////////////////////////////
-                    Current Deployment Parameters
-    //////////////////////////////////////////////////////////////*/
     
-    ConfigPerL2 public DEPLOYMENT_L2 = SCROLL;
-    string constant DUMMY_TOKEN_NAME = "Scroll Dummy ETH";
-    string constant DUMMY_TOKEN_SYMBOL = "scrollETH";
-
-    /*//////////////////////////////////////////////////////////////
-                
-    //////////////////////////////////////////////////////////////*/
-
     function run() public {
 
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
