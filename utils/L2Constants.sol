@@ -46,18 +46,6 @@ pragma solidity ^0.8.13;
 contract L2Constants {
 
     /*//////////////////////////////////////////////////////////////
-                    Native Minting Deployment Parameters
-    //////////////////////////////////////////////////////////////*/
-
-    ConfigPerL2 public DEPLOYMENT_L2 = SCROLL;
-    address constant WEETH_RATE_PROVIDER = 0x57bd9E614f542fB3d6FeF2B744f3B813f0cc1258;
-    address constant L2_MESSENGER = 0x781e90f1c8Fc4611c9b7497C3B47F99Ef6969CbC;
-    string constant DUMMY_TOKEN_NAME = "Scroll Dummy ETH";
-    string constant DUMMY_TOKEN_SYMBOL = "scrollETH";
-
-
-
-    /*//////////////////////////////////////////////////////////////
                         OFT Deployment Parameters
     //////////////////////////////////////////////////////////////*/
 

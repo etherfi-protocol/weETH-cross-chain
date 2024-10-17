@@ -27,7 +27,7 @@ interface EndpointDelegates {
     function delegates(address) external view returns (address);
 }
 
-contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
+contract OFTMigrationUnitTests is Test, L2Constants, LayerZeroHelpers {
 
     address constant DEPLOYMENT_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
     

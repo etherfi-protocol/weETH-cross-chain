@@ -23,7 +23,7 @@ struct OFTDeployment {
     MintableOFTUpgradeable tokenContract;
 }
 
-contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
+contract DeployOFTScript is Script, L2Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     address scriptDeployer;

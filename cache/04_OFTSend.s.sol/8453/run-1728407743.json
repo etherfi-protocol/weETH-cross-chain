@@ -1,0 +1,10 @@
+{
+  "transactions": [
+    {
+      "rpc": "https://base-mainnet.g.alchemy.com/v2/UiCKOumHcJPK7AGQGaSZaqTieiOOt2ZN"
+    },
+    {
+      "rpc": "https://base-mainnet.g.alchemy.com/v2/UiCKOumHcJPK7AGQGaSZaqTieiOOt2ZN"
+    }
+  ]
+}

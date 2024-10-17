@@ -1,0 +1,10 @@
+{
+  "transactions": [
+    {
+      "rpc": "https://zircuit1-mainnet.p2pify.com/"
+    },
+    {
+      "rpc": "https://zircuit1-mainnet.p2pify.com/"
+    }
+  ]
+}
