@@ -92,21 +92,21 @@ contract L2Constants {
 
     // Mainnet Constants
     string constant L1_RPC_URL = "https://mainnet.gateway.tenderly.co";
-    uint32 constant L1_EID = 30101;
-    address constant L1_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
+    uint32 constant L1_EID = 40161;
+    address constant L1_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f;
     address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address constant L1_WEETH = 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee;
-    address constant L1_CONTRACT_CONTROLLER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
-    address constant L1_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
+    address constant L1_WEETH = address(0);
+    address constant L1_CONTRACT_CONTROLLER = address(0);
+    address constant L1_TIMELOCK = address(0);
 
-    address constant L1_SYNC_POOL = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
-    address constant L1_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
-    address constant L1_VAMP = 0x9FFDF407cDe9a93c47611799DA23924Af3EF764F;
-    address constant L1_SEND_302 = 0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1;
-    address constant L1_RECEIVE_302 = 0xc02Ab410f0734EFa3F14628780e6e695156024C2;
-    address constant L1_LZ_DVN = 0x589dEDbD617e0CBcB916A9223F4d1300c294236b;
-    address constant L1_NETHERMIND_DVN = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
-    address[2] L1_DVN = [0x589dEDbD617e0CBcB916A9223F4d1300c294236b, 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5];
+    address constant L1_SYNC_POOL = address(0);
+    address constant L1_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63; // we are just sending money here and not using the functionality so all good to use the mainnet address
+    address constant L1_VAMP = address(0);
+    address constant L1_SEND_302 = 0xcc1ae8Cf5D3904Cef3360A9532B477529b177cCE;
+    address constant L1_RECEIVE_302 = 0xdAf00F5eE2158dD58E0d3857851c432E34A3A851;
+    address constant L1_LZ_DVN = 0x8eebf8b423B73bFCa51a1Db4B7354AA0bFCA9193;
+    address constant L1_NETHERMIND_DVN = 0xcA01DAa8e559Cb6a810ce7906eC2AeA39BDeccE4;
+    address[2] L1_DVN = [0x8eebf8b423B73bFCa51a1Db4B7354AA0bFCA9193, 0xcA01DAa8e559Cb6a810ce7906eC2AeA39BDeccE4];
 
     // https://docs.layerzero.network/v2/developers/solana/configuration/oapp-config#dead-dvn
     address constant DEAD_DVN = 0x000000000000000000000000000000000000dEaD;
