@@ -3,6 +3,7 @@ cache/
 out/
 cache_forge/
 output/
+bin/
 
 # Ignores development broadcast logs
 broadcast/
