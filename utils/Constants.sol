@@ -51,24 +51,21 @@ contract Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://arbitrum.llamarpc.com";
+    string constant DEPLOYMENT_RPC_URL = "";
     string constant DEPLOYMENT_CHAIN_ID = "";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 30110;
-    address constant DEPLOYMENT_SEND_LID_302 = 0x975bcD720be66659e3EB3C0e4F1866a3020E493A;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x7B9E184e07a6EE1aC23eAe0fe8D6Be2f663f05e6;
-    address constant DEPLOYMENT_LZ_DVN = 0x2f55C492897526677C5B68fb199ea31E2c126416;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0xa7b5189bcA84Cd304D8553977c7C614329750d99;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
+    uint32 constant DEPLOYMENT_EID = 0;
+    address constant DEPLOYMENT_SEND_LID_302 = address(0);
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
+    address constant DEPLOYMENT_LZ_DVN = address(0);
+    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
+    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
 
     // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = 0x703956BEa5F198D63379F28A2d6179cbd9C1c9c5;
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x0c6ca434756EeDF928a55EBeAf0019364B279732;
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0); // migration OFT is non-upgradeable hence no proxy admin
-
-    // the new upgradeable version of the OFT adapter
-    address constant DEPLOYMENT_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
+    address constant DEPLOYMENT_OFT = address(0);
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0);
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0);
 
     /*//////////////////////////////////////////////////////////////
                     
@@ -97,10 +94,7 @@ contract Constants {
     address constant L1_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
 
     address constant L1_SYNC_POOL_ADDRESS = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
-    address constant L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
-    address constant L1_OFT_ADAPTER = 0xFE7fe01F8B9A76803aF3750144C2715D9bcf7D0D;
-    address constant L1_UPGRADEABLE_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
-    address constant L1_UPGRADEABLE_OFT_ADAPTER_PROXY_ADMIN = 0xa9E9bBf04F95688D7fd82036f83544630E463CAc;
+    address constant L1_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
     address constant L1_VAMP = 0x9FFDF407cDe9a93c47611799DA23924Af3EF764F;
     address constant L1_SEND_302 = 0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1;
     address constant L1_RECEIVE_302 = 0xc02Ab410f0734EFa3F14628780e6e695156024C2;
@@ -111,6 +105,8 @@ contract Constants {
     // https://docs.layerzero.network/v2/developers/solana/configuration/oapp-config#dead-dvn
     address constant DEAD_DVN = 0x000000000000000000000000000000000000dEaD;
 
+    address constant L1_OFT_ADAPTER_PROXY_ADMIN = 0xa9E9bBf04F95688D7fd82036f83544630E463CAc;
+    address constant L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
 
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
