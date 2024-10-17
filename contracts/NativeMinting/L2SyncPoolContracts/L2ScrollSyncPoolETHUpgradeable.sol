@@ -109,7 +109,7 @@ contract L2ScrollSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessen
         return receipt;
     }
 
-    /**
+    /** 
      * @dev Deposit function with referral event 
      */
     function deposit(

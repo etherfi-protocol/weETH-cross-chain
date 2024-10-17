@@ -46,18 +46,6 @@ pragma solidity ^0.8.13;
 contract L2Constants {
 
     /*//////////////////////////////////////////////////////////////
-                    Native Minting Deployment Parameters
-    //////////////////////////////////////////////////////////////*/
-
-    ConfigPerL2 public DEPLOYMENT_L2 = SCROLL;
-    address constant WEETH_RATE_PROVIDER = 0x57bd9E614f542fB3d6FeF2B744f3B813f0cc1258;
-    address constant L2_MESSENGER = 0x781e90f1c8Fc4611c9b7497C3B47F99Ef6969CbC;
-    string constant DUMMY_TOKEN_NAME = "Scroll Dummy ETH";
-    string constant DUMMY_TOKEN_SYMBOL = "scrollETH";
-
-
-
-    /*//////////////////////////////////////////////////////////////
                         OFT Deployment Parameters
     //////////////////////////////////////////////////////////////*/
 
@@ -89,8 +77,8 @@ contract L2Constants {
     string constant TOKEN_SYMBOL = "weETH";
     
     // weETH Bridge Rate Limits
-    uint256 constant BUCKET_SIZE = 1000 ether;
-    uint256 constant BUCKET_REFILL_PER_SECOND = 0.1 ether;
+    uint256 constant BUCKET_SIZE = 3600000000000000000000;
+    uint256 constant BUCKET_REFILL_PER_SECOND = 1000000000000000000;
 
     // Global Production weETH Bridge Rate Limits
     uint256 constant LIMIT = 2000 ether;
@@ -109,6 +97,7 @@ contract L2Constants {
     address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address constant L1_WEETH = 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee;
     address constant L1_CONTRACT_CONTROLLER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
+    address constant L1_TIMELOCK_GNOSIS = 0xcdd57D11476c22d265722F68390b036f3DA48c21;
     address constant L1_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
 
     address constant L1_SYNC_POOL = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
@@ -338,7 +327,7 @@ contract L2Constants {
 
     ConfigPerL2 SCROLL = ConfigPerL2({
         NAME: "scroll",
-        RPC_URL: "https://scroll-mainnet.public.blastapi.io",
+        RPC_URL: "https://scroll-mainnet.g.alchemy.com/v2/tboG4m2gbe7vHzF_NTjyT2Jrx8fPmyjf",
         CHAIN_ID: "534352",
 
         L2_EID: 30214,
