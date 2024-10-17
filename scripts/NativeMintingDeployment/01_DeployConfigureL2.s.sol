@@ -93,26 +93,7 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers {
 
         // set OFT configurations for the L2 sync pool
         syncPool.setPeer(L1_EID, _toBytes32(L1_SYNC_POOL));
-        _setDVN();
-
+        ILayerZeroEndpointV2(SCROLL.L2_ENDPOINT).setConfig(syncPoolProxy, SCROLL.SEND_302, getDVNConfig(L1_EID, SCROLL.LZ_DVN));
         IOAppOptionsType3(syncPoolProxy).setEnforcedOptions(getEnforcedOptions(L1_EID));
-    }
-
-    function _setDVN() internal {
-        SetConfigParam[] memory params = new SetConfigParam[](1);
-        address[] memory requiredDVNs = new address[](2);
-        requiredDVNs[0] = SCROLL.LZ_DVN[0];
-        requiredDVNs[1] = SCROLL.LZ_DVN[1];
-        UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
-            requiredDVNCount: 2,
-            optionalDVNCount: 0,
-            optionalDVNThreshold: 0,
-            requiredDVNs: requiredDVNs,
-            optionalDVNs: new address[](0)
-        });
-
-        params[0] = SetConfigParam(L1_EID, 2, abi.encode(ulnConfig));
-        ILayerZeroEndpointV2(SCROLL.L2_ENDPOINT).setConfig(syncPoolProxy, SCROLL.SEND_302, params);
     }
 }

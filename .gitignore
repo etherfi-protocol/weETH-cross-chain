@@ -1,0 +1,27 @@
+# Compiler files
+cache/
+out/
+cache_forge/
+output/
+
+# Ignores development broadcast logs
+broadcast/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+node_modules/
+/.idea
+*.tsbuildinfo
+
+# VS Code workspace config
+workspace.code-workspace
+.vscode/
+.DS_Store
+
+output/
+
+transactions/

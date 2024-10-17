@@ -70,7 +70,7 @@ contract LayerZeroHelpers {
         return abi.encode(ulnConfig);
     }
 
-    function getEnforcedOptions(uint32 _eid) public view returns (EnforcedOptionParam[] memory) {
+    function getEnforcedOptions(uint32 _eid) public pure returns (EnforcedOptionParam[] memory) {
         EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](2);
 
         enforcedOptions[0] = EnforcedOptionParam({
