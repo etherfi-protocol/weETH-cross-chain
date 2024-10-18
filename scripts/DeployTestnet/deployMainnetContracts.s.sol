@@ -18,7 +18,13 @@ contract mockEETH is ERC20 {
     }
 }
 
-contract mockWEETH {
+contract mockWEETH is ERC20 {
+
+    constructor() ERC20("Wrapped EtherFi ETH", "weETH") {
+        _mint(msg.sender, 1000000000000000000000000000);
+    }
+
+    
 
 }
 
