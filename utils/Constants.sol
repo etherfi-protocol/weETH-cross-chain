@@ -108,6 +108,9 @@ contract Constants {
     address constant L1_OFT_ADAPTER_PROXY_ADMIN = 0xa9E9bBf04F95688D7fd82036f83544630E463CAc;
     address constant L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
 
+    // Cross chain pauser EOA
+    address constant PAUSER_EOA = 0x531E5C5167d1bad7300a87CbCdD9d905ef7B490E;
+
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
     constructor () {
