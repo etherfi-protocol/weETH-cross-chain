@@ -21,7 +21,7 @@ contract DeployConfigureNewOFT is Script, Constants, GnosisHelpers, LayerZeroHel
                     Current Deployment Parameter 
     //////////////////////////////////////////////////////////////*/
 
-    ConfigPerL2 currentDeploymentChain = OP;
+    ConfigPerL2 currentDeploymentChain = MODE;
 
     /*//////////////////////////////////////////////////////////////
                 

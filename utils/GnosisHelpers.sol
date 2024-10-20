@@ -60,4 +60,26 @@ contract GnosisHelpers is Test {
         return iToHex(abi.encodePacked(addr));
     }
 
+    address constant timelock = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
+    bytes32 constant predecessor = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 constant salt = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    uint256 constant delay = 259200;
+
+    // Generates the schedule transaction for a Timelock
+    function _getTimelockScheduleTransaction(address to, bytes memory data, bool isLasts) internal pure returns (string memory) {
+
+        string memory timelockAddressHex = iToHex(abi.encodePacked(address(timelock)));
+        string memory scheduleTransactionData = iToHex(abi.encodeWithSignature("schedule(address,uint256,bytes,bytes32,bytes32,uint256)", to, 0, data, predecessor, salt, delay));
+
+        return _getGnosisTransaction(timelockAddressHex, scheduleTransactionData, isLasts);
+    }
+
+    function _getTimelockExecuteTransaction(address to, bytes memory data, bool isLasts) internal pure returns (string memory) {
+
+        string memory timelockAddressHex = iToHex(abi.encodePacked(address(timelock)));
+        string memory executeTransactionData = iToHex(abi.encodeWithSignature("execute(address,uint256,bytes,bytes32,bytes32)", to, 0, data, predecessor, salt));
+
+        return _getGnosisTransaction(timelockAddressHex, executeTransactionData, isLasts);
+    }
+
 }

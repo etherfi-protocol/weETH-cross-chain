@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 
 import "../utils/Constants.sol";
+import "../utils/GnosisHelpers.sol";
 import "../utils/LayerZeroHelpers.sol";
 import "../contracts/EtherfiOFTUpgradeable.sol";
 import "../contracts/PairwiseRateLimiter.sol";
@@ -21,7 +22,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 // a test suite for the security features we are adding to the OFT contracts {pausing, rate limiting}
-contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
+contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers, GnosisHelpers {
     ConfigPerL2 public TEST_L2;
     address public pauser;
     address public unpauser;
@@ -41,64 +42,25 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
 
     function setUpMainnet() public {
         TEST_L2 = BASE;
-        pauser = vm.addr(1);
-        unpauser = vm.addr(2);
-        oftAdapter = EtherfiOFTAdapterUpgradeable(L1_UPGRADEABLE_OFT_ADAPTER);
+        pauser = PAUSER_EOA;
+        unpauser = L1_CONTRACT_CONTROLLER;
+        oftAdapter = EtherfiOFTAdapterUpgradeable(L1_OFT_ADAPTER);
         vm.createSelectFork(L1_RPC_URL);
 
-        // upgrade the OFTAdapter to pauseable version
-        ProxyAdmin proxyAdmin = ProxyAdmin(L1_UPGRADEABLE_OFT_ADAPTER_PROXY_ADMIN);
-        address newImpl = address(new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
-        vm.prank(L1_TIMELOCK);
-        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(L1_UPGRADEABLE_OFT_ADAPTER), newImpl, "");
-        oftAdapter.initialize(L1_CONTRACT_CONTROLLER, L1_CONTRACT_CONTROLLER);
-
-        // premigration our upgradeable OFTAdapter has no funds
-        deal(L1_WEETH, L1_UPGRADEABLE_OFT_ADAPTER, 100_000 ether);
-
-        vm.startPrank(L1_CONTRACT_CONTROLLER);
-        // set rate limits
-        PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfigArray = new PairwiseRateLimiter.RateLimitConfig[](1);
-        rateLimitConfigArray[0] = PairwiseRateLimiter.RateLimitConfig({
-            peerEid: TEST_L2.L2_EID,
-            limit: LIMIT,
-            window: WINDOW
-        });
-        oftAdapter.setOutboundRateLimits(rateLimitConfigArray);
-        oftAdapter.setInboundRateLimits(rateLimitConfigArray);
-
-        // set pauser role
-        oftAdapter.grantRole(UNPAUSER_ROLE, unpauser);
-        oftAdapter.grantRole(PAUSER_ROLE, pauser);
-        vm.stopPrank();
+        executeGnosisTransactionBundle("./output/schedule-oft-adapter-upgrade.json", L1_TIMELOCK_GNOSIS);
+        vm.warp(block.timestamp + 259200 + 1);
+        executeGnosisTransactionBundle("./output/execute-oft-adapter-upgrade.json", L1_TIMELOCK_GNOSIS);
+        executeGnosisTransactionBundle("./output/configure-mainnet-security.json", L1_CONTRACT_CONTROLLER);
     }
 
     function setUpL2() public {
         TEST_L2 = BASE;
-        pauser = vm.addr(1);
+        pauser = PAUSER_EOA;
+        unpauser = TEST_L2.L2_CONTRACT_CONTROLLER_SAFE;
         oft = EtherfiOFTUpgradeable(TEST_L2.L2_OFT);
         vm.createSelectFork(TEST_L2.RPC_URL);
 
-        // upgrade existing OFT contract to pauseable version
-        ProxyAdmin proxyAdmin = ProxyAdmin(TEST_L2.L2_OFT_PROXY_ADMIN);
-        address newImpl = address(new EtherfiOFTUpgradeable(TEST_L2.L2_ENDPOINT));
-        vm.startPrank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
-        proxyAdmin.upgradeAndCall(ITransparentUpgradeableProxy(TEST_L2.L2_OFT), newImpl, "");
-
-        // set inbound rate limits (outbound is already set)
-        PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfigArray = new PairwiseRateLimiter.RateLimitConfig[](1);
-        rateLimitConfigArray[0] = PairwiseRateLimiter.RateLimitConfig({
-            peerEid: L1_EID,
-            limit: LIMIT,
-            window: WINDOW
-        });
-        oft.setInboundRateLimits(rateLimitConfigArray);
-
-        // set pauser role
-        oft.grantRole(UNPAUSER_ROLE, unpauser);
-        oft.grantRole(PAUSER_ROLE, pauser);
-
-        vm.stopPrank();
+        executeGnosisTransactionBundle("./output/security-upgrade-base.json", TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
     }
 
     function test_onlyOwnerAccessControl() public {
@@ -322,7 +284,7 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
     // mock an inbound cross chain transfer
     function _mockCrossChainReceive(uint256 amount, Status status) internal {
         // setting params based on our current chain
-        address peerAddress = L1_UPGRADEABLE_OFT_ADAPTER;
+        address peerAddress = L1_OFT_ADAPTER;
         address lzEndpoint = TEST_L2.L2_ENDPOINT;
         uint32 srcEid = L1_EID;
         if (block.chainid == 1) {
@@ -371,7 +333,7 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers {
         uint32 dstEid = L1_EID;
         if (block.chainid == 1) {
             weETH = L1_WEETH;
-            localOFTContract = L1_UPGRADEABLE_OFT_ADAPTER;
+            localOFTContract = L1_OFT_ADAPTER;
             dstEid = TEST_L2.L2_EID;
         }
 
