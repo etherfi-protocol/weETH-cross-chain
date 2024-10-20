@@ -66,5 +66,4 @@ contract DeployConfigureNewOFT is Script, Constants, GnosisHelpers, LayerZeroHel
         securityUpgradeJson = string.concat(securityUpgradeJson, setInboundRateLimitTransaction);
         vm.writeJson(securityUpgradeJson, string.concat("./output/security-upgrade-", currentDeploymentChain.NAME, ".json"));
     }
-
 }
