@@ -1,34 +1,42 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {OFTAdapterUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTAdapterUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+
+import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
+import {IMintableERC20} from "../interfaces/IMintableERC20.sol";
 import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
-contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter {
+/**
+ * @title Etherfi mintable upgradeable OFT token
+ * @dev Extends MintableOFTUpgradeable with pausing and rate limiting functionality
+ */
+contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
 
     /**
-     * @dev Constructor for EtherfiOFTAdapterUpgradeable
-     * @param _token The address of the already deployed weETH token 
-     * @param _lzEndpoint The LZ endpoint address
+     * @dev Constructor for MintableOFT
+     * @param endpoint The layer zero endpoint address
      */
-    constructor(address _token, address _lzEndpoint) OFTAdapterUpgradeable(_token, _lzEndpoint) {
+    constructor(address endpoint) OFTUpgradeable(endpoint) {
         _disableInitializers();
     }
 
     /**
      * @dev Initializes the contract
-     * @param _owner The contract owner
-     * @param _delegate The LZ delegate
+     * @param name The name of the token
+     * @param symbol The symbol of the token
+     * @param owner The owner of the token
      */
-    function initialize(address _owner, address _delegate) external virtual reinitializer(2) {
-        __Ownable_init(_owner);
-        __OFTAdapter_init(_delegate);
+    function initialize(string memory name, string memory symbol, address owner) external virtual initializer {
+        __OFT_init(name, symbol, owner);
+        __Ownable_init(owner);
 
-        _grantRole(DEFAULT_ADMIN_ROLE, _owner);
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
     }
 
     function _debit(
@@ -49,6 +57,16 @@ contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
         return super._credit(_to, _amountLD, 0);
     }
 
+    /**
+     * @notice Mint function that can only be called by a minter
+     * @dev Used by the SyncPool contract in the native minting flow
+     * @param _account The account to mint the tokens to
+     * @param _amount The amount of tokens to mint
+     */
+    function mint(address _account, uint256 _amount) external onlyRole(MINTER_ROLE) {
+        _mint(_account, _amount);
+    }
+    
     function setOutboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {
         _setOutboundRateLimits(_rateLimitConfigs);
     }
@@ -78,5 +96,18 @@ contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
      */
     function revokeRole(bytes32 role, address account) public override onlyOwner() {
         _revokeRole(role, account);
+    }
+
+    function updateTokenSymbol(string memory name_, string memory symbol_) external onlyOwner() {
+        ERC20Storage storage $ = getERC20Storage();
+        $._name = name_;
+        $._symbol = symbol_;
+    }
+
+    function getERC20Storage() internal pure returns (ERC20Storage storage $) {
+        bytes32 ERC20StorageLocation = 0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00;
+        assembly {
+            $.slot := ERC20StorageLocation
+        }
     }
 }
