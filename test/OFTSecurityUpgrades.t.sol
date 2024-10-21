@@ -53,54 +53,63 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers, GnosisHel
         executeGnosisTransactionBundle("./output/configure-mainnet-security.json", L1_CONTRACT_CONTROLLER);
     }
 
-    function setUpL2() public {
-        TEST_L2 = BASE;
+    function setUpL2(ConfigPerL2 memory currentChain) public {
+        TEST_L2 = currentChain;
         pauser = PAUSER_EOA;
         unpauser = TEST_L2.L2_CONTRACT_CONTROLLER_SAFE;
         oft = EtherfiOFTUpgradeable(TEST_L2.L2_OFT);
         vm.createSelectFork(TEST_L2.RPC_URL);
-
-        executeGnosisTransactionBundle("./output/security-upgrade-base.json", TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+        
+        executeGnosisTransactionBundle(string.concat("./output/security-upgrade-", TEST_L2.NAME, ".json"), TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
     }
 
     function test_onlyOwnerAccessControl() public {
-        setUpL2();
-
         address defaultAdmin = vm.addr(3);
-
-        // making owner and default admin different addresses
-        vm.startPrank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
-        oft.grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
-        oft.renounceRole(DEFAULT_ADMIN_ROLE, TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
-        vm.stopPrank();
-
-        // ensure that default admin can't do things
-        vm.startPrank(defaultAdmin);
-
         PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfigArray = new PairwiseRateLimiter.RateLimitConfig[](1);
-        rateLimitConfigArray[0] = PairwiseRateLimiter.RateLimitConfig({
-            peerEid: L1_EID,
-            limit: STANDBY_LIMIT,
-            window: STANDBY_WINDOW
-        });
-        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
-        oft.setInboundRateLimits(rateLimitConfigArray);
-
-        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
-        oft.setOutboundRateLimits(rateLimitConfigArray);
-
-        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
-        oft.grantRole(MINTER_ROLE, pauser);
-
-        // ensure the owner can do things
-        vm.startPrank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
-
-        oft.setInboundRateLimits(rateLimitConfigArray);
-        oft.setOutboundRateLimits(rateLimitConfigArray);
-        oft.grantRole(MINTER_ROLE, pauser);
-        oft.revokeRole(MINTER_ROLE, pauser);
-        vm.stopPrank();
+            rateLimitConfigArray[0] = PairwiseRateLimiter.RateLimitConfig({
+                peerEid: L1_EID,
+                limit: STANDBY_LIMIT,
+                window: STANDBY_WINDOW
+            });
         
+        // test against all L2s
+        for (uint i = 0; i < L2s.length; i++) {
+
+            if ( L2s[i].L2_EID == 30165) {
+                // zksync has a different execution environment and we can't simulate against it here
+                continue;
+            }
+            setUpL2(L2s[i]);
+
+
+            // making owner and default admin different addresses
+            vm.startPrank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+            oft.grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+            oft.renounceRole(DEFAULT_ADMIN_ROLE, TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+            vm.stopPrank();
+
+            // ensure that default admin can't do things
+            vm.startPrank(defaultAdmin);
+
+            vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+            oft.setInboundRateLimits(rateLimitConfigArray);
+
+            vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+            oft.setOutboundRateLimits(rateLimitConfigArray);
+
+            vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, defaultAdmin));
+            oft.grantRole(MINTER_ROLE, pauser);
+
+            // ensure the owner can do things
+            vm.startPrank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+
+            oft.setInboundRateLimits(rateLimitConfigArray);
+            oft.setOutboundRateLimits(rateLimitConfigArray);
+            oft.grantRole(MINTER_ROLE, pauser);
+            oft.revokeRole(MINTER_ROLE, pauser);
+            vm.stopPrank();
+        }
+
         setUpMainnet();
 
         // making the owner and default admin different addresses
@@ -133,21 +142,29 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers, GnosisHel
     }
 
     function test_pauseAccessControl() public {
-        setUpL2();
+        // test against all L2s
+        for (uint i = 0; i < L2s.length; i++) {
 
-        vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
-        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, TEST_L2.L2_CONTRACT_CONTROLLER_SAFE, PAUSER_ROLE));
-        oft.pauseBridge();
+            if ( L2s[i].L2_EID == 30165) {
+                // zksync has a different execution environment and we can't simulate against it here
+                continue;
+            }
+            setUpL2(L2s[i]);
 
-        vm.prank(pauser);
-        oft.pauseBridge();
+            vm.prank(TEST_L2.L2_CONTRACT_CONTROLLER_SAFE);
+            vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, TEST_L2.L2_CONTRACT_CONTROLLER_SAFE, PAUSER_ROLE));
+            oft.pauseBridge();
 
-        vm.prank(pauser);
-        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, pauser, UNPAUSER_ROLE));
-        oft.unpauseBridge();
+            vm.prank(pauser);
+            oft.pauseBridge();
 
-        vm.prank(unpauser);
-        oft.unpauseBridge();
+            vm.prank(pauser);
+            vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, pauser, UNPAUSER_ROLE));
+            oft.unpauseBridge();
+
+            vm.prank(unpauser);
+            oft.unpauseBridge();
+        }
 
         setUpMainnet();
 
@@ -168,33 +185,41 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers, GnosisHel
 
     // testing the pausing functionality of the OFT token against cross chain transfers
     function test_pauseOFT() public {
-        setUpL2();
+        // test against all L2s
+        for (uint i = 0; i < L2s.length; i++) {
 
-        // simulate outbound cross chain transfers
-        _sendCrossChain(1 ether, Status.Success);
+            if ( L2s[i].L2_EID == 30165) {
+                // zksync has a different execution environment and we can't simulate against it here
+                continue;
+            }
+            setUpL2(L2s[i]);
 
-        vm.prank(pauser);
-        oft.pauseBridge();
+            // simulate outbound cross chain transfers
+            _sendCrossChain(1 ether, Status.Success);
 
-        _sendCrossChain(1 ether, Status.PauseRevert);
+            vm.prank(pauser);
+            oft.pauseBridge();
 
-        vm.prank(unpauser);
-        oft.unpauseBridge();
+            _sendCrossChain(1 ether, Status.PauseRevert);
 
-        _sendCrossChain(1 ether, Status.Success);
+            vm.prank(unpauser);
+            oft.unpauseBridge();
 
-        // simulate inbound cross chain transfers
-        _mockCrossChainReceive(1 ether, Status.Success);
+            _sendCrossChain(1 ether, Status.Success);
 
-        vm.prank(pauser);
-        oft.pauseBridge();
+            // simulate inbound cross chain transfers
+            _mockCrossChainReceive(1 ether, Status.Success);
 
-        _mockCrossChainReceive(1 ether, Status.PauseRevert);
+            vm.prank(pauser);
+            oft.pauseBridge();
 
-        vm.prank(unpauser);
-        oft.unpauseBridge();
+            _mockCrossChainReceive(1 ether, Status.PauseRevert);
 
-        _mockCrossChainReceive(1 ether, Status.Success);
+            vm.prank(unpauser);
+            oft.unpauseBridge();
+
+            _mockCrossChainReceive(1 ether, Status.Success);
+        }
     }
 
     // testing the pausing functionality of the OFT adapter against cross chain transfers
@@ -229,30 +254,38 @@ contract TestOFTSecurityUpgrades is Test, Constants, LayerZeroHelpers, GnosisHel
     }
 
     function test_rateLimitOFT() public {
-        setUpL2();
+        // test against all L2s
+        for (uint i = 0; i < L2s.length; i++) {
 
-        (uint256 outboundAmountInFlight, uint256 amountCanBeSent) = oft.getAmountCanBeSent(L1_EID);
-        _sendCrossChain(10 ether, Status.Success);
-        (uint256 outboundAmountInFlightAfter, uint256 amountCanBeSentAfter) = oft.getAmountCanBeSent(L1_EID);
+            if ( L2s[i].L2_EID == 30165) {
+                // zksync has a different execution environment and we can't simulate against it here
+                continue;
+            }
+            setUpL2(L2s[i]);
 
-        assertEq(outboundAmountInFlight + 10 ether, outboundAmountInFlightAfter);
-        assertEq(amountCanBeSent - 10 ether, amountCanBeSentAfter);
+            (uint256 outboundAmountInFlight, uint256 amountCanBeSent) = oft.getAmountCanBeSent(L1_EID);
+            _sendCrossChain(10 ether, Status.Success);
+            (uint256 outboundAmountInFlightAfter, uint256 amountCanBeSentAfter) = oft.getAmountCanBeSent(L1_EID);
 
-        _mockCrossChainReceive(2 ether, Status.Success);
-        (uint256 inboundAmountInFlight, uint256 amountCanBeReceived) = oft.getAmountCanBeReceived(L1_EID);
+            assertEq(outboundAmountInFlight + 10 ether, outboundAmountInFlightAfter);
+            assertEq(amountCanBeSent - 10 ether, amountCanBeSentAfter);
 
-        assertEq(inboundAmountInFlight, 2 ether);
-        assertEq(amountCanBeReceived, 1998 ether);
+            _mockCrossChainReceive(2 ether, Status.Success);
+            (uint256 inboundAmountInFlight, uint256 amountCanBeReceived) = oft.getAmountCanBeReceived(L1_EID);
 
-        _sendCrossChain(1995 ether, Status.OutboundRateLimitRevert);
-        _mockCrossChainReceive(1995 ether, Status.Success);
-        _mockCrossChainReceive(5 ether, Status.InboundRateLimitRevert);
+            assertEq(inboundAmountInFlight, 2 ether);
+            assertEq(amountCanBeReceived, 1998 ether);
 
-        // warp forward 4 hours
-        vm.warp(block.timestamp + 14400);
+            _sendCrossChain(1995 ether, Status.OutboundRateLimitRevert);
+            _mockCrossChainReceive(1995 ether, Status.Success);
+            _mockCrossChainReceive(5 ether, Status.InboundRateLimitRevert);
 
-        _sendCrossChain(1995 ether, Status.Success);
-        _mockCrossChainReceive(1995 ether, Status.Success);
+            // warp forward 4 hours
+            vm.warp(block.timestamp + 14400);
+
+            _sendCrossChain(1995 ether, Status.Success);
+            _mockCrossChainReceive(1995 ether, Status.Success);
+        }
     }
 
     function test_rateLimitOFTAdapter() public {
