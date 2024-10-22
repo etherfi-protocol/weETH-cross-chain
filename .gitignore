@@ -2,7 +2,7 @@
 cache/
 out/
 cache_forge/
-output/
+bin/
 
 # Ignores development broadcast logs
 broadcast/
@@ -21,7 +21,5 @@ node_modules/
 workspace.code-workspace
 .vscode/
 .DS_Store
-
-output/
 
 transactions/
