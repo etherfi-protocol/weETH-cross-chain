@@ -28,6 +28,8 @@ interface EndpointDelegates {
 }
 
 contract OFTMigrationUnitTests is Test, Constants, LayerZeroHelpers {
+
+    address constant DEPLOYMENT_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
     
     // Send a migration message on arbitrum and ensures access control is enforced
     function test_MigrationSend() public {
