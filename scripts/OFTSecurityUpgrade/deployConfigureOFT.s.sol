@@ -21,7 +21,7 @@ contract DeployConfigureNewOFT is Script, Constants, GnosisHelpers, LayerZeroHel
                     Current Deployment Parameter 
     //////////////////////////////////////////////////////////////*/
 
-    ConfigPerL2 currentDeploymentChain = MODE;
+    ConfigPerL2 currentDeploymentChain = ZKSYNC;
 
     /*//////////////////////////////////////////////////////////////
                 
@@ -29,11 +29,12 @@ contract DeployConfigureNewOFT is Script, Constants, GnosisHelpers, LayerZeroHel
 
     function run() public {
         
-        vm.createSelectFork(currentDeploymentChain.RPC_URL);
-        vm.startBroadcast();
+        // vm.createSelectFork(currentDeploymentChain.RPC_URL);
+        // vm.startBroadcast();
 
         // deploy new OFT contract
-        address newOFTImpl = address(new EtherfiOFTUpgradeable(currentDeploymentChain.L2_ENDPOINT));
+        // address newOFTImpl = address(new EtherfiOFTUpgradeable(currentDeploymentChain.L2_ENDPOINT));
+        address newOFTImpl = currentDeploymentChain.L2_OFT_NEW_IMPL;
 
         // generate transactions for this chain {upgrade OFT contract, set pauser, set unpauser}
         string memory securityUpgradeJson = _getGnosisHeader(currentDeploymentChain.CHAIN_ID);
