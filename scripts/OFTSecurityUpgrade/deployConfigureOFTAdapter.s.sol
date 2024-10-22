@@ -22,7 +22,8 @@ contract DeployConfigureNewOFTAdapter is Script, Constants, GnosisHelpers, Layer
         vm.startBroadcast();
 
         // deploy new OFT Adapter contract
-        address newOFTAdapterImpl = address(new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
+        // address newOFTAdapterImpl = address(new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
+        address newOFTAdapterImpl = L1_OFT_ADAPTER_NEW_IMPL;
 
         // generate the timelock transactio to upgrade the OFT Adapter contract
         string memory scheduleOFTAdapterUpgrade = _getGnosisHeader("1");
