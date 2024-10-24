@@ -70,7 +70,7 @@ contract L2Constants {
                     
     //////////////////////////////////////////////////////////////*/
 
-    address constant DEPLOYER_ADDRESS = 0xaFa61D537A1814DE82776BF600cb10Ff26342208;
+    address constant DEPLOYER_ADDRESS = 0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150;
     
     // OFT Token Constants
     string constant TOKEN_NAME = "Wrapped eETH";
@@ -327,7 +327,7 @@ contract L2Constants {
 
     ConfigPerL2 SCROLL = ConfigPerL2({
         NAME: "scroll",
-        RPC_URL: "https://scroll-mainnet.g.alchemy.com/v2/tboG4m2gbe7vHzF_NTjyT2Jrx8fPmyjf",
+        RPC_URL: "https://scroll-mainnet.g.alchemy.com/v2/u1nV6EBj7N1_SNFNv6vifP2719G3o9lQ",
         CHAIN_ID: "534352",
 
         L2_EID: 30214,
@@ -341,15 +341,15 @@ contract L2Constants {
         L2_CONTRACT_CONTROLLER_SAFE: 0x3cD08f51D0EA86ac93368DE31822117cd70CECA3,
         L2_OFT_PROXY_ADMIN: 0x99fef08aEF9D6955138B66AD16Ab314DB17878ee,
 
-        L2_SYNC_POOL: address(0),
-        L2_SYNC_POOL_RATE_LIMITER: address(0),
-        L2_EXCHANGE_RATE_PROVIDER: address(0),
-        L2_PRICE_ORACLE: address(0),
-        L2_MESSENGER: address(0),
-
-        L1_MESSENGER: address(0),
-        L1_DUMMY_TOKEN: address(0),
-        L1_RECEIVER: address(0),
+        L2_SYNC_POOL: 0xE5204F19B909abEf09fA08109771bCD6482DA94C,
+        L2_SYNC_POOL_RATE_LIMITER: 0x9ed20806B1aFA01455FAa8f56ab847ED873aD62a,
+        L2_EXCHANGE_RATE_PROVIDER: 0xC6bf4dd1C58110DFF04872BE2386Db90602b736C,
+        L2_PRICE_ORACLE: 0x57bd9E614f542fB3d6FeF2B744f3B813f0cc1258 ,
+        L2_MESSENGER: 0x781e90f1c8Fc4611c9b7497C3B47F99Ef6969CbC,
+        
+        L1_MESSENGER: 0x6774Bcbd5ceCeF1336b5300fb5186a12DDD8b367,
+        L1_DUMMY_TOKEN: 0xe1918E7E8cEf6bEd73B79fb3152064C88720ABa3,
+        L1_RECEIVER: 0x38e4C53F79c170114246c408dAD1FB4A6Ed4A647,
 
         L2_SYNC_POOL_PROXY_ADMIN: address(0),
         L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
