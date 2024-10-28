@@ -105,7 +105,7 @@ contract L2ScrollSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessen
         bytes memory data = abi.encode(originEid, receipt.guid, l1TokenIn, amountIn, amountOut);
         bytes memory message = abi.encodeCall(IL1Receiver.onMessageReceived, data);
 
-        IL2ScrollMessenger(messenger).sendMessage{value: amountIn}(receiver, amountIn, message, 0, receiver);
+        IL2ScrollMessenger(messenger).sendMessage{value: amountIn}(receiver, amountIn, message, 0);
 
         return receipt;
     }
