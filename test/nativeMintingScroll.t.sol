@@ -36,7 +36,7 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
     address private SENDER = SCROLL.L2_SYNC_POOL;
     address private TARGET = SCROLL.L1_RECEIVER;
     uint256 private MESSAGE_VALUE = 1 ether;
-    bytes private BRIDGE_MESSAGE = hex"3a69197e000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000007606cfdefe81475092062f6ad888d215048e7e205c867241f2c2955d8797c8c56129000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000d340c667d97d73a";
+    bytes private BRIDGE_MESSAGE = hex"3a69197e000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000007606354f3d23887b1a2dbe602eccaa08d1057e7408e19dc8b7c9a72fd57aa7badcc9000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000d332324faa0c769";
 
     /// @notice Test the upgrade to natvie minting functionalilty and deposit/sync on L2
     function testNativeMintingL2() public {
@@ -92,6 +92,8 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
         uint256 lockBoxBalanceBefore = IERC20(L1_WEETH).balanceOf(L1syncPool.getLockBox());
 
         // Mock inbound LayerZero message from L2SyncPool
+        // used the data from this call:
+        // https://layerzeroscan.com/tx/0x1107ae898ad34e942d2e007dbb358c26d24ec578d8e9628fafa9b6c1727ae92d
         Origin memory origin = Origin({
             srcEid: SCROLL.L2_EID,
             sender: _toBytes32(SCROLL.L2_SYNC_POOL),
@@ -99,16 +101,17 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
         });
         bytes32 guid = 0x1fb4f4c346dd3904d20a62a68ba66df159e012db8526b776cd5bb07b2f80f20e;
         address lzExecutor = 0x173272739Bd7Aa6e4e214714048a9fE699453059;
-        bytes memory messageL2Message = hex"000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000000000000000000000000000000000000008bf92a3188ea37b2c600000000000000000000000000000000000000000000008539e6cb6ac88d1154";
+        bytes memory messageL2Message = hex"000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000121cc50fba271ca2860000000000000000000000000000000000000000000000113ae1410d24beb5a6";
         
         vm.prank(L1_ENDPOINT);
         L1syncPool.lzReceive(origin, guid, messageL2Message, lzExecutor, "");
 
         // Verify fast-sync results
         IERC20 scrollDummyToken = IERC20(SCROLL.L1_DUMMY_TOKEN);
-        assertApproxEqAbs(scrollDummyToken.balanceOf(L1_VAMP), 2582 ether, 1 ether);
+        assertApproxEqAbs(scrollDummyToken.balanceOf(L1_VAMP), 334.114 ether, 0.01 ether);
         uint256 lockBoxBalanceAfter = IERC20(L1_WEETH).balanceOf(L1syncPool.getLockBox());
-        assertApproxEqAbs(lockBoxBalanceAfter, lockBoxBalanceBefore + 2457 ether, 1 ether);
+        // As eETH continues to appreciate, the amount received from this fast-sync will decrease from the original 317 weETH
+        assertApproxEqAbs(lockBoxBalanceAfter, lockBoxBalanceBefore + 317 ether, 1 ether);
 
         // Test slow-sync scenario
         uint256 vampBalanceBefore = L1_VAMP.balance;
