@@ -94,7 +94,6 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
 
         // set all LayerZero configurations and sync pool specific configurations
         syncPool.setPeer(L1_EID, _toBytes32(L1_SYNC_POOL));
-        syncPool.setL1TokenIn(Constants.ETH_ADDRESS, Constants.ETH_ADDRESS);
         IOAppOptionsType3(proxy).setEnforcedOptions(getEnforcedOptions(L1_EID));
         ILayerZeroEndpointV2(SCROLL.L2_ENDPOINT).setConfig(
             address(syncPool),
@@ -102,7 +101,7 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
             getDVNConfig(L1_EID, SCROLL.LZ_DVN)
         );
 
-        L2ScrollSyncPoolETHUpgradeable(syncPool).setL1TokenIn(Constants.ETH_ADDRESS, Constants.ETH_ADDRESS);
+        syncPool.setL1TokenIn(Constants.ETH_ADDRESS, Constants.ETH_ADDRESS);
         syncPool.transferOwnership(SCROLL.L2_CONTRACT_CONTROLLER_SAFE);
 
         return proxy;
