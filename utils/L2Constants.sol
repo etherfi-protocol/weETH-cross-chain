@@ -91,29 +91,29 @@ contract L2Constants {
     uint32 constant L2_PRICE_ORACLE_HEART_BEAT = 24 hours;
 
     // Mainnet Constants
-    string constant L1_RPC_URL = "https://mainnet.gateway.tenderly.co";
-    uint32 constant L1_EID = 30101;
-    address constant L1_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
+    string constant L1_RPC_URL = "https://gateway.tenderly.co/public/sepolia";
+    uint32 constant L1_EID = 40161;
+    address constant L1_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f;
     address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address constant L1_WEETH = 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee;
-    address constant L1_CONTRACT_CONTROLLER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
-    address constant L1_TIMELOCK_GNOSIS = 0xcdd57D11476c22d265722F68390b036f3DA48c21;
-    address constant L1_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
+    address constant L1_WEETH = address(0);
+    address constant L1_CONTRACT_CONTROLLER = address(0);
+    address constant L1_TIMELOCK_GNOSIS = address(0);
+    address constant L1_TIMELOCK = address(0);
 
-    address constant L1_SYNC_POOL = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
-    address constant L1_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
-    address constant L1_VAMP = 0x9FFDF407cDe9a93c47611799DA23924Af3EF764F;
-    address constant L1_SEND_302 = 0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1;
-    address constant L1_RECEIVE_302 = 0xc02Ab410f0734EFa3F14628780e6e695156024C2;
-    address constant L1_LZ_DVN = 0x589dEDbD617e0CBcB916A9223F4d1300c294236b;
-    address constant L1_NETHERMIND_DVN = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
-    address[2] L1_DVN = [0x589dEDbD617e0CBcB916A9223F4d1300c294236b, 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5];
+    address constant L1_SYNC_POOL = address(0);
+    address constant L1_OFT_ADAPTER = address(0);
+    address constant L1_VAMP = address(0);
+    address constant L1_SEND_302 = 0xcc1ae8Cf5D3904Cef3360A9532B477529b177cCE;
+    address constant L1_RECEIVE_302 = 0xdAf00F5eE2158dD58E0d3857851c432E34A3A851;
+    address constant L1_LZ_DVN = 0x8eebf8b423b73bfca51a1db4b7354aa0bfca9193;
+    address constant L1_NETHERMIND_DVN = 0xac294c43d44d4131db389256959f33e713851e31;
+    address[2] L1_DVN = [0x8eebf8b423b73bfca51a1db4b7354aa0bfca9193, 0xac294c43d44d4131db389256959f33e713851e31];
 
     // https://docs.layerzero.network/v2/developers/solana/configuration/oapp-config#dead-dvn
     address constant DEAD_DVN = 0x000000000000000000000000000000000000dEaD;
 
-    address constant L1_OFT_ADAPTER_PROXY_ADMIN = 0xa9E9bBf04F95688D7fd82036f83544630E463CAc;
-    address constant L1_SYNC_POOL_PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
+    address constant L1_OFT_ADAPTER_PROXY_ADMIN = address(0);
+    address constant L1_SYNC_POOL_PROXY_ADMIN = address(0);
 
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
@@ -326,30 +326,30 @@ contract L2Constants {
 
 
     ConfigPerL2 SCROLL = ConfigPerL2({
-        NAME: "scroll",
-        RPC_URL: "https://scroll-mainnet.g.alchemy.com/v2/u1nV6EBj7N1_SNFNv6vifP2719G3o9lQ",
-        CHAIN_ID: "534352",
+        NAME: "scroll sepolia",
+        RPC_URL: "https://sepolia-rpc.scroll.io/",
+        CHAIN_ID: "534351",
 
-        L2_EID: 30214,
-        L2_ENDPOINT: 0x1a44076050125825900e736c501f859c50fE728c,
-        SEND_302: 0x9BbEb2B2184B9313Cf5ed4a4DDFEa2ef62a2a03B,
-        RECEIVE_302: 0x8363302080e711E0CAb978C081b9e69308d49808,
-        LZ_EXECUTOR: 0x581b26F362AD383f7B51eF8A165Efa13DDe398a4,
-        LZ_DVN: [0xbe0d08a85EeBFCC6eDA0A843521f7CBB1180D2e2, 0x446755349101cB20c582C224462c3912d3584dCE],
+        L2_EID: 40170,
+        L2_ENDPOINT: 0x6EDCE65403992e310A62460808c4b910D972f10f,
+        SEND_302: 0x21f1C2B131557c3AebA918D590815c47Dc4F20aa,
+        RECEIVE_302: 0xf2dB23f9eA1311E9ED44E742dbc4268de4dB0a88,
+        LZ_EXECUTOR: 0xD0D47C34937DdbeBBe698267a6BbB1dacE51198D,
+        LZ_DVN: [0xb186F85d0604FE58af2Ea33fE40244f5EEF7351B, 0xcA01DAa8e559Cb6a810ce7906eC2AeA39BDeccE4],
 
-        L2_OFT: 0x01f0a31698C4d065659b9bdC21B3610292a1c506,
-        L2_CONTRACT_CONTROLLER_SAFE: 0x3cD08f51D0EA86ac93368DE31822117cd70CECA3,
-        L2_OFT_PROXY_ADMIN: 0x99fef08aEF9D6955138B66AD16Ab314DB17878ee,
+        L2_OFT: address(0),
+        L2_CONTRACT_CONTROLLER_SAFE: address(0), // will have to use an EOA
+        L2_OFT_PROXY_ADMIN: address(0),
 
-        L2_SYNC_POOL: 0x9D44aAf17dE8D4c64E622701a7C2bb1fABa20F8a,
-        L2_SYNC_POOL_RATE_LIMITER: 0x9ed20806B1aFA01455FAa8f56ab847ED873aD62a,
-        L2_EXCHANGE_RATE_PROVIDER: 0xC6bf4dd1C58110DFF04872BE2386Db90602b736C,
-        L2_PRICE_ORACLE: 0x57bd9E614f542fB3d6FeF2B744f3B813f0cc1258 ,
-        L2_MESSENGER: 0x781e90f1c8Fc4611c9b7497C3B47F99Ef6969CbC,
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0) ,
+        L2_MESSENGER: 0xBa50f5340FB9F3Bd074bD638c9BE13eCB36E603d,
         
-        L1_MESSENGER: 0x6774Bcbd5ceCeF1336b5300fb5186a12DDD8b367,
-        L1_DUMMY_TOKEN: 0xe1918E7E8cEf6bEd73B79fb3152064C88720ABa3,
-        L1_RECEIVER: 0x23F6c4930Da080b2d89bB5BB68c0d000Ad31d6a3,
+        L1_MESSENGER: 0x50c7d3e7f7c656493D1D76aaa1a836CedfCBB16A,
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: addresss(0),
 
         L2_SYNC_POOL_PROXY_ADMIN: address(0),
         L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
