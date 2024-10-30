@@ -17,15 +17,15 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     function run() public {
         
         // comment out for testing
-        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        // vm.startBroadcast(privateKey);
-        vm.startPrank(DEPLOYER_ADDRESS);
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(privateKey);
+        // vm.startBroadcast(DEPLOYER_ADDRESS);
 
         console.log("Deploying contracts on L1...");
         
-        address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("ScrollDummyTokenImpl")}(18));
+        address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("ScrollDummyTokenImplMock")}(18));
         address dummyTokenProxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("ScrollDummyToken")}(
+            new TransparentUpgradeableProxy{salt: keccak256("ScrollDummyTokenMock")}(
                 dummyTokenImpl, 
                 L1_TIMELOCK, 
                 abi.encodeWithSelector(
@@ -41,9 +41,9 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         dummyToken.grantRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
         dummyToken.renounceRole(DEFAULT_ADMIN_ROLE, DEPLOYER_ADDRESS);
 
-        address scrollReceiverImpl = address(new L1ScrollReceiverETHUpgradeable{salt: keccak256("ScrollReceiverImpl")}());
+        address scrollReceiverImpl = address(new L1ScrollReceiverETHUpgradeable{salt: keccak256("ScrollReceiverImplMock")}());
         address scrollReceiverProxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("ScrollReceiver")}(
+            new TransparentUpgradeableProxy{salt: keccak256("ScrollReceiverMock")}(
                 scrollReceiverImpl, 
                 L1_TIMELOCK, 
                 abi.encodeWithSelector(
@@ -53,22 +53,20 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         );
         console.log("ScrollReceiver deployed at: ", scrollReceiverProxy);
         require(scrollReceiverProxy == SCROLL.L1_RECEIVER, "ScrollReceiver address mismatch");
-
-        // included for testing
-        vm.stopPrank();
         
         console.log("Generating L1 transactions for native minting...");
 
         // the require transactions to integrate native minting on the L1 side are spilt between the timelock and the L1 contract controller
         
         // 1. generate the schedule and execute transactions for the L1 sync pool
-        string memory timelock_schedule_transactions = _getGnosisHeader("1");
-        string memory timelock_execute_transactions = _getGnosisHeader("1");
+        string memory timelock_schedule_transactions = _getGnosisHeader("11155111");
+        string memory timelock_execute_transactions = _getGnosisHeader("11155111");
         
         // registers the new dummy token as an acceptable token for the vamp contract
-        bytes memory setTokenData = abi.encodeWithSignature("registerToken(address,address,bool,uint16,uint32,uint32,bool)", dummyTokenProxy, address(0), true, 0, 20_000, 200_000, true); 
-        timelock_schedule_transactions = string.concat(timelock_schedule_transactions, _getGnosisScheduleTransaction(L1_VAMP, setTokenData, false));
-        timelock_execute_transactions = string.concat(timelock_execute_transactions, _getGnosisExecuteTransaction(L1_VAMP, setTokenData, false));
+        // no need on testnet the mock contract doesn't have a whitelist
+        // bytes memory setTokenData = abi.encodeWithSignature("registerToken(address,address,bool,uint16,uint32,uint32,bool)", dummyTokenProxy, address(0), true, 0, 20_000, 200_000, true); 
+        // timelock_schedule_transactions = string.concat(timelock_schedule_transactions, _getGnosisScheduleTransaction(L1_VAMP, setTokenData, false));
+        // timelock_execute_transactions = string.concat(timelock_execute_transactions, _getGnosisExecuteTransaction(L1_VAMP, setTokenData, false));
 
         // set {receiver, dummy} token on the L1 sync pool
         bytes memory setReceiverData = abi.encodeWithSignature("setReceiver(uint32,address)", SCROLL.L2_EID, scrollReceiverProxy);
@@ -92,7 +90,7 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         vm.writeJson(timelock_execute_transactions, "./output/L1NativeMintingExecuteTransactions.json");
 
         // 2. generate transactions required by the L1 contract controller
-        string memory l1_contract_controller_transaction = _getGnosisHeader("1");
+        string memory l1_contract_controller_transaction = _getGnosisHeader("11155111");
 
         // set DVN receive config for the L1 sync to receive messages from the L2 sync pool
         string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_SYNC_POOL, L1_RECEIVE_302, getDVNConfig(SCROLL.L2_EID, L1_DVN)));

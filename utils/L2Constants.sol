@@ -70,7 +70,7 @@ contract L2Constants {
                     
     //////////////////////////////////////////////////////////////*/
 
-    address constant DEPLOYER_ADDRESS = 0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150;
+    address constant DEPLOYER_ADDRESS = 0x531E5C5167d1bad7300a87CbCdD9d905ef7B490E;
     
     // OFT Token Constants
     string constant TOKEN_NAME = "Wrapped eETH";
@@ -95,19 +95,19 @@ contract L2Constants {
     uint32 constant L1_EID = 40161;
     address constant L1_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f;
     address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address constant L1_WEETH = address(0);
-    address constant L1_CONTRACT_CONTROLLER = address(0);
-    address constant L1_TIMELOCK_GNOSIS = address(0);
-    address constant L1_TIMELOCK = address(0);
+    address constant L1_WEETH = 0xcAD5310CF56E54442F47b79BdCecFd3B2940A783;
+    address constant L1_CONTRACT_CONTROLLER = 0x485d386eE14844F72538Ae9caFfFaaaF23900b6A;
+    address constant L1_TIMELOCK_GNOSIS = 0x485d386eE14844F72538Ae9caFfFaaaF23900b6A;
+    address constant L1_TIMELOCK = 0x4E1de97A696fb45B3dC3003c72Ac6f504caBAD59;
 
-    address constant L1_SYNC_POOL = address(0);
-    address constant L1_OFT_ADAPTER = address(0);
-    address constant L1_VAMP = address(0);
+    address constant L1_SYNC_POOL = 0x8907dE00626E5764A704096FC6B36A8751B9aD7e;
+    address constant L1_OFT_ADAPTER = 0xdc06023b80e588f1121A901eFC3a0126f7191692; // lockbox can just be an EOA for this simulation
+    address constant L1_VAMP = 0xfc8e10a756705be8c993205047dff10769AFab54;
     address constant L1_SEND_302 = 0xcc1ae8Cf5D3904Cef3360A9532B477529b177cCE;
     address constant L1_RECEIVE_302 = 0xdAf00F5eE2158dD58E0d3857851c432E34A3A851;
-    address constant L1_LZ_DVN = 0x8eebf8b423b73bfca51a1db4b7354aa0bfca9193;
-    address constant L1_NETHERMIND_DVN = 0xac294c43d44d4131db389256959f33e713851e31;
-    address[2] L1_DVN = [0x8eebf8b423b73bfca51a1db4b7354aa0bfca9193, 0xac294c43d44d4131db389256959f33e713851e31];
+    address constant L1_LZ_DVN = 0x8eebf8b423B73bFCa51a1Db4B7354AA0bFCA9193;
+    address constant L1_NETHERMIND_DVN = 0xCA7a736be0Fe968A33Af62033B8b36D491f7999B;
+    address[2] L1_DVN = [0x8eebf8b423B73bFCa51a1Db4B7354AA0bFCA9193, 0xCA7a736be0Fe968A33Af62033B8b36D491f7999B];
 
     // https://docs.layerzero.network/v2/developers/solana/configuration/oapp-config#dead-dvn
     address constant DEAD_DVN = 0x000000000000000000000000000000000000dEaD;
@@ -337,19 +337,19 @@ contract L2Constants {
         LZ_EXECUTOR: 0xD0D47C34937DdbeBBe698267a6BbB1dacE51198D,
         LZ_DVN: [0xb186F85d0604FE58af2Ea33fE40244f5EEF7351B, 0xcA01DAa8e559Cb6a810ce7906eC2AeA39BDeccE4],
 
-        L2_OFT: address(0),
-        L2_CONTRACT_CONTROLLER_SAFE: address(0), // will have to use an EOA
+        L2_OFT: 0x36870C2f15a20301E87dE1C09CD1C205a8E6E596,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x531E5C5167d1bad7300a87CbCdD9d905ef7B490E, // will have to use an EOA
         L2_OFT_PROXY_ADMIN: address(0),
 
-        L2_SYNC_POOL: address(0),
-        L2_SYNC_POOL_RATE_LIMITER: address(0),
-        L2_EXCHANGE_RATE_PROVIDER: address(0),
-        L2_PRICE_ORACLE: address(0) ,
+        L2_SYNC_POOL: 0x0038D1F7f6FEfd1dFa61976BA809Ded62f78E1A7,
+        L2_SYNC_POOL_RATE_LIMITER: 0xcD68Af9D8d13839f855bB338D83f0e708bDF694e,
+        L2_EXCHANGE_RATE_PROVIDER: 0x44974e809De61b2bcdD52e1cB347655E2bc16224,
+        L2_PRICE_ORACLE: 0x4F310A6414bB1cb897AfEa172700384570FbD8dE,
         L2_MESSENGER: 0xBa50f5340FB9F3Bd074bD638c9BE13eCB36E603d,
         
         L1_MESSENGER: 0x50c7d3e7f7c656493D1D76aaa1a836CedfCBB16A,
-        L1_DUMMY_TOKEN: address(0),
-        L1_RECEIVER: addresss(0),
+        L1_DUMMY_TOKEN: 0x9bC3C3EaFB49754E7F53ae17b4caA9E29eD84cFA,
+        L1_RECEIVER: 0x3894303b5E8Ea937DbD1D42748B58CA78A2bC39b,
 
         L2_SYNC_POOL_PROXY_ADMIN: address(0),
         L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),

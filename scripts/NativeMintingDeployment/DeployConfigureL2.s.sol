@@ -25,9 +25,9 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     EnforcedOptionParam[] public enforcedOptions;
 
     function deployConfigureExchangeRateProvider(address scriptDeployer) private returns (address) {
-        address impl = address(new EtherfiL2ExchangeRateProvider{salt: keccak256("ExchangeRateProviderImpl")}());
+        address impl = address(new EtherfiL2ExchangeRateProvider{salt: keccak256("ExchangeRateProviderImplMock")}());
         address proxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("ExchangeRateProvider")}(
+            new TransparentUpgradeableProxy{salt: keccak256("ExchangeRateProviderMock")}(
                 impl,
                 SCROLL.L2_CONTRACT_CONTROLLER_SAFE,
                 abi.encodeWithSelector(
@@ -37,7 +37,7 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
             )
         );
         console.log("Exchange Rate Provider deployed at: ", proxy);
-        require(proxy == SCROLL.L2_EXCHANGE_RATE_PROVIDER, "Exchange Rate Provider address mismatch");
+        // require(proxy == SCROLL.L2_EXCHANGE_RATE_PROVIDER, "Exchange Rate Provider address mismatch");
         
         EtherfiL2ExchangeRateProvider provider = EtherfiL2ExchangeRateProvider(proxy);
         provider.setRateParameters(ETH_ADDRESS, SCROLL.L2_PRICE_ORACLE, 0, L2_PRICE_ORACLE_HEART_BEAT);
@@ -47,13 +47,13 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     }
 
     function deployConfigureBucketRateLimiter(address scriptDeployer) private returns (address) {
-        address impl = address(new BucketRateLimiter{salt: keccak256("BucketRateLimiterImpl")}());
-        ERC1967Proxy proxy = new ERC1967Proxy{salt: keccak256("BucketRateLimiter")}(
+        address impl = address(new BucketRateLimiter{salt: keccak256("BucketRateLimiterImplMock")}());
+        ERC1967Proxy proxy = new ERC1967Proxy{salt: keccak256("BucketRateLimiterMock")}(
             impl,
             abi.encodeWithSelector(BucketRateLimiter.initialize.selector, scriptDeployer)
         );
         console.log("Bucket Rate Limiter deployed at: ", address(proxy));
-        require(address(proxy) == SCROLL.L2_SYNC_POOL_RATE_LIMITER, "Bucket Rate Limiter address mismatch");
+        // require(address(proxy) == SCROLL.L2_SYNC_POOL_RATE_LIMITER, "Bucket Rate Limiter address mismatch");
         
         BucketRateLimiter limiter = BucketRateLimiter(address(proxy));
         limiter.setCapacity(BUCKET_SIZE);
@@ -69,9 +69,9 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         address exchangeRateProvider,
         address bucketRateLimiter
     ) private returns (address) {
-        address impl = address(new L2ScrollSyncPoolETHUpgradeable{salt: keccak256("L2SyncPoolImpl")}(SCROLL.L2_ENDPOINT));
+        address impl = address(new L2ScrollSyncPoolETHUpgradeable{salt: keccak256("L2SyncPoolImplMock")}(SCROLL.L2_ENDPOINT));
         address proxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("L2SyncPool")}(
+            new TransparentUpgradeableProxy{salt: keccak256("L2SyncPoolMock")}(
                 impl,
                 SCROLL.L2_CONTRACT_CONTROLLER_SAFE,
                 abi.encodeWithSelector(
@@ -88,7 +88,7 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         );
 
         console.log("Sync Pool deployed at: ", proxy);
-        require(proxy == SCROLL.L2_SYNC_POOL, "Sync Pool address mismatch");
+        // require(proxy == SCROLL.L2_SYNC_POOL, "Sync Pool address mismatch");
 
         L2ScrollSyncPoolETHUpgradeable syncPool = L2ScrollSyncPoolETHUpgradeable(proxy);
 
@@ -108,29 +108,34 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     }
 
     function run() public {
-        vm.startPrank(DEPLOYER_ADDRESS);
+        // comment out for testing
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(privateKey);
+        // vm.startBroadcast(DEPLOYER_ADDRESS);
 
         console.log("Deploying contracts on L2...");
+
+        L2ScrollSyncPoolETHUpgradeable syncPool = L2ScrollSyncPoolETHUpgradeable(SCROLL.L2_SYNC_POOL);
+        MessagingFee memory msgFee = syncPool.quoteSync(Constants.ETH_ADDRESS, hex"", false);
+        syncPool.sync{value: msgFee.nativeFee}(Constants.ETH_ADDRESS, hex"", msgFee);
         
-        // deploy and configure the native minting related contracts
-        address exchangeRateProvider = deployConfigureExchangeRateProvider(DEPLOYER_ADDRESS);
-        address rateLimiter = deployConfigureBucketRateLimiter(DEPLOYER_ADDRESS);
-        address syncPool = deployConfigureSyncPool(DEPLOYER_ADDRESS, exchangeRateProvider, rateLimiter);
+        // // deploy and configure the native minting related contracts
+        // address exchangeRateProvider = deployConfigureExchangeRateProvider(DEPLOYER_ADDRESS);
+        // address rateLimiter = deployConfigureBucketRateLimiter(DEPLOYER_ADDRESS);
+        // address syncPool = deployConfigureSyncPool(DEPLOYER_ADDRESS, exchangeRateProvider, rateLimiter);
 
-        // generate the transactions required by the L2 contract controller
+        // // generate the transactions required by the L2 contract controller
 
-        // give the L2 sync pool permission to mint the dummy token
-        string memory minterTransaction = _getGnosisHeader(SCROLL.CHAIN_ID);
-        bytes memory setMinterData = abi.encodeWithSignature("grantRole(bytes32,address)", MINTER_ROLE, SCROLL.L2_SYNC_POOL);
-        minterTransaction = string.concat(minterTransaction, _getGnosisTransaction(iToHex(abi.encodePacked(SCROLL.L2_OFT)), iToHex(setMinterData), true));
-        vm.writeJson(minterTransaction, "./output/setScrollMinter.json");
+        // // give the L2 sync pool permission to mint the dummy token
+        // string memory minterTransaction = _getGnosisHeader(SCROLL.CHAIN_ID);
+        // bytes memory setMinterData = abi.encodeWithSignature("grantRole(bytes32,address)", MINTER_ROLE, SCROLL.L2_SYNC_POOL);
+        // minterTransaction = string.concat(minterTransaction, _getGnosisTransaction(iToHex(abi.encodePacked(SCROLL.L2_OFT)), iToHex(setMinterData), true));
+        // vm.writeJson(minterTransaction, "./output/setScrollMinter.json");
 
-        // transaction to set the min sync 
-        string memory minSyncTransaction = _getGnosisHeader(SCROLL.CHAIN_ID);
-        bytes memory setMinSyncData = abi.encodeWithSignature("setMinSyncAmount(address,uint256)", Constants.ETH_ADDRESS, 10 ether);
-        minSyncTransaction = string.concat(minSyncTransaction, _getGnosisTransaction(iToHex(abi.encodePacked(SCROLL.L2_SYNC_POOL)), iToHex(setMinSyncData), true));
-        vm.writeJson(minSyncTransaction, "./output/setMinSyncAmount.json");
-
-        vm.stopPrank();
+        // // transaction to set the min sync 
+        // string memory minSyncTransaction = _getGnosisHeader(SCROLL.CHAIN_ID);
+        // bytes memory setMinSyncData = abi.encodeWithSignature("setMinSyncAmount(address,uint256)", Constants.ETH_ADDRESS, 10 ether);
+        // minSyncTransaction = string.concat(minSyncTransaction, _getGnosisTransaction(iToHex(abi.encodePacked(SCROLL.L2_SYNC_POOL)), iToHex(setMinSyncData), true));
+        // vm.writeJson(minSyncTransaction, "./output/setMinSyncAmount.json");
     }
 }

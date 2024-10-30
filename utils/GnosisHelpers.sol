@@ -59,10 +59,10 @@ contract GnosisHelpers is Test {
         return iToHex(abi.encodePacked(addr));
     }
 
-    address constant timelock = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
+    address constant timelock = 0x4E1de97A696fb45B3dC3003c72Ac6f504caBAD59;
     bytes32 constant predecessor = 0x0000000000000000000000000000000000000000000000000000000000000000;
     bytes32 constant salt = 0x0000000000000000000000000000000000000000000000000000000000000000;
-    uint256 constant delay = 259200;
+    uint256 constant delay = 1;
 
     // Generates the schedule transaction for a gnosis safe
     function _getGnosisScheduleTransaction(address to, bytes memory data, bool isLasts) internal pure returns (string memory) {
