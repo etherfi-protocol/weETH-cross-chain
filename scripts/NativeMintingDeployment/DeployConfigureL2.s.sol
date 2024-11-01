@@ -108,7 +108,6 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     }
 
     function run() public {
-        // comment out for testing
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(privateKey);
 
