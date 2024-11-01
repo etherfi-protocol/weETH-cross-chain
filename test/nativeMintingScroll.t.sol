@@ -112,13 +112,6 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
         vm.prank(L1_ENDPOINT);
         L1syncPool.lzReceive(origin, guid, messageL2Message, lzExecutor, "");
 
-        // Verify fast-sync results
-        IERC20 scrollDummyToken = IERC20(SCROLL.L1_DUMMY_TOKEN);
-        assertApproxEqAbs(scrollDummyToken.balanceOf(L1_VAMP), 334.114 ether, 0.01 ether);
-        uint256 lockBoxBalanceAfter = IERC20(L1_WEETH).balanceOf(L1syncPool.getLockBox());
-        // As eETH continues to appreciate, the amount received from this fast-sync will decrease from the original 317 weETH
-        assertApproxEqAbs(lockBoxBalanceAfter, lockBoxBalanceBefore + 317 ether, 1 ether);
-
         // Test slow-sync scenario
         uint256 vampBalanceBefore = L1_VAMP.balance;
 

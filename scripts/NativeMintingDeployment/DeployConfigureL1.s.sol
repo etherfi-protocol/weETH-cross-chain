@@ -68,7 +68,7 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         // timelock_schedule_transactions = string.concat(timelock_schedule_transactions, _getGnosisScheduleTransaction(L1_VAMP, setTokenData, false));
         // timelock_execute_transactions = string.concat(timelock_execute_transactions, _getGnosisExecuteTransaction(L1_VAMP, setTokenData, false));
 
-        set {receiver, dummy} token on the L1 sync pool
+        // set {receiver, dummy} token on the L1 sync pool
         bytes memory setReceiverData = abi.encodeWithSignature("setReceiver(uint32,address)", SCROLL.L2_EID, scrollReceiverProxy);
         bytes memory setDummyTokenData = abi.encodeWithSignature("setDummyToken(uint32,address)", SCROLL.L2_EID, dummyTokenProxy);
         timelock_schedule_transactions = string.concat(timelock_schedule_transactions, _getGnosisScheduleTransaction(L1_SYNC_POOL, setReceiverData, false));
