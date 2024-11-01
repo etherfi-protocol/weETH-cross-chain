@@ -7,6 +7,8 @@ import "../contracts/NativeMinting/EtherfiL1SyncPoolETH.sol";
 import "../contracts/NativeMinting/L2SyncPoolContracts/L2ScrollSyncPoolETHUpgradeable.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import "../contracts/NativeMinting/BucketRateLimiter.sol";
+import "../contracts/NativeMinting/mockLiquifier.sol";
+import "../contracts/NativeMinting/mockWEETH.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IScrollMessenger.sol";
 import "../utils/L2Constants.sol";
@@ -36,14 +38,15 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
     address private SENDER = SCROLL.L2_SYNC_POOL;
     address private TARGET = SCROLL.L1_RECEIVER;
     uint256 private MESSAGE_VALUE = 1 ether;
-    bytes private BRIDGE_MESSAGE = hex"3a69197e000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000009ceadcb40313553905cf94c7eb16af232cadaf0846110869647d43d85c96428c228c000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000d32e708032b6efe";
+    bytes private BRIDGE_MESSAGE = hex"3a69197e000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000009cea2df0d7d0a08e162e881dfd7551ab4a8ba38f7bb014e64139acba988f4c4f0f4b000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000d32e708032b6efe";
 
     /// @notice Test the upgrade to natvie minting functionalilty and deposit/sync on L2
     function testNativeMintingL2() public {
         // Setup L2 environment
         vm.createSelectFork(SCROLL.RPC_URL);
-        L2NativeMintingScript nativeMintingL2 = new L2NativeMintingScript();
-        nativeMintingL2.run();
+        // L2NativeMintingScript nativeMintingL2 = new L2NativeMintingScript();
+        // contracts are already deployed
+        // nativeMintingL2.run();
  
         executeGnosisTransactionBundle("./output/setScrollMinter.json", SCROLL.L2_CONTRACT_CONTROLLER_SAFE);
         vm.warp(block.timestamp + 3600);
@@ -77,23 +80,22 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
     /// @notice Test upgrade to native minting functionality and fast/slow sync on L1
     function testNativeMintingL1() public {
         // Setup L1 environment
-        // vm.createSelectFork(L1_RPC_URL);
-        // L1NativeMintingScript nativeMintingL1 = new L1NativeMintingScript();
+        vm.createSelectFork(L1_RPC_URL);
+        L1NativeMintingScript nativeMintingL1 = new L1NativeMintingScript();
+        // contracts are already deployed
         // nativeMintingL1.run();
 
-        // // Execute timelock transactions
-        // executeGnosisTransactionBundle("./output/L1NativeMintingScheduleTransactions.json", L1_TIMELOCK_GNOSIS);
-        // vm.warp(block.timestamp + 2); // Advance past timelock period
-        // executeGnosisTransactionBundle("./output/L1NativeMintingExecuteTransactions.json", L1_TIMELOCK_GNOSIS);
+        // Execute timelock transactions
+        executeGnosisTransactionBundle("./output/L1NativeMintingScheduleTransactions.json", L1_TIMELOCK_GNOSIS);
+        vm.warp(block.timestamp + 2); // Advance past timelock period
+        executeGnosisTransactionBundle("./output/L1NativeMintingExecuteTransactions.json", L1_TIMELOCK_GNOSIS);
 
-        // address delegate = ILayerZeroEndpointV2(L1_ENDPOINT).delegates(L1_SYNC_POOL);
-        // console.log(delegate);
-        // executeGnosisTransactionBundle("./output/L1NativeMintingSetConfig.json", L1_CONTRACT_CONTROLLER);
+        address delegate = ILayerZeroEndpointV2(L1_ENDPOINT).delegates(L1_SYNC_POOL);
+        console.log(delegate);
+        executeGnosisTransactionBundle("./output/L1NativeMintingSetConfig.json", L1_CONTRACT_CONTROLLER);
 
         // Test fast-sync scenario
-        vm.createSelectFork(L1_RPC_URL);
         EtherfiL1SyncPoolETH L1syncPool = EtherfiL1SyncPoolETH(L1_SYNC_POOL);
-        uint256 lockBoxBalanceBefore = IERC20(L1_WEETH).balanceOf(L1syncPool.getLockBox());
 
         // Mock inbound LayerZero message from L2SyncPool
         // used the data from this call:
@@ -111,27 +113,27 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
         L1syncPool.lzReceive(origin, guid, messageL2Message, lzExecutor, "");
 
         // Verify fast-sync results
-        // IERC20 scrollDummyToken = IERC20(SCROLL.L1_DUMMY_TOKEN);
-        // assertApproxEqAbs(scrollDummyToken.balanceOf(L1_VAMP), 334.114 ether, 0.01 ether);
-        // uint256 lockBoxBalanceAfter = IERC20(L1_WEETH).balanceOf(L1syncPool.getLockBox());
-        // // As eETH continues to appreciate, the amount received from this fast-sync will decrease from the original 317 weETH
-        // assertApproxEqAbs(lockBoxBalanceAfter, lockBoxBalanceBefore + 317 ether, 1 ether);
+        IERC20 scrollDummyToken = IERC20(SCROLL.L1_DUMMY_TOKEN);
+        assertApproxEqAbs(scrollDummyToken.balanceOf(L1_VAMP), 334.114 ether, 0.01 ether);
+        uint256 lockBoxBalanceAfter = IERC20(L1_WEETH).balanceOf(L1syncPool.getLockBox());
+        // As eETH continues to appreciate, the amount received from this fast-sync will decrease from the original 317 weETH
+        assertApproxEqAbs(lockBoxBalanceAfter, lockBoxBalanceBefore + 317 ether, 1 ether);
 
         // Test slow-sync scenario
         uint256 vampBalanceBefore = L1_VAMP.balance;
 
-        // // Mock Scroll messenger call
-        // vm.store(
-        //     address(0x50c7d3e7f7c656493D1D76aaa1a836CedfCBB16A),
-        //     bytes32(0x00000000000000000000000000000000000000000000000000000000000000c9),
-        //     bytes32(uint256(uint160(SENDER)))
-        // );
+        // Mock Scroll messenger call
+        vm.store(
+            address(0x50c7d3e7f7c656493D1D76aaa1a836CedfCBB16A),
+            bytes32(0x00000000000000000000000000000000000000000000000000000000000000c9),
+            bytes32(uint256(uint160(SENDER)))
+        );
 
-        // startHoax(0x50c7d3e7f7c656493D1D76aaa1a836CedfCBB16A);
-        // (bool success, ) = TARGET.call{value: MESSAGE_VALUE}(BRIDGE_MESSAGE);
-        // require(success, "Message call failed");
+        startHoax(0x50c7d3e7f7c656493D1D76aaa1a836CedfCBB16A);
+        (bool success, ) = TARGET.call{value: MESSAGE_VALUE}(BRIDGE_MESSAGE);
+        require(success, "Message call failed");
 
-        // assertEq(vampBalanceBefore + MESSAGE_VALUE, L1_VAMP.balance);
+        assertEq(vampBalanceBefore + 0.3 ether, L1_VAMP.balance);
     }
 
 }

@@ -8,6 +8,8 @@ import {L1BaseSyncPoolUpgradeable, Constants} from "./L1BaseSyncPoolUpgradeable.
 import {ILiquifier} from "../../interfaces/ILiquifier.sol";
 import {IWeEth} from "../../interfaces/IWeEth.sol";
 
+import "forge-std/console.sol";
+
 contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     error EtherfiL1SyncPoolETH__OnlyETH();
     error EtherfiL1SyncPoolETH__InvalidAmountIn();

@@ -8,8 +8,11 @@ contract mockWEETH is ERC20 {
         eeth = mockEETH(_eeth);
     }
 
-    function wrap(uint256 amount) public {
-        _mint(msg.sender, (amount * 95) / 100);
+    function wrap(uint256 amount) public returns (uint256) {
+        uint256 weETHToMint = (amount * 95) / 100;
+        _mint(msg.sender, weETHToMint);
         eeth.transferFrom(msg.sender, address(this), amount);
+
+        return weETHToMint;
     }
 }

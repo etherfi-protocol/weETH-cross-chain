@@ -59,7 +59,7 @@ contract GnosisHelpers is Test {
         return iToHex(abi.encodePacked(addr));
     }
 
-    address constant timelock = 0x4E1de97A696fb45B3dC3003c72Ac6f504caBAD59;
+    address constant timelock = 0xE27aE1E586dAAb1Cf8fa64F765A32C8ffaACFbC8;
     bytes32 constant predecessor = 0x0000000000000000000000000000000000000000000000000000000000000000;
     bytes32 constant salt = 0x0000000000000000000000000000000000000000000000000000000000000000;
     uint256 constant delay = 1;
