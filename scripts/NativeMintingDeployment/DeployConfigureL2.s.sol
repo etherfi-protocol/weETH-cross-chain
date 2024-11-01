@@ -25,9 +25,9 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     EnforcedOptionParam[] public enforcedOptions;
 
     function deployConfigureExchangeRateProvider(address scriptDeployer) private returns (address) {
-        address impl = address(new EtherfiL2ExchangeRateProvider{salt: keccak256("ExchangeRateProviderImpl")}());
+        address impl = address(new EtherfiL2ExchangeRateProvider{salt: keccak256("ExchangeRateProviderImplMock2")}());
         address proxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("ExchangeRateProvider")}(
+            new TransparentUpgradeableProxy{salt: keccak256("ExchangeRateProviderMock2")}(
                 impl,
                 SCROLL.L2_CONTRACT_CONTROLLER_SAFE,
                 abi.encodeWithSelector(
@@ -47,8 +47,8 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     }
 
     function deployConfigureBucketRateLimiter(address scriptDeployer) private returns (address) {
-        address impl = address(new BucketRateLimiter{salt: keccak256("BucketRateLimiterImpl")}());
-        ERC1967Proxy proxy = new ERC1967Proxy{salt: keccak256("BucketRateLimiter")}(
+        address impl = address(new BucketRateLimiter{salt: keccak256("BucketRateLimiterImplMock2")}());
+        ERC1967Proxy proxy = new ERC1967Proxy{salt: keccak256("BucketRateLimiterMock2")}(
             impl,
             abi.encodeWithSelector(BucketRateLimiter.initialize.selector, scriptDeployer)
         );
@@ -69,9 +69,9 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         address exchangeRateProvider,
         address bucketRateLimiter
     ) private returns (address) {
-        address impl = address(new L2ScrollSyncPoolETHUpgradeable{salt: keccak256("L2SyncPoolImpl")}(SCROLL.L2_ENDPOINT));
+        address impl = address(new L2ScrollSyncPoolETHUpgradeable{salt: keccak256("L2SyncPoolImplMock2")}(SCROLL.L2_ENDPOINT));
         address proxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("L2SyncPool")}(
+            new TransparentUpgradeableProxy{salt: keccak256("L2SyncPoolMock2")}(
                 impl,
                 SCROLL.L2_CONTRACT_CONTROLLER_SAFE,
                 abi.encodeWithSelector(
@@ -108,7 +108,8 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     }
 
     function run() public {
-        vm.startPrank(DEPLOYER_ADDRESS);
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(privateKey);
 
         console.log("Deploying contracts on L2...");
         
