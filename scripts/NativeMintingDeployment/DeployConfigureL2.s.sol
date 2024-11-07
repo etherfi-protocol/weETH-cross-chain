@@ -108,14 +108,16 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     }
 
     function run() public {
-        vm.startPrank(DEPLOYER_ADDRESS);
+
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(DEPLOYER_ADDRESS);
 
         console.log("Deploying contracts on L2...");
         
         // deploy and configure the native minting related contracts
         address exchangeRateProvider = deployConfigureExchangeRateProvider(DEPLOYER_ADDRESS);
         address rateLimiter = deployConfigureBucketRateLimiter(DEPLOYER_ADDRESS);
-        address syncPool = deployConfigureSyncPool(DEPLOYER_ADDRESS, exchangeRateProvider, rateLimiter);
+        deployConfigureSyncPool(DEPLOYER_ADDRESS, exchangeRateProvider, rateLimiter);
 
         // generate the transactions required by the L2 contract controller
 

@@ -16,10 +16,8 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     
     function run() public {
         
-        // comment out for testing
         // uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        // vm.startBroadcast(privateKey);
-        vm.startPrank(DEPLOYER_ADDRESS);
+        vm.startBroadcast(DEPLOYER_ADDRESS);
 
         console.log("Deploying contracts on L1...");
         
