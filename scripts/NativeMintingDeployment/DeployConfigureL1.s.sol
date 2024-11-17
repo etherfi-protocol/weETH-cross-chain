@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.8.24;
+pragma solidity ^0.8.24;
 
 import "forge-std/console.sol";
 import "forge-std/Script.sol";
@@ -16,8 +16,7 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     
     function run() public {
         
-        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(DEPLOYER_ADDRESS);
+        // vm.startBroadcast(DEPLOYER_ADDRESS);
 
         console.log("Deploying contracts on L1...");
         
@@ -51,9 +50,6 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         );
         console.log("ScrollReceiver deployed at: ", scrollReceiverProxy);
         require(scrollReceiverProxy == SCROLL.L1_RECEIVER, "ScrollReceiver address mismatch");
-
-        // included for testing
-        vm.stopPrank();
         
         console.log("Generating L1 transactions for native minting...");
 

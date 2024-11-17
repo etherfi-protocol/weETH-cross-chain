@@ -108,8 +108,6 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
     }
 
     function run() public {
-
-        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(DEPLOYER_ADDRESS);
 
         console.log("Deploying contracts on L2...");
@@ -132,7 +130,5 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         bytes memory setMinSyncData = abi.encodeWithSignature("setMinSyncAmount(address,uint256)", Constants.ETH_ADDRESS, 10 ether);
         minSyncTransaction = string.concat(minSyncTransaction, _getGnosisTransaction(iToHex(abi.encodePacked(SCROLL.L2_SYNC_POOL)), iToHex(setMinSyncData), true));
         vm.writeJson(minSyncTransaction, "./output/setMinSyncAmount.json");
-
-        vm.stopPrank();
     }
 }

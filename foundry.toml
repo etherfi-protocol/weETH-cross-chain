@@ -6,7 +6,7 @@ test = "test"
 fs_permissions = [{ access = "read-write", path = "./"}]
 
 evm_version = "shanghai"
-solc_version = "0.8.24"
+solc_version = "0.8.26"
 via_ir = true
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
