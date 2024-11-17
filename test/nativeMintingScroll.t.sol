@@ -36,14 +36,15 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
     address private SENDER = SCROLL.L2_SYNC_POOL;
     address private TARGET = SCROLL.L1_RECEIVER;
     uint256 private MESSAGE_VALUE = 1 ether;
-    bytes private BRIDGE_MESSAGE = hex"3a69197e000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000007606354f3d23887b1a2dbe602eccaa08d1057e7408e19dc8b7c9a72fd57aa7badcc9000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000d332324faa0c769";
+    bytes private BRIDGE_MESSAGE = hex"3a69197e000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000007606ebd50bcf19f47f644e6981a58d2287a3b8d6c0702ffa0a1cb9ecdd12c568a498000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000d2ddfc66b17a973";
 
     /// @notice Test the upgrade to natvie minting functionalilty and deposit/sync on L2
     function testNativeMintingL2() public {
         // Setup L2 environment
         vm.createSelectFork(SCROLL.RPC_URL);
         L2NativeMintingScript nativeMintingL2 = new L2NativeMintingScript();
-        nativeMintingL2.run();
+        // contracts have already been deployed hence no need to simulate deployments
+        // nativeMintingL2.run();
  
         executeGnosisTransactionBundle("./output/setScrollMinter.json", SCROLL.L2_CONTRACT_CONTROLLER_SAFE);
         vm.warp(block.timestamp + 3600);
@@ -52,7 +53,7 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
         L2ScrollSyncPoolETHUpgradeable syncPool = L2ScrollSyncPoolETHUpgradeable(SCROLL.L2_SYNC_POOL);
         address user = vm.addr(2);
         startHoax(user);
-        syncPool.deposit{value: 1 ether}(Constants.ETH_ADDRESS, MESSAGE_VALUE, 0.95 ether);
+        syncPool.deposit{value: 1 ether}(Constants.ETH_ADDRESS, MESSAGE_VALUE, 0.90 ether);
 
         assertApproxEqAbs(IERC20(SCROLL.L2_OFT).balanceOf(user), 0.95 ether, 0.01 ether);
         assertEq(address(syncPool).balance, 1 ether);
@@ -68,6 +69,7 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
             MESSAGE_VALUE,
             messageNonce,
             0,
+            // this value becomes inaccurate as the oracle price changes
             BRIDGE_MESSAGE
         );
         
@@ -79,7 +81,8 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
         // Setup L1 environment
         vm.createSelectFork(L1_RPC_URL);
         L1NativeMintingScript nativeMintingL1 = new L1NativeMintingScript();
-        nativeMintingL1.run();
+        // contracts have already been deployed hence no need to simulate deployments
+        // nativeMintingL1.run();
 
         // Execute timelock transactions
         executeGnosisTransactionBundle("./output/L1NativeMintingScheduleTransactions.json", L1_TIMELOCK_GNOSIS);

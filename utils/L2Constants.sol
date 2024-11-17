@@ -327,7 +327,7 @@ contract L2Constants {
 
     ConfigPerL2 SCROLL = ConfigPerL2({
         NAME: "scroll",
-        RPC_URL: "https://scroll-mainnet.g.alchemy.com/v2/u1nV6EBj7N1_SNFNv6vifP2719G3o9lQ",
+        RPC_URL: "https://rpc.scroll.io",
         CHAIN_ID: "534352",
 
         L2_EID: 30214,
