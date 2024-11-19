@@ -2,18 +2,21 @@
 pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
+import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
 import {IMintableERC20} from "../interfaces/IMintableERC20.sol";
-import { RateLimiter } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
+import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
 /**
- * @title Mintable OFT
- * @dev An OFT token that can be minted by a minter.
+ * @title Etherfi eBTC OFT
+ * @dev extends MintableOFTUpgradeable with pausing and rate limiting functionality
  */
-contract EBTCMintableOFTUpgradeable is RateLimiter, OFTUpgradeable, AccessControlUpgradeable, IMintableERC20 {
+contract EBTCMintableOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
 
     /**
      * @dev Constructor for MintableOFT
@@ -40,9 +43,18 @@ contract EBTCMintableOFTUpgradeable is RateLimiter, OFTUpgradeable, AccessContro
         uint256 _amountLD,
         uint256 _minAmountLD,
         uint32 _dstEid
-    ) internal virtual override returns (uint256 amountSentLD, uint256 amountReceivedLD) {
-        _checkAndUpdateRateLimit(_dstEid, _amountLD);
+    ) internal virtual override whenNotPaused() returns (uint256 amountSentLD, uint256 amountReceivedLD) {
+        _checkAndUpdateOutboundRateLimit(_dstEid, _amountLD);
         return super._debit(_amountLD, _minAmountLD, _dstEid);
+    }
+
+    function _credit(
+        address _to,
+        uint256 _amountLD,
+        uint32 _srcEid
+    ) internal virtual override whenNotPaused() returns (uint256 amountReceivedLD) {
+        _checkAndUpdateInboundRateLimit(_srcEid, _amountLD);
+        return super._credit(_to, _amountLD, 0);
     }
 
     /**
@@ -54,11 +66,38 @@ contract EBTCMintableOFTUpgradeable is RateLimiter, OFTUpgradeable, AccessContro
         _mint(_account, _amount);
     }
     
-    function setRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setRateLimits(_rateLimitConfigs);
+    function setOutboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {
+        _setOutboundRateLimits(_rateLimitConfigs);
     }
 
-    function updateTokenSymbol(string memory name_, string memory symbol_) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setInboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {
+        _setInboundRateLimits(_rateLimitConfigs);
+    }
+
+
+   function pauseBridge() public onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    function unpauseBridge() external onlyRole(UNPAUSER_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * @dev Overrides the role admin logic from AccessControlUpgradeable to restrict granting roles to the owner
+     */
+    function grantRole(bytes32 role, address account) public override onlyOwner() {
+        _grantRole(role, account);
+    }
+
+    /**
+     * @dev Overrides the role admin logic from AccessControlUpgradeable to restrict revoking roles to the owner
+     */
+    function revokeRole(bytes32 role, address account) public override onlyOwner() {
+        _revokeRole(role, account);
+    }
+
+    function updateTokenSymbol(string memory name_, string memory symbol_) external onlyOwner() {
         ERC20Storage storage $ = getERC20Storage();
         $._name = name_;
         $._symbol = symbol_;
@@ -67,8 +106,6 @@ contract EBTCMintableOFTUpgradeable is RateLimiter, OFTUpgradeable, AccessContro
     function decimals() public view virtual override returns (uint8) {
         return 8;
     }
-
-    // // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.ERC20")) - 1)) & ~bytes32(uint256(0xff))
 
     function getERC20Storage() internal pure returns (ERC20Storage storage $) {
         bytes32 ERC20StorageLocation = 0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00;
