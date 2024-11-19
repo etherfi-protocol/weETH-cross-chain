@@ -22,4 +22,4 @@ workspace.code-workspace
 .vscode/
 .DS_Store
 
-transactions/
+output/
