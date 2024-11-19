@@ -20,6 +20,8 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
 
     RateLimiter.RateLimitConfig[] public deploymentRateLimitConfigs;
 
+    address constant DEPLOYMENT_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
+
     function run() public {
         console.log("Building transactions for mainnet:");
 
