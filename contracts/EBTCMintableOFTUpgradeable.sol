@@ -11,7 +11,7 @@ import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
 /**
  * @title Etherfi eBTC OFT
- * @dev extends MintableOFTUpgradeable with pausing and rate limiting functionality
+ * @dev EtherfiOFTUpgradeable with decimal override for BTC
  */
 contract EBTCMintableOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -103,6 +103,9 @@ contract EBTCMintableOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable,
         $._symbol = symbol_;
     }
 
+    /**
+     * @dev Overrides the ERC20 default of 18 decimals to match Bitcoin's 8 decimal standard.
+     */
     function decimals() public view virtual override returns (uint8) {
         return 8;
     }
