@@ -6,7 +6,7 @@ import "forge-std/Script.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import "../../contracts/EtherFiOFTAdapterUpgradeable.sol";
+import "../../contracts/EtherfiOFTAdapterUpgradeable.sol";
 import "../../utils/LiquidAssetsConstants.sol";
 
 
@@ -29,13 +29,13 @@ contract DeployUpgradeableOFTAdapterLiquid is Script, LiquidConstants {
         address scriptDeployer = vm.addr(privateKey);
         vm.startBroadcast(privateKey);
 
-        address adapterImpl = address(new EtherFiOFTAdapterUpgradeable(DEPLOYMENT_ASSET, L1_LZ_ENDPOINT));
-        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(address(
+        address adapterImpl = address(new EtherfiOFTAdapterUpgradeable(DEPLOYMENT_ASSET, L1_LZ_ENDPOINT));
+        EtherfiOFTAdapterUpgradeable adapter = EtherfiOFTAdapterUpgradeable(address(
             new TransparentUpgradeableProxy(
                 address(adapterImpl),
                 L1_CONTRACT_CONTROLLER,
                 abi.encodeWithSelector( // delegate and owner stay with the deployer for now
-                    EtherFiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
+                    EtherfiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
                 )
             ))
         );

@@ -12,7 +12,7 @@ import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/lib
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 import "../../contracts/MintableOFTUpgradeable.sol";
-import "../../contracts/EtherFiOFTAdapterUpgradeable.sol";
+import "../../contracts/EtherfiOFTAdapterUpgradeable.sol";
 import "../../utils/LiquidAssetsConstants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
@@ -38,7 +38,7 @@ contract DeployOFT is Script, LiquidConstants, LayerZeroHelpers {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         address scriptDeployer = vm.addr(privateKey);
 
-        EtherFiOFTAdapterUpgradeable oftAdapter = EtherFiOFTAdapterUpgradeable(DEPLOYMENT_OFT_ADAPTER);
+        EtherfiOFTAdapterUpgradeable oftAdapter = EtherfiOFTAdapterUpgradeable(DEPLOYMENT_OFT_ADAPTER);
 
         vm.startBroadcast(privateKey);
 

@@ -10,10 +10,10 @@ import {IMintableERC20} from "../interfaces/IMintableERC20.sol";
 import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
 /**
- * @title Etherfi eBTC OFT
- * @dev EtherfiOFTUpgradeable with decimal override for BTC
+ * @title Etherfi mintable upgradeable OFT token
+ * @dev Extends MintableOFTUpgradeable with pausing and rate limiting functionality
  */
-contract EBTCMintableOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
+contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
@@ -58,7 +58,8 @@ contract EBTCMintableOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable,
     }
 
     /**
-     * @dev Mint function that can only be called by a minter
+     * @notice Mint function that can only be called by a minter
+     * @dev Used by the SyncPool contract in the native minting flow
      * @param _account The account to mint the tokens to
      * @param _amount The amount of tokens to mint
      */
@@ -101,13 +102,6 @@ contract EBTCMintableOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable,
         ERC20Storage storage $ = getERC20Storage();
         $._name = name_;
         $._symbol = symbol_;
-    }
-
-    /**
-     * @dev Overrides the ERC20 default of 18 decimals to match Bitcoin's 8 decimal standard.
-     */
-    function decimals() public view virtual override returns (uint8) {
-        return 8;
     }
 
     function getERC20Storage() internal pure returns (ERC20Storage storage $) {

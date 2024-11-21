@@ -17,7 +17,7 @@ import "../utils/L2Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
 import "../contracts/MigrationOFT.sol";
 import "../contracts/EtherFiOFTAdapter.sol";    
-import "../contracts/EtherFiOFTAdapterUpgradeable.sol";
+import "../contracts/EtherfiOFTAdapterUpgradeable.sol";
 import "../contracts/MintableOFTUpgradeable.sol";
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
@@ -86,7 +86,7 @@ contract OFTMigrationUnitTests is Test, L2Constants, LayerZeroHelpers {
         vm.createSelectFork(L1_RPC_URL);
 
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
-        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(DEPLOYMENT_OFT_ADAPTER);
+        EtherfiOFTAdapterUpgradeable adapter = EtherfiOFTAdapterUpgradeable(DEPLOYMENT_OFT_ADAPTER);
 
         for (uint256 i = 0; i < L2s.length; i++) {
             // ensuring outbound transfers execute successfully

@@ -12,8 +12,13 @@ import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManage
 // import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 
+<<<<<<< HEAD
 import "../../contracts/EtherFiOFTAdapterUpgradeable.sol";
 import "../../utils/L2Constants.sol";
+=======
+import "../../contracts/EtherfiOFTAdapterUpgradeable.sol";
+import "../../utils/Constants.sol";
+>>>>>>> master
 import "../../utils/LayerZeroHelpers.sol";
 
 contract DeployUpgradeableOFTAdapter is Script, L2Constants, LayerZeroHelpers {
@@ -29,13 +34,13 @@ contract DeployUpgradeableOFTAdapter is Script, L2Constants, LayerZeroHelpers {
         address scriptDeployer = vm.addr(1);
         vm.startBroadcast(scriptDeployer);
 
-        address adapterImpl = address(new EtherFiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
-        EtherFiOFTAdapterUpgradeable adapter = EtherFiOFTAdapterUpgradeable(address(
+        address adapterImpl = address(new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
+        EtherfiOFTAdapterUpgradeable adapter = EtherfiOFTAdapterUpgradeable(address(
             new TransparentUpgradeableProxy(
                 address(adapterImpl),
                 L1_TIMELOCK,
                 abi.encodeWithSelector( // delegate and owner stay with the deployer for now
-                    EtherFiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
+                    EtherfiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
                 )
             ))
         );
