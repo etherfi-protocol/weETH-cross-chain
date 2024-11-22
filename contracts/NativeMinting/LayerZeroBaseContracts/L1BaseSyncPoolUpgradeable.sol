@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
@@ -10,8 +11,8 @@ import {
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/OAppReceiverUpgradeable.sol";
 import {Origin} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
-import {IL1SyncPool} from "../interfaces/IL1SyncPool.sol";
-import {Constants} from "../libraries/Constants.sol";
+import {IL1SyncPool} from "../../../interfaces/IL1SyncPool.sol";
+import {Constants} from "../../libraries/Constants.sol";
 
 /**
  * @title L1 Base Sync Pool

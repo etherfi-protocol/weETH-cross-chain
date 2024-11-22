@@ -3,10 +3,10 @@ pragma solidity ^0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {IDummyToken} from "../interfaces/IDummyToken.sol";
-import {L1BaseSyncPoolUpgradeable, Constants} from "./L1BaseSyncPoolUpgradeable.sol";
-import {ILiquifier} from "../interfaces/ILiquifier.sol";
-import {IWeEth} from "../interfaces/IWeEth.sol";
+import {IDummyToken} from "../../interfaces/IDummyToken.sol";
+import {L1BaseSyncPoolUpgradeable, Constants} from "./LayerZeroBaseContracts/L1BaseSyncPoolUpgradeable.sol";
+import {ILiquifier} from "../../interfaces/ILiquifier.sol";
+import {IWeEth} from "../../interfaces/IWeEth.sol";
 
 contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     error EtherfiL1SyncPoolETH__OnlyETH();
