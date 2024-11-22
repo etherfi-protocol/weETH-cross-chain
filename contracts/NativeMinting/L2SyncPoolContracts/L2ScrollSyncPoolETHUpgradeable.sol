@@ -52,6 +52,7 @@ contract L2ScrollSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessen
         address receiver,
         address delegate
     ) external virtual initializer {
+        
         __L2BaseSyncPool_init(l2ExchangeRateProvider, rateLimiter, tokenOut, dstEid, delegate);
         __BaseMessenger_init(messenger);
         __BaseReceiver_init(receiver);
