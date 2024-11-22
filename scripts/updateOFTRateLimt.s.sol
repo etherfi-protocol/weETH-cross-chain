@@ -6,7 +6,7 @@ import "forge-std/Script.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 
-import "../utils/Constants.sol";
+import "../utils/L2Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
 import "../utils/GnosisHelpers.sol";
 

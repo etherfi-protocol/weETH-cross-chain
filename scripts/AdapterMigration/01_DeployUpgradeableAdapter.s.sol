@@ -9,13 +9,16 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
+// import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 
-import "../../contracts/EtherfiOFTAdapterUpgradeable.sol";
-import "../../utils/Constants.sol";
+import "../../contracts/EtherFiOFTAdapterUpgradeable.sol";
+import "../../utils/L2Constants.sol";
+
+
 import "../../utils/LayerZeroHelpers.sol";
-contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
+
+contract DeployUpgradeableOFTAdapter is Script, L2Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
     
     EnforcedOptionParam[] public enforcedOptions;
@@ -60,7 +63,7 @@ contract DeployUpgradeableOFTAdapter is Script, Constants, LayerZeroHelpers {
         for (uint256 i = 0; i < L2s.length; i++) {
             _appendEnforcedOptions(L2s[i].L2_EID);
         }
-        adapter.setEnforcedOptions(enforcedOptions);
+        IOAppOptionsType3(adapterProxy).setEnforcedOptions(enforcedOptions);
 
         console.log("Transfering ownership to the gnosis...");
         adapter.setDelegate(L1_CONTRACT_CONTROLLER);
