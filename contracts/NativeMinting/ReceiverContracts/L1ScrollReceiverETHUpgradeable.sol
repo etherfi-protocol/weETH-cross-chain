@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
@@ -40,7 +39,7 @@ contract L1ScrollReceiverETHUpgradeable is L1BaseReceiverUpgradeable {
 
         if (tokenIn != Constants.ETH_ADDRESS) revert L1ScrollReceiverETH__OnlyETH();
 
-        address sender = IL1ScrollMessenger(getMessenger()).xDomainMessageSender();
+        address sender = IL1ScrollMessenger(msg.sender).xDomainMessageSender();
 
         _forwardToL1SyncPool(
             originEid, bytes32(uint256(uint160(sender))), guid, tokenIn, amountIn, amountOut, msg.value
