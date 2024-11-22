@@ -2,7 +2,7 @@
 cache/
 out/
 cache_forge/
-output/
+bin/
 
 # Ignores development broadcast logs
 broadcast/
@@ -23,5 +23,3 @@ workspace.code-workspace
 .DS_Store
 
 output/
-
-transactions/

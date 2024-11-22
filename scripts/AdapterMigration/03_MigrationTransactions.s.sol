@@ -12,13 +12,15 @@ import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManage
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 
 import "../../contracts/MintableOFTUpgradeable.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
 contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     RateLimiter.RateLimitConfig[] public deploymentRateLimitConfigs;
+
+    address constant DEPLOYMENT_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
 
     function run() public {
         console.log("Building transactions for mainnet:");

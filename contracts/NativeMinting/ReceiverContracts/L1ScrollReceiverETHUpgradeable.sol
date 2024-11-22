@@ -15,6 +15,10 @@ import {Constants} from "../../../libraries/Constants.sol";
 contract L1ScrollReceiverETHUpgradeable is L1BaseReceiverUpgradeable {
     error L1ScrollReceiverETH__OnlyETH();
 
+    constructor() {
+        _disableInitializers();
+    }
+
     /**
      * @dev Initializer for L1 Mode Receiver ETH
      * @param l1SyncPool Address of the L1 sync pool
@@ -36,8 +40,7 @@ contract L1ScrollReceiverETHUpgradeable is L1BaseReceiverUpgradeable {
 
         if (tokenIn != Constants.ETH_ADDRESS) revert L1ScrollReceiverETH__OnlyETH();
 
-        // address sender = IL1ScrollMessenger(msg.sender).xDomainMessageSender();
-        address sender = address(0);
+        address sender = IL1ScrollMessenger(getMessenger()).xDomainMessageSender();
 
         _forwardToL1SyncPool(
             originEid, bytes32(uint256(uint160(sender))), guid, tokenIn, amountIn, amountOut, msg.value

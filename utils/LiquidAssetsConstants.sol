@@ -22,8 +22,6 @@ contract LiquidConstants {
     address constant WBTC = 0x657e8C867D8B37dCC18fA4Caead9C45EB088C642;
     string constant EBTC_NAME = "ether.fi BTC";
     string constant EBTC_SYMBOL = "eBTC";
-    
-
 
     /*//////////////////////////////////////////////////////////////
                         Scroll Constants
