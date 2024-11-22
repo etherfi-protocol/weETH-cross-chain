@@ -17,7 +17,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 import "../../contracts/MintableOFTUpgradeable.sol";
 import "forge-std/Test.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
 contract CrossChainSend is Script, Constants, LayerZeroHelpers {
