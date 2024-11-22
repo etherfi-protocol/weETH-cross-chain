@@ -6,11 +6,11 @@ import {
     MessagingReceipt
 } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
-import {BaseMessengerUpgradeable} from "../../../utils/BaseMessengerUpgradeable.sol";
-import {BaseReceiverUpgradeable} from "../../../utils/BaseReceiverUpgradeable.sol";
-import {L2BaseSyncPoolUpgradeable} from "../L2BaseSyncPoolUpgradeable.sol";
+import {BaseMessengerUpgradeable} from "../LayerZeroBaseContracts/BaseMessengerUpgradeable.sol";
+import {BaseReceiverUpgradeable} from "../LayerZeroBaseContracts/BaseReceiverUpgradeable.sol";
+import {L2BaseSyncPoolUpgradeable} from "../LayerZeroBaseContracts/L2BaseSyncPoolUpgradeable.sol";
 import {ICrossDomainMessenger} from "../../../interfaces/ICrossDomainMessenger.sol";
-import {Constants} from "../../../libraries/Constants.sol";
+import {Constants} from "../../libraries/Constants.sol";
 import {IL1Receiver} from "../../../interfaces/IL1Receiver.sol";
 
 /**

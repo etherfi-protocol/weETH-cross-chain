@@ -15,10 +15,10 @@ import {
     MessagingReceipt
 } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
-import {IL2ExchangeRateProvider} from "../../interfaces/IL2ExchangeRateProvider.sol";
-import {IL2SyncPool} from "../../interfaces/IL2SyncPool.sol";
-import {IMintableERC20} from "../../interfaces/IMintableERC20.sol";
-import {IRateLimiter} from "../../interfaces/IRateLimiter.sol";
+import {IL2ExchangeRateProvider} from "../../../interfaces/IL2ExchangeRateProvider.sol";
+import {IL2SyncPool} from "../../../interfaces/IL2SyncPool.sol";
+import {IMintableERC20} from "../../../interfaces/IMintableERC20.sol";
+import {IRateLimiter} from "../../../interfaces/IRateLimiter.sol";
 import {Constants} from "../../libraries/Constants.sol";
 
 /**

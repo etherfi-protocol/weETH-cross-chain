@@ -3,9 +3,9 @@ pragma solidity ^0.8.20;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import {BaseMessengerUpgradeable} from "../../utils/BaseMessengerUpgradeable.sol";
-import {IL1SyncPool} from "../../interfaces/IL1SyncPool.sol";
-import {IL1Receiver} from "../../interfaces/IL1Receiver.sol";
+import {BaseMessengerUpgradeable} from "./BaseMessengerUpgradeable.sol";
+import {IL1SyncPool} from "../../../interfaces/IL1SyncPool.sol";
+import {IL1Receiver} from "../../../interfaces/IL1Receiver.sol";
 
 /**
  * @title L1 Base Receiver

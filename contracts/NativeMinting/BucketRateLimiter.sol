@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "../../interfaces/IRateLimiter.sol";
-import "../../utils/BucketLimiter.sol";
+import "../libraries/BucketLimiter.sol";
 
 contract BucketRateLimiter is IRateLimiter, Initializable, PausableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
 

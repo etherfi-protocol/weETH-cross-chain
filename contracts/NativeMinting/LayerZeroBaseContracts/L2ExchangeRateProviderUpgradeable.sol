@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import {IL2ExchangeRateProvider} from "../../interfaces/IL2ExchangeRateProvider.sol";
+import {IL2ExchangeRateProvider} from "../../../interfaces/IL2ExchangeRateProvider.sol";
 import {Constants} from "../../libraries/Constants.sol";
 
 /**
