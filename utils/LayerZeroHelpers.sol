@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
+
+import "../contracts/PairwiseRateLimiter.sol";
 
 import "./Constants.sol";
 
@@ -15,9 +16,9 @@ contract LayerZeroHelpers {
     }
 
     // Creates a RateLimiter.RateLimitConfig struct based on the inputs provided
-    function _getRateLimitConfig(uint32 dstEid, uint256 limit, uint256 window) internal pure returns (RateLimiter.RateLimitConfig memory) {
-       return RateLimiter.RateLimitConfig({ 
-        dstEid: dstEid,
+    function _getRateLimitConfig(uint32 peerEid, uint256 limit, uint256 window) internal pure returns (PairwiseRateLimiter.RateLimitConfig memory) {
+       return PairwiseRateLimiter.RateLimitConfig({ 
+        peerEid: peerEid,
         limit: limit,
         window: window
        });
