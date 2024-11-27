@@ -7,6 +7,7 @@ import {console2} from "forge-std/console2.sol";
 
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
+import "../../contracts/EtherfiOFTAdapterUpgradeable.sol";
 
 import "../../utils/Constants.sol";
 
@@ -44,6 +45,29 @@ contract verifyOFTUpgradeBytecode is Script, Constants {
             } else {
                 console2.log("XXXX Bytecode doesn't match XXXX\n");
             }
+        }
+
+        // OFTAdapter was deployed with paris hence we verify it as well on the paris run
+        if (keccak256(abi.encodePacked(evmVersion)) == keccak256(abi.encodePacked("paris"))) {
+            vm.createSelectFork(L1_RPC_URL);
+            EtherfiOFTAdapterUpgradeable tmp = new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT);
+            bytes memory localBytecode = address(tmp).code;
+
+            // compared to deployed address
+            bytes memory onchainRuntimeBytecode = L1_OFT_ADAPTER_NEW_IMPL.code;
+
+            bool runtimeMatches = keccak256(localBytecode) == keccak256(onchainRuntimeBytecode);
+        
+            console.log("mainnet");
+            console2.log("=== Contract Verification Results ===");
+            console2.log("Contract address:", L1_OFT_ADAPTER_NEW_IMPL);
+        
+            if (runtimeMatches) {
+                console2.log("Runtime bytecode matches!\n");
+            } else {
+                console2.log("XXXX Bytecode doesn't match XXXX\n");
+            }
+
         }
     }
 
