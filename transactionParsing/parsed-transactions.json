@@ -947,10 +947,27 @@
   ],
   "execute-oft-adapter-upgrade.json": [
     {
-      "status": "error",
-      "message": "Error decoding parameters: 'data'",
+      "contract": "EtherfiTimelock",
+      "function": "execute",
       "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
-      "signature": "0x134008d3",
+      "transaction": {
+        "contract": "ProxyAdmin",
+        "function": "upgradeAndCall",
+        "target": "0xa9E9bBf04F95688D7fd82036f83544630E463CAc",
+        "parameters": {
+          "proxy": "0xcd2eb13d6831d4602d80e5db9230a57596cdca63",
+          "implementation": "0xa82cc578927058af14fd84d96a817dc85ac4f946",
+          "data": {
+            "contract": "EtherfiOFTAdapterUpgradeable",
+            "function": "initialize",
+            "target": "0xa9E9bBf04F95688D7fd82036f83544630E463CAc",
+            "parameters": {
+              "_owner": "0x2aca71020de61bb532008049e1bd41e451ae8adc",
+              "_delegate": "0x2aca71020de61bb532008049e1bd41e451ae8adc"
+            }
+          }
+        }
+      },
       "file_source": "execute-oft-adapter-upgrade.json"
     }
   ],

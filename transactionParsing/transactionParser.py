@@ -89,11 +89,16 @@ class LocalTxnParser:
 
                 # decode the underlying call that is being scheduled/executed
                 if contract_name == "EtherfiTimelock":
+                    transaction = {}
+                    if func_abi['name'] == 'schedule':
+                        transaction = self.parse_txn(parameters['target'], parameters['data'])
+                    else:
+                        transaction = self.parse_txn(parameters['target'], parameters['payload'])
                     return {
                         "contract": contract_name,
                         "function": func_abi['name'],
                         "target": target,
-                        "transaction": self.parse_txn(parameters['target'], parameters['data'])
+                        "transaction": transaction
                     }
                 
 
@@ -171,7 +176,7 @@ def main():
     results = parser.process_directory(transactions_dir)
     
     # Write results to output file
-    output_path = os.path.join(current_dir, 'parsed_transactions.json')
+    output_path = os.path.join(current_dir, 'parsed-transactions.json')
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=2)
         
