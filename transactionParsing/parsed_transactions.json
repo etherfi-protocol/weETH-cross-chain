@@ -1,0 +1,1223 @@
+{
+  "configure-mainnet-security.json": [
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0xcd2eb13D6831d4602D80E5db9230A57596CDCA63",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "configure-mainnet-security.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0xcd2eb13D6831d4602D80E5db9230A57596CDCA63",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0x2aca71020de61bb532008049e1bd41e451ae8adc"
+      },
+      "file_source": "configure-mainnet-security.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0xcd2eb13D6831d4602D80E5db9230A57596CDCA63",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "configure-mainnet-security.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0xcd2eb13D6831d4602D80E5db9230A57596CDCA63",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "configure-mainnet-security.json"
+    }
+  ],
+  "schedule-oft-adapter-upgrade.json": [
+    {
+      "contract": "EtherfiTimelock",
+      "function": "schedule",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "ProxyAdmin",
+        "function": "upgradeAndCall",
+        "target": "0xa9E9bBf04F95688D7fd82036f83544630E463CAc",
+        "parameters": {
+          "proxy": "0xcd2eb13d6831d4602d80e5db9230a57596cdca63",
+          "implementation": "0xa82cc578927058af14fd84d96a817dc85ac4f946",
+          "data": {
+            "contract": "EtherfiOFTAdapterUpgradeable",
+            "function": "initialize",
+            "target": "0xa9E9bBf04F95688D7fd82036f83544630E463CAc",
+            "parameters": {
+              "_owner": "0x2aca71020de61bb532008049e1bd41e451ae8adc",
+              "_delegate": "0x2aca71020de61bb532008049e1bd41e451ae8adc"
+            }
+          }
+        }
+      },
+      "file_source": "schedule-oft-adapter-upgrade.json"
+    }
+  ],
+  "security-upgrade-zksync.json": [
+    {
+      "contract": "ProxyAdmin",
+      "function": "upgradeAndCall",
+      "target": "0x908245fAA919eD7cF69d3f9ab75ED0F30d91D301",
+      "parameters": {
+        "proxy": "0xc1fa6e2e8667d9be0ca938a54c7e0285e9df924a",
+        "implementation": "0xfe14521c117a85fafab8e4e737a3aab94974f75e",
+        "data": "0x"
+      },
+      "file_source": "security-upgrade-zksync.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0xc1Fa6E2E8667d9bE0Ca938a54c7E0285E9Df924a",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "security-upgrade-zksync.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0xc1Fa6E2E8667d9bE0Ca938a54c7E0285E9Df924a",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0x8b9836176900a8ee62dbe98066976d6ce829c53e"
+      },
+      "file_source": "security-upgrade-zksync.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0xc1Fa6E2E8667d9bE0Ca938a54c7E0285E9Df924a",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-zksync.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0xc1Fa6E2E8667d9bE0Ca938a54c7E0285E9Df924a",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-zksync.json"
+    }
+  ],
+  "security-upgrade-bnb.json": [
+    {
+      "contract": "ProxyAdmin",
+      "function": "upgradeAndCall",
+      "target": "0x2F6f3cc4a275C7951FB79199F01eD82421eDFb68",
+      "parameters": {
+        "proxy": "0x04c0599ae5a44757c0af6f9ec3b93da8976c150a",
+        "implementation": "0x70d7e0c93d8443325550ba3f71576f5f346b8aa9",
+        "data": "0x"
+      },
+      "file_source": "security-upgrade-bnb.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "security-upgrade-bnb.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0xd568c4d42147224a701a14468bec9e9bccf571f5"
+      },
+      "file_source": "security-upgrade-bnb.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-bnb.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-bnb.json"
+    }
+  ],
+  "security-upgrade-op.json": [
+    {
+      "contract": "ProxyAdmin",
+      "function": "upgradeAndCall",
+      "target": "0x632304Edc891Afed1a7bDe9A40b19F1c393ad5F3",
+      "parameters": {
+        "proxy": "0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff",
+        "implementation": "0x70d7e0c93d8443325550ba3f71576f5f346b8aa9",
+        "data": "0x"
+      },
+      "file_source": "security-upgrade-op.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x5A7fACB970D094B6C7FF1df0eA68D99E6e73CBFF",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "security-upgrade-op.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x5A7fACB970D094B6C7FF1df0eA68D99E6e73CBFF",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0x764682c769ccb119349d92f1b63ee1c03d6aecff"
+      },
+      "file_source": "security-upgrade-op.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0x5A7fACB970D094B6C7FF1df0eA68D99E6e73CBFF",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-op.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0x5A7fACB970D094B6C7FF1df0eA68D99E6e73CBFF",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-op.json"
+    }
+  ],
+  "security-upgrade-blast.json": [
+    {
+      "contract": "ProxyAdmin",
+      "function": "upgradeAndCall",
+      "target": "0x2F6f3cc4a275C7951FB79199F01eD82421eDFb68",
+      "parameters": {
+        "proxy": "0x04c0599ae5a44757c0af6f9ec3b93da8976c150a",
+        "implementation": "0x70d7e0c93d8443325550ba3f71576f5f346b8aa9",
+        "data": "0x"
+      },
+      "file_source": "security-upgrade-blast.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "security-upgrade-blast.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0xa4822d7d24747e6a1baa171944585bad4434f2d5"
+      },
+      "file_source": "security-upgrade-blast.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-blast.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-blast.json"
+    }
+  ],
+  "security-upgrade-scroll.json": [
+    {
+      "contract": "ProxyAdmin",
+      "function": "upgradeAndCall",
+      "target": "0x99fef08aEF9D6955138B66AD16Ab314DB17878ee",
+      "parameters": {
+        "proxy": "0x01f0a31698c4d065659b9bdc21b3610292a1c506",
+        "implementation": "0x70d7e0c93d8443325550ba3f71576f5f346b8aa9",
+        "data": "0x"
+      },
+      "file_source": "security-upgrade-scroll.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x01f0a31698C4d065659b9bdC21B3610292a1c506",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "security-upgrade-scroll.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x01f0a31698C4d065659b9bdC21B3610292a1c506",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0x3cd08f51d0ea86ac93368de31822117cd70ceca3"
+      },
+      "file_source": "security-upgrade-scroll.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0x01f0a31698C4d065659b9bdC21B3610292a1c506",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-scroll.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0x01f0a31698C4d065659b9bdC21B3610292a1c506",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-scroll.json"
+    }
+  ],
+  "security-upgrade-linea.json": [
+    {
+      "contract": "ProxyAdmin",
+      "function": "upgradeAndCall",
+      "target": "0xE21B7A5e4c15156180a76F4747313a3485fC4163",
+      "parameters": {
+        "proxy": "0x1bf74c010e6320bab11e2e5a532b5ac15e0b8aa6",
+        "implementation": "0xde8a2c33655aca88f258988ed74d1511876343d1",
+        "data": "0x"
+      },
+      "file_source": "security-upgrade-linea.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x1Bf74C010E6320bab11e2e5A532b5AC15e0b8aA6",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "security-upgrade-linea.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x1Bf74C010E6320bab11e2e5A532b5AC15e0b8aA6",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0xe4ff196cd755566845d3debb1e2bd34123807ebc"
+      },
+      "file_source": "security-upgrade-linea.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0x1Bf74C010E6320bab11e2e5A532b5AC15e0b8aA6",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-linea.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0x1Bf74C010E6320bab11e2e5A532b5AC15e0b8aA6",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-linea.json"
+    }
+  ],
+  "execute-oft-adapter-upgrade.json": [
+    {
+      "status": "error",
+      "message": "Error decoding parameters: 'data'",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "signature": "0x134008d3",
+      "file_source": "execute-oft-adapter-upgrade.json"
+    }
+  ],
+  "security-upgrade-base.json": [
+    {
+      "contract": "ProxyAdmin",
+      "function": "upgradeAndCall",
+      "target": "0x2F6f3cc4a275C7951FB79199F01eD82421eDFb68",
+      "parameters": {
+        "proxy": "0x04c0599ae5a44757c0af6f9ec3b93da8976c150a",
+        "implementation": "0xde8a2c33655aca88f258988ed74d1511876343d1",
+        "data": "0x"
+      },
+      "file_source": "security-upgrade-base.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "security-upgrade-base.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0x7a00657a45420044bc526b90ad667affaee0a868"
+      },
+      "file_source": "security-upgrade-base.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-base.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30260,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-base.json"
+    }
+  ],
+  "security-upgrade-mode.json": [
+    {
+      "contract": "ProxyAdmin",
+      "function": "upgradeAndCall",
+      "target": "0x2F6f3cc4a275C7951FB79199F01eD82421eDFb68",
+      "parameters": {
+        "proxy": "0x04c0599ae5a44757c0af6f9ec3b93da8976c150a",
+        "implementation": "0x70d7e0c93d8443325550ba3f71576f5f346b8aa9",
+        "data": "0x"
+      },
+      "file_source": "security-upgrade-mode.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "role": "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a",
+        "account": "0x9af1298993dc1f397973c62a5d47a284cf76844d"
+      },
+      "file_source": "security-upgrade-mode.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "role": "0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a",
+        "account": "0xa4822d7d24747e6a1baa171944585bad4434f2d5"
+      },
+      "file_source": "security-upgrade-mode.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-mode.json"
+    },
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30243,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30102,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30184,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30111,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30214,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30183,
+            2000000000000000000000,
+            14400
+          ],
+          [
+            30165,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "security-upgrade-mode.json"
+    }
+  ]
+}
