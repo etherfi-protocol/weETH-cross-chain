@@ -89,11 +89,11 @@ contract verifyOFTUpgradeBytecode is Script, Constants {
         ) {
             return "paris";
         } 
-        // zksync custom paris
+        // zksync custom
         else if (
             keccak256(abi.encodePacked(chainName)) == keccak256(abi.encodePacked("zksync"))
         ) {
-            return "zksync-paris";
+            return "zksync-shanghai";
         } else {
             return "unknown";
         }
