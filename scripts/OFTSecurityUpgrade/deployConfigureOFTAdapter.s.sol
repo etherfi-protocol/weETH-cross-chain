@@ -10,28 +10,30 @@ import "../../contracts/EtherfiOFTAdapterUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/GnosisHelpers.sol";
 import "../../utils/LayerZeroHelpers.sol";
+import "../../contracts/PairwiseRateLimiter.sol";
 
+// forge script scripts/OFTSecurityUpgrade/deployConfigureOFTAdapter.s.sol:DeployConfigureNewOFTAdapter
 contract DeployConfigureNewOFTAdapter is Script, Constants, GnosisHelpers, LayerZeroHelpers {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
 
-    RateLimiter.RateLimitConfig[] public rateLimitConfigs;
+    PairwiseRateLimiter.RateLimitConfig[] public rateLimitConfigs;
 
     function run() public {
     
         vm.startBroadcast();
 
+        // contract has never been deployed
         // deploy new OFT Adapter contract
         // address newOFTAdapterImpl = address(new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
-        address newOFTAdapterImpl = L1_OFT_ADAPTER_NEW_IMPL;
 
-        // generate the timelock transactio to upgrade the OFT Adapter contract
+        // generate the timelock transaction to upgrade the OFT Adapter contract
         string memory scheduleOFTAdapterUpgrade = _getGnosisHeader("1");
         string memory executeOFTAdapterUpgrade = _getGnosisHeader("1");
 
         // data to initialize the contract during the upgrade
         bytes memory initializationData = abi.encodeWithSignature("initialize(address,address)", L1_CONTRACT_CONTROLLER, L1_CONTRACT_CONTROLLER);
-        bytes memory initializationTransaction = abi.encodeWithSignature("upgradeAndCall(address,address,bytes)", L1_OFT_ADAPTER, newOFTAdapterImpl, initializationData);
+        bytes memory initializationTransaction = abi.encodeWithSignature("upgradeAndCall(address,address,bytes)", L1_OFT_ADAPTER, L1_OFT_ADAPTER_NEW_IMPL, initializationData);
 
         // generate timelock schedule and execute transaction
         scheduleOFTAdapterUpgrade = string.concat(scheduleOFTAdapterUpgrade, _getTimelockScheduleTransaction(L1_OFT_ADAPTER_PROXY_ADMIN, initializationTransaction, true));

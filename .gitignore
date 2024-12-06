@@ -23,3 +23,5 @@ workspace.code-workspace
 .DS_Store
 
 output/
+
+transactionParsing/venv
