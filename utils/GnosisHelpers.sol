@@ -26,7 +26,6 @@ contract GnosisHelpers is Test {
         }
     }
 
-
     // Get the gnosis transaction header
     function _getGnosisHeader(string memory chainId) internal pure returns (string memory) {
         return string.concat('{"chainId":"', chainId, '","meta": { "txBuilderVersion": "1.16.5" }, "transactions": [');
@@ -65,8 +64,8 @@ contract GnosisHelpers is Test {
     bytes32 constant salt = 0x0000000000000000000000000000000000000000000000000000000000000000;
     uint256 constant delay = 259200;
 
-    // Generates the schedule transaction for a Timelock
-    function _getTimelockScheduleTransaction(address to, bytes memory data, bool isLasts) internal pure returns (string memory) {
+    // Generates the schedule transaction for a gnosis safe
+    function _getGnosisScheduleTransaction(address to, bytes memory data, bool isLasts) internal pure returns (string memory) {
 
         string memory timelockAddressHex = iToHex(abi.encodePacked(address(timelock)));
         string memory scheduleTransactionData = iToHex(abi.encodeWithSignature("schedule(address,uint256,bytes,bytes32,bytes32,uint256)", to, 0, data, predecessor, salt, delay));
@@ -74,7 +73,7 @@ contract GnosisHelpers is Test {
         return _getGnosisTransaction(timelockAddressHex, scheduleTransactionData, isLasts);
     }
 
-    function _getTimelockExecuteTransaction(address to, bytes memory data, bool isLasts) internal pure returns (string memory) {
+    function _getGnosisExecuteTransaction(address to, bytes memory data, bool isLasts) internal pure returns (string memory) {
 
         string memory timelockAddressHex = iToHex(abi.encodePacked(address(timelock)));
         string memory executeTransactionData = iToHex(abi.encodeWithSignature("execute(address,uint256,bytes,bytes32,bytes32)", to, 0, data, predecessor, salt));

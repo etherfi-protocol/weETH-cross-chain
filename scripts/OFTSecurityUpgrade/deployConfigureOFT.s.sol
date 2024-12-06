@@ -5,7 +5,7 @@ import "forge-std/console.sol";
 import "forge-std/Script.sol";
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../../utils/GnosisHelpers.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
