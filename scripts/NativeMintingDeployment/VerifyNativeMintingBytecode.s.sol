@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../../utils/L2Constants.sol";
 
+// forge script scripts/NativeMintingDeployment/VerifyNativeMintingBytecode.s.sol:verifyNativeMintingBytecode --via-ir
 contract verifyNativeMintingBytecode is Script, L2Constants {
 
     address constant L1_DUMMY_TOKEN_IMPL = 0x96a049493ACF81f92aF84149e0CA09ae13985cD0;
