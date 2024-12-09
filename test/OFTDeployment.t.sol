@@ -14,7 +14,8 @@ import { MessagingFee } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interf
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import { SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
-import "../contracts/MintableOFTUpgradeable.sol";
+import "../contracts/EtherfiOFTUpgradeable.sol";
+import "../contracts/EtherFiOFTAdapter.sol";
 import "../utils/Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
 
@@ -26,7 +27,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
     function testGnosisMainnet() public {
         console.log("Tesing peer transactions for mainnet");
         vm.createSelectFork(L1_RPC_URL);
-        vm.deal(L1_CONTRACT_CONTROLLER, 100 ether);
+        vm.deal(L1_CONTRACT_CONTROLLER, 10_000 ether);
 
         string memory json = vm.readFile("./output/mainnet.json");
         uint256 numTransactions = 4;
@@ -41,7 +42,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
         }
 
         console.log("Confirming that the OFT for mainnet has added the deployment as a peer");
-        MintableOFTUpgradeable adapter = MintableOFTUpgradeable(L1_OFT_ADAPTER);
+        EtherFiOFTAdapter adapter = EtherFiOFTAdapter(L1_OFT_ADAPTER);
         assertTrue(adapter.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 1), hex"000301001101000000000000000000000000000f4240");
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 2), hex"000301001101000000000000000000000000000f4240");
@@ -65,7 +66,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
             console.log("Testing gnosis peer transactions for %s", L2s[i].NAME);
             string memory l2Name = L2s[i].NAME;
             vm.createSelectFork(L2s[i].RPC_URL);
-            vm.deal(L2s[i].L2_CONTRACT_CONTROLLER_SAFE, 100 ether);
+            vm.deal(L2s[i].L2_CONTRACT_CONTROLLER_SAFE, 10_000 ether);
 
             string memory filePath = string.concat("./output/", l2Name, ".json");
             string memory json = vm.readFile(filePath);
@@ -82,11 +83,15 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
             }
 
             console.log("Confirming that the OFT for %s has added the deployment as a peer", L2s[i].NAME);
-            MintableOFTUpgradeable oft = MintableOFTUpgradeable(L2s[i].L2_OFT);
+            EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(L2s[i].L2_OFT);
             assertTrue(oft.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
-            (,,uint256 limit, uint256 window) = oft.rateLimits(DEPLOYMENT_EID);
+            (,,uint256 limit, uint256 window) = oft.inboundRateLimits(DEPLOYMENT_EID);
             assertEq(limit, 2000 ether);
             assertEq(window, 4 hours);
+            (,,limit, window) = oft.outboundRateLimits(DEPLOYMENT_EID);
+            assertEq(limit, 2000 ether);
+            assertEq(window, 4 hours);
+
             assertEq(oft.enforcedOptions(DEPLOYMENT_EID, 1), hex"000301001101000000000000000000000000000f4240");
             assertEq(oft.enforcedOptions(DEPLOYMENT_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
@@ -103,14 +108,16 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
         // Confirm that the deployment chain is properly configured
 
         vm.createSelectFork(DEPLOYMENT_RPC_URL);
-        MintableOFTUpgradeable oft = MintableOFTUpgradeable(DEPLOYMENT_OFT);
+        EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
 
         console.log("confirming that L2 -> L1 configuration is correct");
         assertTrue(oft.isPeer(L1_EID, _toBytes32(L1_OFT_ADAPTER)));
-        (,,uint256 limit, uint256 window) = oft.rateLimits(L1_EID);
-        // STANDBY rate limits
-        assertEq(limit, 0.0001 ether);
-        assertEq(window, 1 minutes);
+        (,,uint256 limit, uint256 window) = oft.inboundRateLimits(L1_EID);
+        assertEq(limit, 2000 ether);
+        assertEq(window, 4 hours);
+        (,,limit, window) = oft.outboundRateLimits(L1_EID);
+        assertEq(limit, 2000 ether);
+        assertEq(window, 4 hours);
         assertEq(oft.enforcedOptions(L1_EID, 1), hex"000301001101000000000000000000000000000f4240");
         assertEq(oft.enforcedOptions(L1_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
@@ -121,54 +128,29 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
         for (uint i = 0; i < L2s.length; i++) {
             console.log("confirming that deployment -> %s configuration is correct", L2s[i].NAME);
             assertTrue(oft.isPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT)));
-            (,,limit, window) = oft.rateLimits(L2s[i].L2_EID);
-            // STANDBY rate limits
-            assertEq(limit, 0.0001 ether);
-            assertEq(window, 1 minutes);
+            (,,limit, window) = oft.inboundRateLimits(L2s[i].L2_EID);
+            assertEq(limit, 2000 ether);
+            assertEq(window, 4 hours);
+            (,,limit, window) = oft.outboundRateLimits(L2s[i].L2_EID);
+            assertEq(limit, 2000 ether);
+            assertEq(window, 4 hours);
             assertEq(oft.enforcedOptions(L2s[i].L2_EID, 1), hex"000301001101000000000000000000000000000f4240"); 
             assertEq(oft.enforcedOptions(L2s[i].L2_EID, 2), hex"000301001101000000000000000000000000000f4240");
-
 
             assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302, L2s[i].L2_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
             assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, L2s[i].L2_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
         }
 
         console.log("Testing successful cross chains");
-        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 0.000001 ether, false);
+        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 1 ether, false);
         for (uint i = 0; i < L2s.length; i++) {
-            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 0.000001 ether, false);
+            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 1 ether, false);
         }
 
-        console.log("Testing failed sends do to rate limit increase");
-        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 1 ether, true);
+        console.log("Testing failed sends do to rate limit exceeded");
+        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 2001 ether, true);
         for (uint i = 0; i < L2s.length; i++) {
-            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 1 ether, true);
-        }
-
-        console.log("Executing transaction to increase rate limits");
-        string memory json = vm.readFile("./output/productionRateLimit.json");
-        uint256 numTransactions = 1;
-        for (uint256 i = 0; i < numTransactions; i++) {
-            address to = vm.parseJsonAddress(json, string.concat(string.concat(".transactions[", Strings.toString(i)), "].to"));
-            uint256 value = vm.parseJsonUint(json, string.concat(string.concat(".transactions[", Strings.toString(i)), "].value"));
-            bytes memory data = vm.parseJsonBytes(json, string.concat(string.concat(".transactions[", Strings.toString(i)), "].data"));
-
-            vm.prank(DEPLOYMENT_CONTRACT_CONTROLLER);
-            (bool success,) = address(to).call{value: value}(data);
-            require(success, "Transaction failed");
-        }
-
-        console.log("Testing successful cross chain sends after rate limit increase");
-        (,,limit, window) = oft.rateLimits(L1_EID);
-        for (uint i = 0; i < L2s.length; i++) {
-            (,,limit, window) = oft.rateLimits(L2s[i].L2_EID);
-            // PROD rate limits
-            assertEq(limit, 2000 ether);
-            assertEq(window, 4 hours);
-        }
-        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 10 ether, false);
-        for (uint i = 0; i < L2s.length; i++) {
-            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 10 ether, false);
+            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 2001 ether, true);
         }
     }
 

@@ -15,7 +15,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAp
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
-import "../../contracts/MintableOFTUpgradeable.sol";
+import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/Constants.sol";
 
 contract OFTOwnershipTransfer is Script, Constants {
@@ -28,9 +28,8 @@ contract OFTOwnershipTransfer is Script, Constants {
 
         vm.startBroadcast(privateKey);
 
-        MintableOFTUpgradeable oft = MintableOFTUpgradeable(DEPLOYMENT_OFT);
+        EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
         ProxyAdmin oftProxyAdmin = ProxyAdmin(DEPLOYMENT_PROXY_ADMIN_CONTRACT);
-
 
         address owner = oft.owner();
         console.log("OFT owner: %s", owner);

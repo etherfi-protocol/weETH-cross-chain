@@ -8,11 +8,11 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
+import "../../contracts/PairwiseRateLimiter.sol";
 
-import "../../contracts/MintableOFTUpgradeable.sol";
+import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
@@ -20,15 +20,16 @@ struct OFTDeployment {
     address adminAddress;
     address implementationAddress;
     address proxyAddress;
-    MintableOFTUpgradeable tokenContract;
+    EtherfiOFTUpgradeable tokenContract;
 }
 
+// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --via-ir --evm-version "paris" --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
 contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     address scriptDeployer;
     OFTDeployment oftDeployment;
-    RateLimiter.RateLimitConfig[] public rateLimitConfigs;
+    PairwiseRateLimiter.RateLimitConfig[] public rateLimitConfigs;
     EnforcedOptionParam[] public enforcedOptions;
 
     function run() public {
@@ -51,20 +52,20 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
         console.log("Deploying OFT contract...");
 
         // Create salt for deployment
-        bytes32 SALT = keccak256(abi.encodePacked(scriptDeployer, TOKEN_NAME));
+        bytes32 SALT = keccak256(abi.encodePacked(TOKEN_NAME));
 
-        oftDeployment.implementationAddress = address(new MintableOFTUpgradeable{salt: SALT}(DEPLOYMENT_LZ_ENDPOINT));
+        oftDeployment.implementationAddress = address(new EtherfiOFTUpgradeable{salt: SALT}(DEPLOYMENT_LZ_ENDPOINT));
         oftDeployment.proxyAddress = address(
             new TransparentUpgradeableProxy{salt: SALT}(
                 oftDeployment.implementationAddress,
                 scriptDeployer,
                 abi.encodeWithSelector(
-                    MintableOFTUpgradeable.initialize.selector, TOKEN_NAME, TOKEN_SYMBOL, scriptDeployer
+                    EtherfiOFTUpgradeable.initialize.selector, TOKEN_NAME, TOKEN_SYMBOL, scriptDeployer
                 )
             )
         );
 
-        oftDeployment.tokenContract = MintableOFTUpgradeable(oftDeployment.proxyAddress);
+        oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
 
         console.log("OFT proxy", oftDeployment.proxyAddress);
         console.log("OFT implementation", oftDeployment.implementationAddress);
@@ -74,15 +75,13 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
         console.log("Configuring rate limits...");
         // Individual rate limits must be set for each chain
 
-        // setting standby rate limits for L1
-        rateLimitConfigs.push(_getRateLimitConfig(L1_EID, STANDBY_LIMIT, STANDBY_WINDOW));
-
-        // Iterate over each L2 and add the standby rate limit config
+        rateLimitConfigs.push(_getRateLimitConfig(L1_EID, LIMIT, WINDOW));
         for (uint256 i = 0; i < L2s.length; i++) {
-            rateLimitConfigs.push(_getRateLimitConfig(L2s[i].L2_EID, STANDBY_LIMIT, STANDBY_WINDOW));
+            rateLimitConfigs.push(_getRateLimitConfig(L2s[i].L2_EID, LIMIT, WINDOW));
         }
 
-        oftDeployment.tokenContract.setRateLimits(rateLimitConfigs);
+        oftDeployment.tokenContract.setInboundRateLimits(rateLimitConfigs);
+        oftDeployment.tokenContract.setOutboundRateLimits(rateLimitConfigs);
     }
 
     function configurePeer() internal {
@@ -115,7 +114,6 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
         console.log("Configuring enforced options...");
 
         _appendEnforcedOptions(L1_EID);
-
         for (uint256 i = 0; i < L2s.length; i++) {
             _appendEnforcedOptions(L2s[i].L2_EID);
         }
@@ -146,9 +144,7 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
         });
 
         params[0] = SetConfigParam(dstEid, 2, abi.encode(ulnConfig));
-
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(oftDeployment.proxyAddress, DEPLOYMENT_SEND_LID_302, params);
-
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(oftDeployment.proxyAddress, DEPLOYMENT_RECEIVE_LIB_302, params);
     }
 

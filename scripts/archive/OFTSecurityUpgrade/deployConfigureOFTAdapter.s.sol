@@ -4,13 +4,11 @@ pragma solidity ^0.8.13;
 import "forge-std/console.sol";
 import "forge-std/Script.sol";
 
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
-
-import "../../contracts/EtherfiOFTAdapterUpgradeable.sol";
-import "../../utils/Constants.sol";
-import "../../utils/GnosisHelpers.sol";
-import "../../utils/LayerZeroHelpers.sol";
-import "../../contracts/PairwiseRateLimiter.sol";
+import "../../../contracts/EtherfiOFTAdapterUpgradeable.sol";
+import "../../../utils/Constants.sol";
+import "../../../utils/GnosisHelpers.sol";
+import "../../../utils/LayerZeroHelpers.sol";
+import "../../../contracts/PairwiseRateLimiter.sol";
 
 // forge script scripts/OFTSecurityUpgrade/deployConfigureOFTAdapter.s.sol:DeployConfigureNewOFTAdapter
 contract DeployConfigureNewOFTAdapter is Script, Constants, GnosisHelpers, LayerZeroHelpers {
