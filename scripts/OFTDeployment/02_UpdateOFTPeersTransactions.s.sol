@@ -80,7 +80,7 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
 
         string memory L2Json = _getGnosisHeader(_l2.CHAIN_ID);
 
-        // Transactios to update the OFT contract
+        // Transactions to update the OFT contract
         L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setPeerDataString, false));
         L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setInboundRateLimitDataString, false));
         L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setOutboundRateLimitDataString, false));
@@ -150,7 +150,7 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
 
     // Helper function to convert bytes to hex strings 
     function iToHex(bytes memory buffer) public pure returns (string memory) {
-        // Fixed buffer size for hexadecimal convertion
+        // Fixed buffer size for hexadecimal conversion
         bytes memory converted = new bytes(buffer.length * 2);
 
         bytes memory _base = "0123456789abcdef";

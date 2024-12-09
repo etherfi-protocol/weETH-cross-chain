@@ -1,0 +1,24 @@
+{
+    "LayerZero_Labs": {
+        "base": "0x9e059a54699a285714207b43b055483e78faac25",
+        "bsc": "0xfd6865c841c2d64565562fcc7e05e619a30615f0",
+        "blast": "0xc097ab8cd7b053326dfe9fb3e3a31a0cce3b526f",
+        "ethereum": "0x589dedbd617e0cbcb916a9223f4d1300c294236b",
+        "linea": "0x129ee430cb2ff2708ccaddbdb408a88fe4ffd480",
+        "mode": "0xce8358bc28dd8296ce8caf1cd2b44787abd65887",
+        "optimism": "0x6a02d83e8d433304bba74ef1c427913958187142",
+        "scroll": "0xbe0d08a85eebfcc6eda0a843521f7cbb1180d2e2",
+        "zksync": "0x620a9df73d2f1015ea75aea1067227f9013f5c51"
+    },
+    "Nethermind": {
+        "base": "0xcd37ca043f8479064e10635020c65ffc005d36f6",
+        "bsc": "0x31f748a368a893bdb5abb67ec95f232507601a73",
+        "blast": "0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b",
+        "ethereum": "0xa59ba433ac34d2927232918ef5b2eaafcf130ba5",
+        "linea": "0xdd7b5e1db4aafd5c8ec3b764efb8ed265aa5445b",
+        "mode": "0xcd37ca043f8479064e10635020c65ffc005d36f6",
+        "optimism": "0xa7b5189bca84cd304d8553977c7c614329750d99",
+        "scroll": "0x446755349101cb20c582c224462c3912d3584dce",
+        "zksync": "0xb183c2b91cf76cad13602b32ada2fd273f19009c"
+    }
+}
