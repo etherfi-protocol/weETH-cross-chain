@@ -64,10 +64,14 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setPeerDataString, false));
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setEnforcedOptionsString, false));
 
+        // Configure the rate limiting on the L1
+        MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setInboundRateLimitDataString, false));
+        MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setOutboundRateLimitDataString, false));
+
         // Transactions to update the mainnet LZ endpoint
-        string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_SEND_302, _getDVNConfig(L1_DVN)));
+        string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_SEND_302, _getDVNConfig(L1_LZ_DVN)));
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1EndpointString, setLZConfigSend, false));
-        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_RECEIVE_302, _getDVNConfig(L1_DVN)));
+        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_RECEIVE_302, _getDVNConfig(L1_LZ_DVN)));
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1EndpointString, setLZConfigReceive, true));
 
         return MainnetJson;
@@ -87,9 +91,9 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
         L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setEnforcedOptionsString, false));
 
         // Transactions to update the corresponding chains LZ endpoint
-        string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", _l2.L2_OFT, _l2.SEND_302, _getDVNConfig(_l2.LZ_DVN)));
+        string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", _l2.L2_OFT, _l2.SEND_302, _getDVNConfig(_l2.LAYERZERO_DVN)));
         L2Json = string.concat(L2Json, _getGnosisTransaction(l2EndpointString, setLZConfigSend, false));
-        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", _l2.L2_OFT, _l2.RECEIVE_302, _getDVNConfig(_l2.LZ_DVN)));
+        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", _l2.L2_OFT, _l2.RECEIVE_302, _getDVNConfig(_l2.LAYERZERO_DVN)));
         L2Json = string.concat(L2Json, _getGnosisTransaction(l2EndpointString, setLZConfigReceive, true));
 
         return L2Json;
@@ -111,6 +115,50 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
     }
 
     // Gets the DVN config for a set of lzDvns. `EID` is the EID of the OFT that is currently being deployed
+    // function _getDVNConfig(address[2] memory lzDvn) internal pure returns (SetConfigParam[] memory) {
+    //     SetConfigParam[] memory params = new SetConfigParam[](1);
+    //     address[] memory requiredDVNs = new address[](2);
+    //     if (lzDvn[0] > lzDvn[1]) {
+    //         requiredDVNs[0] = lzDvn[1];
+    //         requiredDVNs[1] = lzDvn[0];
+    //     } else {
+    //         requiredDVNs[0] = lzDvn[0];
+    //         requiredDVNs[1] = lzDvn[1];
+    //     }
+
+    //     UlnConfig memory ulnConfig = UlnConfig({
+    //         confirmations: 64,
+    //         requiredDVNCount: 2,
+    //         optionalDVNCount: 0,
+    //         optionalDVNThreshold: 0,
+    //         requiredDVNs: requiredDVNs,
+    //         optionalDVNs: new address[](0)
+    //     });
+
+    //     params[0] = SetConfigParam(DEPLOYMENT_EID, 2, abi.encode(ulnConfig));
+
+    //     return params;
+    // }
+
+    function _getDVNConfig(address lzDvn) internal pure returns (SetConfigParam[] memory) {
+        SetConfigParam[] memory params = new SetConfigParam[](1);
+        address[] memory requiredDVNs = new address[](1);
+
+        requiredDVNs[0] = lzDvn;
+        UlnConfig memory ulnConfig = UlnConfig({
+            confirmations: 64,
+            requiredDVNCount: 1,
+            optionalDVNCount: 0,
+            optionalDVNThreshold: 0,
+            requiredDVNs: requiredDVNs,
+            optionalDVNs: new address[](0)
+        });
+
+        params[0] = SetConfigParam(DEPLOYMENT_EID, 2, abi.encode(ulnConfig));
+
+        return params;
+    }
+
     function _getDVNConfig(address[2] memory lzDvn) internal pure returns (SetConfigParam[] memory) {
         SetConfigParam[] memory params = new SetConfigParam[](1);
         address[] memory requiredDVNs = new address[](2);
