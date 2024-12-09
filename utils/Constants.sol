@@ -81,9 +81,6 @@ contract Constants {
     // Global Production Rate Limits
     uint256 constant LIMIT = 2000 ether;
     uint256 constant WINDOW = 4 hours;
-    // Global Stand by Rate Limits
-    uint256 constant STANDBY_LIMIT = 0.0001 ether;
-    uint256 constant STANDBY_WINDOW = 1 minutes;
 
     // Mainnet Constants
     string constant L1_RPC_URL = "https://mainnet.gateway.tenderly.co";

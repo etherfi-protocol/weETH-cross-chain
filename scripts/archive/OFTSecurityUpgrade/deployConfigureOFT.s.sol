@@ -4,12 +4,12 @@ pragma solidity ^0.8.13;
 import "forge-std/console.sol";
 import "forge-std/Script.sol";
 
-import "../../contracts/EtherfiOFTUpgradeable.sol";
-import "../../utils/Constants.sol";
-import "../../utils/GnosisHelpers.sol";
-import "../../utils/LayerZeroHelpers.sol";
+import "../../../contracts/EtherfiOFTUpgradeable.sol";
+import "../../../utils/Constants.sol";
+import "../../../utils/GnosisHelpers.sol";
+import "../../../utils/LayerZeroHelpers.sol";
 
-import "../../contracts/PairwiseRateLimiter.sol";
+import "../../../contracts/PairwiseRateLimiter.sol";
 
 
 // forge script scripts/OFTSecurityUpgrade/deployConfigureOFT.s.sol:DeployConfigureNewOFT
