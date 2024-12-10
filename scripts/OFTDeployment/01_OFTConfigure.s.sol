@@ -23,7 +23,7 @@ struct OFTDeployment {
     EtherfiOFTUpgradeable tokenContract;
 }
 
-// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --via-ir --evm-version "paris" --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
+// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --evm-version "paris" --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
 contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
@@ -33,10 +33,9 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     EnforcedOptionParam[] public enforcedOptions;
 
     function run() public {
-
-        uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        scriptDeployer = vm.addr(privateKey);
-        vm.startBroadcast(privateKey);
+        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        scriptDeployer = DEPLOYER_ADDRESS;
+        vm.startBroadcast(DEPLOYER_ADDRESS);
 
         deployOFT();
 
@@ -124,19 +123,32 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     // Configures the deployment chain's DVN for the given destination chain
     function _setDVN(uint32 dstEid) public {
         SetConfigParam[] memory params = new SetConfigParam[](1);
-        address[] memory requiredDVNs = new address[](2);
+        // TODO: uncomment after swell deployment 
+        // address[] memory requiredDVNs = new address[](2);
 
-        // sorting the DVNs to prevent LZ_ULN_Unsorted() errors
-        if (DEPLOYMENT_LZ_DVN > DEPLOYMENT_NETHERMIND_DVN) {
-            requiredDVNs[0] = DEPLOYMENT_NETHERMIND_DVN;
-            requiredDVNs[1] = DEPLOYMENT_LZ_DVN;
-        } else {
-            requiredDVNs[0] = DEPLOYMENT_LZ_DVN;
-            requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
-        }
+        // // sorting the DVNs to prevent LZ_ULN_Unsorted() errors
+        // if (DEPLOYMENT_LZ_DVN > DEPLOYMENT_NETHERMIND_DVN) {
+        //     requiredDVNs[0] = DEPLOYMENT_NETHERMIND_DVN;
+        //     requiredDVNs[1] = DEPLOYMENT_LZ_DVN;
+        // } else {
+        //     requiredDVNs[0] = DEPLOYMENT_LZ_DVN;
+        //     requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
+        // }
+        // UlnConfig memory ulnConfig = UlnConfig({
+        //     confirmations: 64,
+        //     requiredDVNCount: 2,
+        //     optionalDVNCount: 0,
+        //     optionalDVNThreshold: 0,
+        //     requiredDVNs: requiredDVNs,
+        //     optionalDVNs: new address[](0)
+        // });
+
+        // swell deployment only using LZ DVN for now
+        address[] memory requiredDVNs = new address[](1);
+        requiredDVNs[0] = DEPLOYMENT_LZ_DVN;
         UlnConfig memory ulnConfig = UlnConfig({
             confirmations: 64,
-            requiredDVNCount: 2,
+            requiredDVNCount: 1,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
             requiredDVNs: requiredDVNs,

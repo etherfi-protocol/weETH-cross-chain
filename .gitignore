@@ -22,6 +22,6 @@ workspace.code-workspace
 .vscode/
 .DS_Store
 
-output/
+# output/
 
 transactionParsing/venv

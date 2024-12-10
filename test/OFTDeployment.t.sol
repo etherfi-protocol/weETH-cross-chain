@@ -25,12 +25,12 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     function testGnosisMainnet() public {
-        console.log("Tesing peer transactions for mainnet");
+        console.log("Testing peer transactions for mainnet");
         vm.createSelectFork(L1_RPC_URL);
         vm.deal(L1_CONTRACT_CONTROLLER, 10_000 ether);
 
         string memory json = vm.readFile("./output/mainnet.json");
-        uint256 numTransactions = 4;
+        uint256 numTransactions = 6;
         for (uint256 i = 0; i < numTransactions; i++) {
             address to = vm.parseJsonAddress(json, string.concat(string.concat(".transactions[", Strings.toString(i)), "].to"));
             uint256 value = vm.parseJsonUint(json, string.concat(string.concat(".transactions[", Strings.toString(i)), "].value"));
@@ -49,8 +49,8 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
 
         console.log("Confirming that the layerzero endpoint for mainnet is properly configured");
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
-        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_SEND_302, DEPLOYMENT_EID, 2), _getExpectedUln(L1_DVN[0], L1_DVN[1]));
-        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), _getExpectedUln(L1_DVN[0], L1_DVN[1]));
+        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_SEND_302, DEPLOYMENT_EID, 2), _getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
+        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), _getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
 
         _sendCrossChain(DEPLOYMENT_EID, L1_OFT_ADAPTER, 1 ether, false);
     }
@@ -71,7 +71,7 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
             string memory filePath = string.concat("./output/", l2Name, ".json");
             string memory json = vm.readFile(filePath);
             console.log("Executing transactions for %s", l2Name);
-            uint256 numTransactions = 5;
+            uint256 numTransactions = 6;
             for (uint256 j = 0; j < numTransactions; j++) {
                 address to = vm.parseJsonAddress(json, string.concat(string.concat(".transactions[", Strings.toString(j)), "].to"));
                 uint256 value = vm.parseJsonUint(json, string.concat(string.concat(".transactions[", Strings.toString(j)), "].value"));
@@ -97,8 +97,8 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
 
             console.log("Confirming that the layerzero endpoint for %s is properly configured", L2s[i].NAME);
             ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L2s[i].L2_ENDPOINT);
-            assertEq(endpoint.getConfig(L2s[i].L2_OFT, L2s[i].SEND_302, DEPLOYMENT_EID, 2), _getExpectedUln(L2s[i].LZ_DVN[0], L2s[i].LZ_DVN[1]));
-            assertEq(endpoint.getConfig(L2s[i].L2_OFT, L2s[i].RECEIVE_302, DEPLOYMENT_EID, 2), _getExpectedUln(L2s[i].LZ_DVN[0], L2s[i].LZ_DVN[1]));
+            assertEq(endpoint.getConfig(L2s[i].L2_OFT, L2s[i].SEND_302, DEPLOYMENT_EID, 2), _getExpectedUln(L2s[i].LAYERZERO_DVN, L2s[i].NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(L2s[i].L2_OFT, L2s[i].RECEIVE_302, DEPLOYMENT_EID, 2), _getExpectedUln(L2s[i].LAYERZERO_DVN, L2s[i].NETHERMIND_DVN));
 
             _sendCrossChain(DEPLOYMENT_EID, L2s[i].L2_OFT, 1 ether, false);
         }
