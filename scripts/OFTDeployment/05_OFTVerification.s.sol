@@ -37,13 +37,12 @@ contract verifyOFT is Script, Constants, Test {
         // https://www.notion.so/etherfi/weETH-Cross-Chain-L2-Roles-11ab09527c4380148ed5ec6a4f869677
         console2.log("Asserting all roles are correct..\n");
 
-
         EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
         LZEndpoint endpoint = LZEndpoint(DEPLOYMENT_LZ_ENDPOINT);
 
-        assertEq(ProxyAdmin(0xE917Fad11ca0d835d3C8d960906195a641320cd7).owner(),  DEPLOYMENT_CONTRACT_CONTROLLER);
+        assertEq(ProxyAdmin(0xE917Fad11ca0d835d3C8d960906195a641320cd7).owner(), DEPLOYMENT_CONTRACT_CONTROLLER);
 
-        assertEq(oft.owner(),  DEPLOYMENT_CONTRACT_CONTROLLER);
+        assertEq(oft.owner(), DEPLOYMENT_CONTRACT_CONTROLLER);
         assertTrue(oft.hasRole(oft.PAUSER_ROLE(), PAUSER_EOA));
         assertTrue(oft.hasRole(oft.UNPAUSER_ROLE(), DEPLOYMENT_CONTRACT_CONTROLLER));
         assertTrue(oft.hasRole(oft.DEFAULT_ADMIN_ROLE(), DEPLOYMENT_CONTRACT_CONTROLLER));
