@@ -13,7 +13,6 @@ import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/lib
 import "../../contracts/PairwiseRateLimiter.sol";
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
-import "../../contracts/archive/MintableOFTUpgradeable.sol";
 import "../../utils/Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
