@@ -185,7 +185,6 @@ def main():
     # Write results to output file
     output_path = os.path.join(current_dir, 'parsed-transactions.json')
     with open(output_path, 'w') as f:
-        json.dump(results, f, indent=2)
         json.dump(results, f, indent=2, cls=CustomJSONEncoder)
         
     print(f"\nProcessed transactions written to {output_path}")
