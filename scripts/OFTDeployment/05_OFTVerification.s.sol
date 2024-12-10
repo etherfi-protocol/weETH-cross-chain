@@ -22,7 +22,7 @@ contract verifyOFT is Script, Constants, Test {
         bytes memory onchainRuntimeBytecode = DEPLOYMENT_OFT_IMPL.code;
         compareBytes(localBytecode, onchainRuntimeBytecode);
 
-        console2.log("Verification of OFT implementation bytecode...\n");
+        console2.log("Verification of OFT proxy bytecode...\n");
         TransparentUpgradeableProxy tmpProxy = new TransparentUpgradeableProxy(
             DEPLOYMENT_OFT_IMPL, 
             DEPLOYER_ADDRESS, 
