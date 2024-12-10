@@ -161,6 +161,13 @@ class LocalTxnParser:
             all_results[filename] = results
                 
         return all_results
+    
+# custom decoder for bytes objects
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, bytes):
+            return '0x' + obj.hex()
+        return super().default(obj)
 
 def main():
     # Initialize the parser
@@ -179,6 +186,7 @@ def main():
     output_path = os.path.join(current_dir, 'parsed-transactions.json')
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=2)
+        json.dump(results, f, indent=2, cls=CustomJSONEncoder)
         
     print(f"\nProcessed transactions written to {output_path}")
     
