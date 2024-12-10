@@ -26,31 +26,20 @@ contract LayerZeroHelpers {
 
     // Encodes a UlnConfig struct for the provided DVNs as bytes. This is how the DVN data is stored in the layerzero endpoint
     function _getExpectedUln(address lzDvn, address nethermindDvn) public pure returns (bytes memory) {
-        // address[] memory requiredDVNs = new address[](2);
+        address[] memory requiredDVNs = new address[](2);
 
-        // The DVN arrays are sorted in ascending order (enforced by requires statements in the layerzer endpoint contract)
-        // if (lzDvn > nethermindDvn) {
-        //     requiredDVNs[0] = nethermindDvn;
-        //     requiredDVNs[1] = lzDvn;
-        // } else {
-        //     requiredDVNs[0] = lzDvn;
-        //     requiredDVNs[1] = nethermindDvn;
-        // }
+        // The DVN arrays are sorted in ascending order (enforced by requires statements in the layerzero endpoint contract)
+        if (lzDvn > nethermindDvn) {
+            requiredDVNs[0] = nethermindDvn;
+            requiredDVNs[1] = lzDvn;
+        } else {
+            requiredDVNs[0] = lzDvn;
+            requiredDVNs[1] = nethermindDvn;
+        }
 
-        // UlnConfig memory ulnConfig = UlnConfig({
-        //     confirmations: 64,
-        //     requiredDVNCount: 2,
-        //     optionalDVNCount: 0,
-        //     optionalDVNThreshold: 0,
-        //     requiredDVNs: requiredDVNs,
-        //     optionalDVNs: new address[](0)
-        // });
-
-        address[] memory requiredDVNs = new address[](1);
-        requiredDVNs[0] = lzDvn;
         UlnConfig memory ulnConfig = UlnConfig({
             confirmations: 64,
-            requiredDVNCount: 1,
+            requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
             requiredDVNs: requiredDVNs,

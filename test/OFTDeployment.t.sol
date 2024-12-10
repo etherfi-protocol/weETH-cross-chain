@@ -110,6 +110,21 @@ contract OFTDeploymentTest is Test, Constants, LayerZeroHelpers {
         vm.createSelectFork(DEPLOYMENT_RPC_URL);
         EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
 
+        // TODO: remove after swell deployment
+        // for the swell deployment the nethermind dvn was given after admin was transferred to the contract controller
+        // hence we have an additional transaction to execute to set the config with the nethermind DVN
+        string memory json = vm.readFile("./output/swellSetConfig.json");
+        uint256 numTransactions = 18;
+        for (uint256 i = 0; i < numTransactions; i++) {
+            address to = vm.parseJsonAddress(json, string.concat(string.concat(".transactions[", Strings.toString(i)), "].to"));
+            uint256 value = vm.parseJsonUint(json, string.concat(string.concat(".transactions[", Strings.toString(i)), "].value"));
+            bytes memory data = vm.parseJsonBytes(json, string.concat(string.concat(".transactions[", Strings.toString(i)), "].data"));
+
+            vm.prank(DEPLOYMENT_CONTRACT_CONTROLLER);
+            (bool success,) = address(to).call{value: value}(data);
+            require(success, "Transaction failed");
+        }
+
         console.log("confirming that L2 -> L1 configuration is correct");
         assertTrue(oft.isPeer(L1_EID, _toBytes32(L1_OFT_ADAPTER)));
         (,,uint256 limit, uint256 window) = oft.inboundRateLimits(L1_EID);
