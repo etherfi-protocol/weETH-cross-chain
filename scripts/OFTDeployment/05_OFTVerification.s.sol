@@ -9,33 +9,31 @@ import "forge-std/Test.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/Constants.sol";
+import "../ContractCodeChecker.s.sol";
 
 // forge script scripts/OFTDeployment/05_OFTVerification.s.sol:verifyOFT --evm-version "paris"
-contract verifyOFT is Script, Constants, Test {
-    function run() public {
+contract verifyOFT is ContractCodeChecker, Script, Constants, Test {
 
+    function run() public {
         vm.createSelectFork(DEPLOYMENT_RPC_URL);
 
-        console2.log("Verification of OFT implementation bytecode...\n");
+        console2.log("#1. Verification of [OFT implementation] bytecode...");
         EtherfiOFTUpgradeable tmpOFT = new EtherfiOFTUpgradeable(DEPLOYMENT_LZ_ENDPOINT);
-        bytes memory localBytecode = address(tmpOFT).code;
-        bytes memory onchainRuntimeBytecode = DEPLOYMENT_OFT_IMPL.code;
-        compareBytes(localBytecode, onchainRuntimeBytecode);
+        verifyContractByteCodeMatch(DEPLOYMENT_OFT_IMPL, address(tmpOFT));
 
-        console2.log("Verification of OFT proxy bytecode...\n");
+        console2.log("#2. Verification of [OFT proxy] bytecode...");
+        address INITIAL_OWNER = 0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150;
         TransparentUpgradeableProxy tmpProxy = new TransparentUpgradeableProxy(
             DEPLOYMENT_OFT_IMPL, 
-            DEPLOYER_ADDRESS, 
+            INITIAL_OWNER,  
             abi.encodeWithSelector(
             EtherfiOFTUpgradeable.initialize.selector, TOKEN_NAME, TOKEN_SYMBOL, DEPLOYER_ADDRESS)
         );
-        localBytecode = address(tmpProxy).code;
-        onchainRuntimeBytecode = DEPLOYMENT_OFT.code;
-        compareBytes(localBytecode, onchainRuntimeBytecode);
+        verifyContractByteCodeMatch(DEPLOYMENT_OFT, address(tmpProxy));
 
         // below the expected roles are verified; see notion for documentation on expected roles
         // https://www.notion.so/etherfi/weETH-Cross-Chain-L2-Roles-11ab09527c4380148ed5ec6a4f869677
-        console2.log("Asserting all roles are correct..\n");
+        console2.log("#3. Asserting all roles are correct..\n");
 
         EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
         LZEndpoint endpoint = LZEndpoint(DEPLOYMENT_LZ_ENDPOINT);
@@ -51,17 +49,6 @@ contract verifyOFT is Script, Constants, Test {
         assertEq(endpoint.delegates(DEPLOYMENT_OFT), DEPLOYMENT_CONTRACT_CONTROLLER);
     
         console2.log("All roles are correct!\n");
-    }
-
-    function compareBytes(bytes memory a, bytes memory b) internal pure {
-
-        if (keccak256(a) == keccak256(b)) {
-            console2.log("Runtime bytecode exact match!\n");
-        } else if (a.length == b.length) {
-            console2.log("Bytecode length match!\n");
-        } else {
-            console2.log("XXXX Bytecode doesn't match XXXX\n");
-        }
     }
 }
 
