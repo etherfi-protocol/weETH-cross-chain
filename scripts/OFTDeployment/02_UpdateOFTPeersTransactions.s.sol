@@ -16,6 +16,8 @@ import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
+
+// forge script scripts/OFTDeployment/02_UpdateOFTPeersTransactions.s.sol:UpdateOFTPeersTransactions
 contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
@@ -63,6 +65,10 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
         // Adding the transactions to update the OFT adapter
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setPeerDataString, false));
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setEnforcedOptionsString, false));
+
+        // Configure the rate limiting on the L1
+        MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setInboundRateLimitDataString, false));
+        MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setOutboundRateLimitDataString, false));
 
         // Transactions to update the mainnet LZ endpoint
         string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_SEND_302, _getDVNConfig(L1_DVN)));

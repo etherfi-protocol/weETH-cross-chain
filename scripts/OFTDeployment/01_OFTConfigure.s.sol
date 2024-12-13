@@ -23,7 +23,7 @@ struct OFTDeployment {
     EtherfiOFTUpgradeable tokenContract;
 }
 
-// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --via-ir --evm-version "paris" --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
+// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --evm-version "paris" --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
 contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
@@ -33,10 +33,8 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     EnforcedOptionParam[] public enforcedOptions;
 
     function run() public {
-
-        uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        scriptDeployer = vm.addr(privateKey);
-        vm.startBroadcast(privateKey);
+        scriptDeployer = DEPLOYER_ADDRESS;
+        vm.startBroadcast(DEPLOYER_ADDRESS);
 
         deployOFT();
 
