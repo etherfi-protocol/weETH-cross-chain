@@ -54,23 +54,22 @@ contract Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://swell-mainnet.alt.technology";
-    string constant DEPLOYMENT_CHAIN_ID = "1923";
+    string constant DEPLOYMENT_RPC_URL = "";
+    string constant DEPLOYMENT_CHAIN_ID = "";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 30335;
-    address constant DEPLOYMENT_SEND_LID_302 = 0xc1B621b18187F74c8F6D52a6F709Dd2780C09821;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x377530cdA84DFb2673bF4d145DCF0C4D7fdcB5b6;
-    address constant DEPLOYMENT_LZ_DVN = 0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0xcb566e3B6934Fa77258d68ea18E931fa75e1aaAa;
+    uint32 constant DEPLOYMENT_EID = 0;
+    address constant DEPLOYMENT_SEND_LID_302 = address(0);
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
+    address constant DEPLOYMENT_LZ_DVN = address(0);
+    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
+    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
 
     // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = 0xA6cB988942610f6731e664379D15fFcfBf282b44;
-    address constant DEPLOYMENT_OFT_IMPL = 0x04E5c62b27092234CeC69ec56Dfa0b2c97F72Eb3;
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x6D685276540271076e2c07eD6ed6Ce351549bA11;
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0xE917Fad11ca0d835d3C8d960906195a641320cd7;
-
+    address constant DEPLOYMENT_OFT = address(0);
+    address constant DEPLOYMENT_OFT_IMPL = address(0);
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0);
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0);
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
@@ -125,7 +124,7 @@ contract Constants {
         L2s.push(SCROLL);
         L2s.push(LINEA);
         L2s.push(ZKSYNC);
-        // L2s.push(SWELL);
+        L2s.push(SWELL);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({

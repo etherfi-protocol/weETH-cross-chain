@@ -114,28 +114,6 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
             string memory L2Json = _build_configuration_transaction_L2(L2s[i]);
             vm.writeJson(L2Json, string.concat("./output/", L2s[i].NAME, ".json"));
         }
-
-        // TODO: remove after swell deployment
-        // additional transaction to set swell config to include nethermind for all peers
-        string memory deploymentEndpointString = iToHex(abi.encodePacked(DEPLOYMENT_LZ_ENDPOINT));
-
-        string memory deploymentJson = _getGnosisHeader(DEPLOYMENT_CHAIN_ID);
-        address[2] memory deploymentDVNs = [DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN];
-
-        // set the config for all the L2s
-        for (uint256 i = 0; i < L2s.length; i++) {
-            string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302, _getDVNConfig(deploymentDVNs, L2s[i].L2_EID)));
-            deploymentJson = string.concat(deploymentJson, _getGnosisTransaction(deploymentEndpointString, setLZConfigSend, false));
-            string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, _getDVNConfig(deploymentDVNs, L2s[i].L2_EID)));
-            deploymentJson = string.concat(deploymentJson, _getGnosisTransaction(deploymentEndpointString, setLZConfigReceive, false));
-        }
-
-        string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302,  _getDVNConfig(deploymentDVNs, L1_EID)));
-        deploymentJson = string.concat(deploymentJson, _getGnosisTransaction(deploymentEndpointString, setLZConfigSend, false));
-        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, _getDVNConfig(deploymentDVNs, L1_EID)));
-        deploymentJson = string.concat(deploymentJson, _getGnosisTransaction(deploymentEndpointString, setLZConfigReceive, true));
-
-        vm.writeJson(deploymentJson, "./output/swellSetConfig.json");
     }
 
     // Gets the DVN config for a set of lzDvns. `EID` is the EID of the OFT that is currently being deployed
@@ -160,32 +138,6 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
         });
 
         params[0] = SetConfigParam(DEPLOYMENT_EID, 2, abi.encode(ulnConfig));
-
-        return params;
-    }
-
-    // TODO: remove after swell deployment
-    function _getDVNConfig(address[2] memory lzDvn, uint32 peerId) internal pure returns (SetConfigParam[] memory) {
-        SetConfigParam[] memory params = new SetConfigParam[](1);
-        address[] memory requiredDVNs = new address[](2);
-        if (lzDvn[0] > lzDvn[1]) {
-            requiredDVNs[0] = lzDvn[1];
-            requiredDVNs[1] = lzDvn[0];
-        } else {
-            requiredDVNs[0] = lzDvn[0];
-            requiredDVNs[1] = lzDvn[1];
-        }
-
-        UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
-            requiredDVNCount: 2,
-            optionalDVNCount: 0,
-            optionalDVNThreshold: 0,
-            requiredDVNs: requiredDVNs,
-            optionalDVNs: new address[](0)
-        });
-
-        params[0] = SetConfigParam(peerId, 2, abi.encode(ulnConfig));
 
         return params;
     }

@@ -33,7 +33,6 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     EnforcedOptionParam[] public enforcedOptions;
 
     function run() public {
-        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
         scriptDeployer = DEPLOYER_ADDRESS;
         vm.startBroadcast(DEPLOYER_ADDRESS);
 
@@ -123,32 +122,19 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
     // Configures the deployment chain's DVN for the given destination chain
     function _setDVN(uint32 dstEid) public {
         SetConfigParam[] memory params = new SetConfigParam[](1);
-        // TODO: uncomment after swell deployment 
-        // address[] memory requiredDVNs = new address[](2);
+        address[] memory requiredDVNs = new address[](2);
 
-        // // sorting the DVNs to prevent LZ_ULN_Unsorted() errors
-        // if (DEPLOYMENT_LZ_DVN > DEPLOYMENT_NETHERMIND_DVN) {
-        //     requiredDVNs[0] = DEPLOYMENT_NETHERMIND_DVN;
-        //     requiredDVNs[1] = DEPLOYMENT_LZ_DVN;
-        // } else {
-        //     requiredDVNs[0] = DEPLOYMENT_LZ_DVN;
-        //     requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
-        // }
-        // UlnConfig memory ulnConfig = UlnConfig({
-        //     confirmations: 64,
-        //     requiredDVNCount: 2,
-        //     optionalDVNCount: 0,
-        //     optionalDVNThreshold: 0,
-        //     requiredDVNs: requiredDVNs,
-        //     optionalDVNs: new address[](0)
-        // });
-
-        // swell deployment only using LZ DVN for now
-        address[] memory requiredDVNs = new address[](1);
-        requiredDVNs[0] = DEPLOYMENT_LZ_DVN;
+        // sorting the DVNs to prevent LZ_ULN_Unsorted() errors
+        if (DEPLOYMENT_LZ_DVN > DEPLOYMENT_NETHERMIND_DVN) {
+            requiredDVNs[0] = DEPLOYMENT_NETHERMIND_DVN;
+            requiredDVNs[1] = DEPLOYMENT_LZ_DVN;
+        } else {
+            requiredDVNs[0] = DEPLOYMENT_LZ_DVN;
+            requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
+        }
         UlnConfig memory ulnConfig = UlnConfig({
             confirmations: 64,
-            requiredDVNCount: 1,
+            requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
             requiredDVNs: requiredDVNs,
