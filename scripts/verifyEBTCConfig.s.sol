@@ -47,6 +47,7 @@ contract eBTCVerifier is Script, LayerZeroHelpers, Test {
         }
     }
 
+    // forge script scripts/verifyEBTCConfig.s.sol
     function verifyChain(ConfigPerChain memory chain) private {
         vm.createSelectFork(chain.RPC_URL);
         
