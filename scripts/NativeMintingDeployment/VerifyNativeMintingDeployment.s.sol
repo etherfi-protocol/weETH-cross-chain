@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "../../utils/L2Constants.sol";
 import "../ContractCodeChecker.sol";
 
-// forge script scripts/NativeMintingDeployment/verifyNativeMintingDeployment.s.sol:verifyNativeMintingBytecode --via-ir
+// forge script scripts/NativeMintingDeployment/VerifyNativeMintingDeployment.s.sol:verifyNativeMintingDeployment --via-ir
 // verifies the bytecode and upgrade role of the native minting contracts
 contract verifyNativeMintingDeployment is Script, L2Constants, ContractCodeChecker, Test {
 
