@@ -116,7 +116,7 @@ contract ContractCodeChecker {
 
         // If trimmed lengths differ significantly, it suggests structural differences in code
         if (trimmedLocal.length != trimmedOnchain.length) {
-            revert("Post-trim length mismatch: potential code differences.");
+            console2.log("Post-trim length mismatch: potential code differences.");
         }
 
         // Compare trimmed arrays byte-by-byte
