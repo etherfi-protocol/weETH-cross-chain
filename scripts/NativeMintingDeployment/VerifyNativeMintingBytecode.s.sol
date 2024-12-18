@@ -13,9 +13,10 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../../utils/L2Constants.sol";
+import "../ContractCodeChecker.sol";
 
 // forge script scripts/NativeMintingDeployment/VerifyNativeMintingBytecode.s.sol:verifyNativeMintingBytecode --via-ir
-contract verifyNativeMintingBytecode is Script, L2Constants {
+contract verifyNativeMintingBytecode is Script, L2Constants, ContractCodeChecker {
 
     address constant L1_DUMMY_TOKEN_IMPL = 0x96a049493ACF81f92aF84149e0CA09ae13985cD0;
     address constant L1_RECEIVER_IMPL = 0xF670aE1c81dDa2eF7Dc32007d029dF0cD10AC3fF;
@@ -39,6 +40,7 @@ contract verifyNativeMintingBytecode is Script, L2Constants {
         bytes memory localBytecode = address(new DummyTokenUpgradeable(18)).code;
         bool lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Implementation bytecode lengths match:", lengthsMatch);
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
 
         // Create proxy instance for comparison (constructor args don't affect bytecode)
         onchainBytecode = address(new TransparentUpgradeableProxy(L1_DUMMY_TOKEN_IMPL, DEPLOYER_ADDRESS, "")).code;
@@ -46,6 +48,7 @@ contract verifyNativeMintingBytecode is Script, L2Constants {
         lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Proxy bytecode lengths match:", lengthsMatch);
         console.log("");
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
     }
 
     // Verify L1ScrollReceiver implementation and proxy
@@ -55,6 +58,7 @@ contract verifyNativeMintingBytecode is Script, L2Constants {
         bytes memory localBytecode = address(new L1ScrollReceiverETHUpgradeable()).code;
         bool lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Implementation bytecode lengths match:", lengthsMatch);
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
 
         // Reuse previously created proxy for comparison
         onchainBytecode = address(new TransparentUpgradeableProxy(L1_DUMMY_TOKEN_IMPL, DEPLOYER_ADDRESS, "")).code;
@@ -62,6 +66,7 @@ contract verifyNativeMintingBytecode is Script, L2Constants {
         lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Proxy bytecode lengths match:", lengthsMatch);
         console.log("");
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
     }
 
     //------------------------------------------------------------------------------
@@ -77,12 +82,14 @@ contract verifyNativeMintingBytecode is Script, L2Constants {
         bytes memory localBytecode = address(new EtherfiL2ExchangeRateProvider()).code;
         bool lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Implementation bytecode lengths match:", lengthsMatch);
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
 
         onchainBytecode = address(new TransparentUpgradeableProxy(L2_EXCHANGE_RATE_PROVIDER_IMPL, DEPLOYER_ADDRESS, "")).code;
         localBytecode = address(SCROLL.L2_EXCHANGE_RATE_PROVIDER).code;
         lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Proxy bytecode lengths match:", lengthsMatch);
         console.log("");
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
     }
 
     // Verify BucketRateLimiter implementation and proxy (uses ERC1967Proxy)
@@ -92,6 +99,7 @@ contract verifyNativeMintingBytecode is Script, L2Constants {
         bytes memory localBytecode = address(new BucketRateLimiter()).code;
         bool lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Implementation bytecode lengths match:", lengthsMatch);
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
 
         // Note: This is the only cross chain contract using ERC1967Proxy instead of TransparentUpgradeableProxy
         onchainBytecode = address(new ERC1967Proxy(L2_SYNC_POOL_RATE_LIMITER, "")).code;
@@ -99,6 +107,7 @@ contract verifyNativeMintingBytecode is Script, L2Constants {
         lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Proxy bytecode lengths match:", lengthsMatch);
         console.log("");
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
     }
 
     // Verify L2ScrollSyncPool implementation and proxy
@@ -108,12 +117,14 @@ contract verifyNativeMintingBytecode is Script, L2Constants {
         bytes memory localBytecode = address(new L2ScrollSyncPoolETHUpgradeable(SCROLL.L2_ENDPOINT)).code;
         bool lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Implementation bytecode lengths match:", lengthsMatch);
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
 
         onchainBytecode = address(new TransparentUpgradeableProxy(L2_EXCHANGE_RATE_PROVIDER_IMPL, DEPLOYER_ADDRESS, "")).code;
         localBytecode = address(SCROLL.L2_SYNC_POOL).code;
         lengthsMatch = onchainBytecode.length == localBytecode.length;
         console.log("- Proxy bytecode lengths match:", lengthsMatch);
         console.log("");
+        verifyContractByteCodeMatchFromByteCode(onchainBytecode, localBytecode);
     }
 }
 }
