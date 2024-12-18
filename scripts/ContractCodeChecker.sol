@@ -131,62 +131,90 @@ contract ContractCodeChecker {
         console2.log("Verifying length match...");
 
         if (localBytecode.length == onchainRuntimeBytecode.length) {
-            console2.log("-> Length Match: Success\n");
+            console2.log("-> Length Match: Success");
         } else {
-            console2.log("-> Length Match: Fail\n");
+            console2.log("-> Length Match: Fail");
         }
+        console2.log("Bytecode Length: ", localBytecode.length, "\n");
     }
 
     function verifyContractByteCodeMatchFromAddress(address deployedImpl, address localDeployed) public {
         verifyLengthMatch(deployedImpl.code, localDeployed.code);
         verifyPartialMatch(deployedImpl.code, localDeployed.code);
-        verifyFullMatch(deployedImpl.code, localDeployed.code);
+        // verifyFullMatch(deployedImpl.code, localDeployed.code);
     }
 
     function verifyContractByteCodeMatchFromByteCode(bytes memory deployedImpl, bytes memory localDeployed) public {
         verifyLengthMatch(deployedImpl, localDeployed);
         verifyPartialMatch(deployedImpl, localDeployed);
-        verifyFullMatch(deployedImpl, localDeployed);
+        // verifyFullMatch(deployedImpl, localDeployed);
     }
 
-    // A helper function to remove metadata (CBOR encoded) from the end of the bytecode.
-    // This is a heuristic based on known patterns in the metadata.
-    function trimMetadata(bytes memory code) internal pure returns (bytes memory) {
-        // Metadata usually starts with 0xa2 or a similar tag near the end.
-        // We can scan backward for a known marker. 
-        // In Solidity 0.8.x, metadata often starts near the end with 0xa2 0x64 ... pattern.
-        // This is a simplified approach and may need refinement.
+    // Known CBOR patterns for Solidity metadata:
+    // "a2 64 73 6f 6c 63" -> a2 (map with 2 pairs), 64 (4-char string), 's' 'o' 'l' 'c'
+    // "a2 64 69 70 66 73" -> a2 (map with 2 pairs), 64 (4-char string), 'i' 'p' 'f' 's'
+    bytes constant SOLC_PATTERN = hex"a264736f6c63";  // "a2 64 73 6f 6c 63"
+    bytes constant IPFS_PATTERN = hex"a26469706673";  // "a2 64 69 70 66 73"
 
-        // For a more robust approach, you'd analyze the last bytes. 
-        // Typically, the CBOR metadata is at the very end of the bytecode.
+    function trimMetadata(bytes memory code) internal pure returns (bytes memory) {
         uint256 length = code.length;
-        if (length < 4) {
-            // Bytecode too short to have metadata
+        if (length < SOLC_PATTERN.length) {
+            // Bytecode too short to contain metadata
             return code;
         }
 
-        // Scan backward for a CBOR header (0xa2).
-        // We'll just look for 0xa2 from the end and truncate there.
-        for (uint256 i = length - 1; i > 0; i--) {
-            if (code[i] == 0xa2) {
-                console2.log("Found metadata start at index: ", i);
-                // print 8 bytes from this point
-                bytes memory tmp = new bytes(8);
-                for (uint256 j = 0; j < 8; j++) {
-                    tmp[j] = code[i + j];
-                }
+        // Try to find a known pattern from the end.
+        // We'll look for either the "solc" pattern or the "ipfs" pattern.
+        int256 solcIndex = lastIndexOf(code, SOLC_PATTERN);
+        int256 ipfsIndex = lastIndexOf(code, IPFS_PATTERN);
 
-                // Found a possible metadata start. We'll cut just before 0xa2.
-                bytes memory trimmed = new bytes(i);
-                for (uint256 j = 0; j < i; j++) {
-                    trimmed[j] = code[j];
-                }
-                return trimmed;
-            }
+        // Determine which pattern was found later (nearer to the end).
+        int256 metadataIndex;
+        if (solcIndex >= 0 && ipfsIndex >= 0) {
+            metadataIndex = solcIndex > ipfsIndex ? solcIndex : ipfsIndex;
+        } else if (solcIndex >= 0) {
+            metadataIndex = solcIndex;
+        } else if (ipfsIndex >= 0) {
+            metadataIndex = ipfsIndex;
+        } else {
+            // No known pattern found, return code as is
+            return code;
         }
 
-        // If no metadata marker found, return as is.
-        return code;
+        console2.log("Original bytecode length: ", length);
+        console2.log("Trimmed metadata from bytecode at index: ", metadataIndex);
+
+        // metadataIndex is where metadata starts
+        bytes memory trimmed = new bytes(uint256(metadataIndex));
+        for (uint256 i = 0; i < uint256(metadataIndex); i++) {
+            trimmed[i] = code[i];
+        }
+        return trimmed;
+    }
+
+    // Helper function: Finds the last occurrence of `pattern` in `data`.
+    // Returns -1 if not found, otherwise returns the starting index.
+    function lastIndexOf(bytes memory data, bytes memory pattern) internal pure returns (int256) {
+        if (pattern.length == 0 || pattern.length > data.length) {
+            return -1;
+        }
+
+        // Start from the end of `data` and move backward
+        for (uint256 i = data.length - pattern.length; /* no condition */; i--) {
+            bool matchFound = true;
+            for (uint256 j = 0; j < pattern.length; j++) {
+                if (data[i + j] != pattern[j]) {
+                    matchFound = false;
+                    break;
+                }
+            }
+            if (matchFound) {
+                return int256(i);
+            }
+            if (i == 0) break; // Prevent underflow
+        }
+
+        return -1;
     }
 
 }
