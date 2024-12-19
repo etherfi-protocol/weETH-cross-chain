@@ -1,0 +1,13 @@
+{
+  "chainId": "534352",
+  "meta": {
+    "txBuilderVersion": "1.16.5"
+  },
+  "transactions": [
+    {
+      "to": "0x01f0a31698c4d065659b9bdc21b3610292a1c506",
+      "value": "0",
+      "data": "0x2f2ff15d9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6000000000000000000000000750cf0fd3bc891d8d864b732bc4ad340096e5e68"
+    }
+  ]
+}

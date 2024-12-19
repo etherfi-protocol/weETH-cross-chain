@@ -1,0 +1,207 @@
+{
+  "setScrollMinter.json": [
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "grantRole",
+      "target": "0x01f0a31698C4d065659b9bdC21B3610292a1c506",
+      "parameters": {
+        "role": "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
+        "account": "0x750cf0fd3bc891d8d864b732bc4ad340096e5e68"
+      },
+      "file_source": "setScrollMinter.json"
+    }
+  ],
+  "L1NativeMintingScheduleTransactions.json": [
+    {
+      "contract": "EtherfiTimelock",
+      "function": "schedule",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": " Liquifier",
+        "function": "registerToken",
+        "target": "0x9FFDF407cDe9a93c47611799DA23924Af3EF764F",
+        "parameters": {
+          "_token": "0x641b33a2e1e46f3af8f3f0f9249e9111f24a51b3",
+          "_target": "0x0000000000000000000000000000000000000000",
+          "_isWhitelisted": true,
+          "_discountInBasisPoints": 0,
+          "_timeBoundCapInEther": 20000,
+          "_totalCapInEther": 200000,
+          "_isL2Eth": true
+        }
+      },
+      "file_source": "L1NativeMintingScheduleTransactions.json"
+    },
+    {
+      "contract": "EtherfiTimelock",
+      "function": "schedule",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "L1SyncPool",
+        "function": "setReceiver",
+        "target": "0xD789870beA40D056A4d26055d0bEFcC8755DA146",
+        "parameters": {
+          "originEid": 30214,
+          "receiver": "0xb7c7cc336390c26bf6ec810e2f79bccbdb660567"
+        }
+      },
+      "file_source": "L1NativeMintingScheduleTransactions.json"
+    },
+    {
+      "contract": "EtherfiTimelock",
+      "function": "schedule",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "L1SyncPool",
+        "function": "setDummyToken",
+        "target": "0xD789870beA40D056A4d26055d0bEFcC8755DA146",
+        "parameters": {
+          "originEid": 30214,
+          "dummyToken": "0x641b33a2e1e46f3af8f3f0f9249e9111f24a51b3"
+        }
+      },
+      "file_source": "L1NativeMintingScheduleTransactions.json"
+    },
+    {
+      "contract": "EtherfiTimelock",
+      "function": "schedule",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "L1SyncPool || EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+        "function": "setPeer",
+        "target": "0xD789870beA40D056A4d26055d0bEFcC8755DA146",
+        "parameters": {
+          "_eid": 30214,
+          "_peer": "0x000000000000000000000000750cf0fd3bc891d8d864b732bc4ad340096e5e68"
+        }
+      },
+      "file_source": "L1NativeMintingScheduleTransactions.json"
+    },
+    {
+      "contract": "EtherfiTimelock",
+      "function": "schedule",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "L1SyncPool || EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+        "function": "setDelegate",
+        "target": "0xD789870beA40D056A4d26055d0bEFcC8755DA146",
+        "parameters": {
+          "_delegate": "0x2aca71020de61bb532008049e1bd41e451ae8adc"
+        }
+      },
+      "file_source": "L1NativeMintingScheduleTransactions.json"
+    }
+  ],
+  "setMinSyncAmount.json": [
+    {
+      "contract": "L2SyncPool",
+      "function": "setMinSyncAmount",
+      "target": "0x750cf0fd3bc891D8D864B732BC4AD340096e5e68",
+      "parameters": {
+        "tokenIn": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "minSyncAmount": 10000000000000000000
+      },
+      "file_source": "setMinSyncAmount.json"
+    }
+  ],
+  "L1NativeMintingExecuteTransactions.json": [
+    {
+      "contract": "EtherfiTimelock",
+      "function": "execute",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": " Liquifier",
+        "function": "registerToken",
+        "target": "0x9FFDF407cDe9a93c47611799DA23924Af3EF764F",
+        "parameters": {
+          "_token": "0x641b33a2e1e46f3af8f3f0f9249e9111f24a51b3",
+          "_target": "0x0000000000000000000000000000000000000000",
+          "_isWhitelisted": true,
+          "_discountInBasisPoints": 0,
+          "_timeBoundCapInEther": 20000,
+          "_totalCapInEther": 200000,
+          "_isL2Eth": true
+        }
+      },
+      "file_source": "L1NativeMintingExecuteTransactions.json"
+    },
+    {
+      "contract": "EtherfiTimelock",
+      "function": "execute",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "L1SyncPool",
+        "function": "setReceiver",
+        "target": "0xD789870beA40D056A4d26055d0bEFcC8755DA146",
+        "parameters": {
+          "originEid": 30214,
+          "receiver": "0xb7c7cc336390c26bf6ec810e2f79bccbdb660567"
+        }
+      },
+      "file_source": "L1NativeMintingExecuteTransactions.json"
+    },
+    {
+      "contract": "EtherfiTimelock",
+      "function": "execute",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "L1SyncPool",
+        "function": "setDummyToken",
+        "target": "0xD789870beA40D056A4d26055d0bEFcC8755DA146",
+        "parameters": {
+          "originEid": 30214,
+          "dummyToken": "0x641b33a2e1e46f3af8f3f0f9249e9111f24a51b3"
+        }
+      },
+      "file_source": "L1NativeMintingExecuteTransactions.json"
+    },
+    {
+      "contract": "EtherfiTimelock",
+      "function": "execute",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "L1SyncPool || EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+        "function": "setPeer",
+        "target": "0xD789870beA40D056A4d26055d0bEFcC8755DA146",
+        "parameters": {
+          "_eid": 30214,
+          "_peer": "0x000000000000000000000000750cf0fd3bc891d8d864b732bc4ad340096e5e68"
+        }
+      },
+      "file_source": "L1NativeMintingExecuteTransactions.json"
+    },
+    {
+      "contract": "EtherfiTimelock",
+      "function": "execute",
+      "target": "0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761",
+      "transaction": {
+        "contract": "L1SyncPool || EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+        "function": "setDelegate",
+        "target": "0xD789870beA40D056A4d26055d0bEFcC8755DA146",
+        "parameters": {
+          "_delegate": "0x2aca71020de61bb532008049e1bd41e451ae8adc"
+        }
+      },
+      "file_source": "L1NativeMintingExecuteTransactions.json"
+    }
+  ],
+  "L1NativeMintingSetConfig.json": [
+    {
+      "contract": "LayerZeroEndpoint",
+      "function": "setConfig",
+      "target": "0x1a44076050125825900e736c501f859c50fE728c",
+      "parameters": {
+        "_oapp": "0xd789870bea40d056a4d26055d0befcc8755da146",
+        "_lib": "0xc02ab410f0734efa3f14628780e6e695156024c2",
+        "_params": [
+          [
+            30214,
+            2,
+            "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000589dedbd617e0cbcb916a9223f4d1300c294236b000000000000000000000000a59ba433ac34d2927232918ef5b2eaafcf130ba50000000000000000000000000000000000000000000000000000000000000000"
+          ]
+        ]
+      },
+      "file_source": "L1NativeMintingSetConfig.json"
+    }
+  ]
+}
