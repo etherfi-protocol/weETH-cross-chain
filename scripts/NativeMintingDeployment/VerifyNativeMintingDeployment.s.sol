@@ -10,7 +10,9 @@ import "../../contracts/NativeMinting/DummyTokenUpgradeable.sol";
 import "../../contracts/NativeMinting/EtherfiL2ExchangeRateProvider.sol";
 import "../../contracts/NativeMinting/BucketRateLimiter.sol";
 import "../../contracts/NativeMinting/ReceiverContracts/L1ScrollReceiverETHUpgradeable.sol";
+import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../contracts/NativeMinting/L2SyncPoolContracts/L2ScrollSyncPoolETHUpgradeable.sol";
+import "../../contracts/NativeMinting/EtherfiL1SyncPoolETH.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
@@ -22,6 +24,7 @@ import "../ContractCodeChecker.sol";
 contract verifyNativeMintingDeployment is Script, L2Constants, ContractCodeChecker, Test {
 
     bytes32 _ADMIN_SLOT = bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1);
+    bytes32 MINTER_ROLE = keccak256("MINTER_ROLE");
 
     address constant L1_DUMMY_TOKEN_IMPL = 0x96a049493ACF81f92aF84149e0CA09ae13985cD0;
     address constant L1_RECEIVER_IMPL = 0xF670aE1c81dDa2eF7Dc32007d029dF0cD10AC3fF;
@@ -121,6 +124,11 @@ contract verifyNativeMintingDeployment is Script, L2Constants, ContractCodeCheck
         assertEq(ProxyAdmin(SCROLL.L2_SYNC_POOL_PROXY_ADMIN).owner(), SCROLL.L2_CONTRACT_CONTROLLER_SAFE);
         assertEq(ProxyAdmin(SCROLL.L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN).owner(), SCROLL.L2_CONTRACT_CONTROLLER_SAFE);
         assertEq(BucketRateLimiter(SCROLL.L2_SYNC_POOL_RATE_LIMITER).owner(), SCROLL.L2_CONTRACT_CONTROLLER_SAFE);
+        // assertTrue(EtherfiOFTUpgradeable(SCROLL.L2_OFT).hasRole(MINTER_ROLE, SCROLL.L2_SYNC_POOL), "L2_SYNC_POOL should have MINTER_ROLE");
+
+        console.log("ProxyAdmin Of L2_OFT: ", SCROLL.L2_OFT_PROXY_ADMIN);
+        console.log("ProxyAdmin Of L2_SYNC_POOL: ", SCROLL.L2_SYNC_POOL_PROXY_ADMIN);
+        console.log("ProxyAdmin Of L2_EXCHANGE_RATE_PROVIDER: ", SCROLL.L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN);
 
         console.log("Checking roles on L1...\n");
         vm.createSelectFork(L1_RPC_URL);
@@ -132,6 +140,11 @@ contract verifyNativeMintingDeployment is Script, L2Constants, ContractCodeCheck
 
         assertEq(ProxyAdmin(SCROLL.L1_DUMMY_TOKEN_PROXY_ADMIN).owner(), L1_TIMELOCK);
         assertEq(ProxyAdmin(SCROLL.L1_RECEIVER_PROXY_ADMIN).owner(), L1_TIMELOCK);
+        assertTrue(DummyTokenUpgradeable(SCROLL.L1_DUMMY_TOKEN).hasRole(MINTER_ROLE, L1_SYNC_POOL), "L1_SYNC_POOL should have MINTER_ROLE");
+
+        console.log("ProxyAdmin Of L1_DUMMY_TOKEN: ", SCROLL.L1_DUMMY_TOKEN_PROXY_ADMIN);
+        console.log("ProxyAdmin Of L1_RECEIVER: ", SCROLL.L1_RECEIVER_PROXY_ADMIN);
+        console.log("ProxyAdmin Of L1_SYNC_POOL: ", L1_SYNC_POOL_PROXY_ADMIN);
         
         console.log("upgrade roles verified successfully\n");
     }
