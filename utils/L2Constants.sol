@@ -452,40 +452,4 @@ contract L2Constants {
         L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
-
-    ConfigPerL2 SWELL = ConfigPerL2({
-        NAME: "swell",
-        RPC_URL: "https://swell-mainnet.alt.technology",
-        CHAIN_ID: "1923",
-
-        L2_EID: 30335,
-        L2_ENDPOINT: 0xcb566e3B6934Fa77258d68ea18E931fa75e1aaAa,
-        SEND_302: 0xc1B621b18187F74c8F6D52a6F709Dd2780C09821,
-        RECEIVE_302: 0x377530cdA84DFb2673bF4d145DCF0C4D7fdcB5b6,
-
-        LAYERZERO_DVN: 0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842,
-        NETHERMIND_DVN: 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B,
-        LZ_DVN: [0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842, address(0)],
-
-        L2_OFT: 0xA6cB988942610f6731e664379D15fFcfBf282b44,
-        L2_OFT_IMPL: 0x04E5c62b27092234CeC69ec56Dfa0b2c97F72Eb3,
-        L2_CONTRACT_CONTROLLER_SAFE: 0x6D685276540271076e2c07eD6ed6Ce351549bA11,
-        L2_OFT_PROXY_ADMIN: 0xE917Fad11ca0d835d3C8d960906195a641320cd7,
-
-        L2_SYNC_POOL: address(0),
-        L2_SYNC_POOL_RATE_LIMITER: address(0),
-        L2_EXCHANGE_RATE_PROVIDER: address(0),
-        L2_PRICE_ORACLE: address(0),
-        L2_MESSENGER: address(0),
-        L2_PRICE_ORACLE_HEART_BEAT: 0,
-
-        L1_MESSENGER: address(0),
-        L1_DUMMY_TOKEN: address(0),
-        L1_RECEIVER: address(0),
-
-        L2_SYNC_POOL_PROXY_ADMIN: address(0),
-        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
-        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
-        L1_RECEIVER_PROXY_ADMIN: address(0)
-    });
 }
