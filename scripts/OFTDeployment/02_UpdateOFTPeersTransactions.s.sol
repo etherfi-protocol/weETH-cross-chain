@@ -10,29 +10,35 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/libs/OptionsBui
 import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
+import "../../contracts/PairwiseRateLimiter.sol";
 
-import "../../contracts/MintableOFTUpgradeable.sol";
+import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
+
+// forge script scripts/OFTDeployment/02_UpdateOFTPeersTransactions.s.sol:UpdateOFTPeersTransactions
 contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     string setPeerDataString;
-    string setRateLimitDataString;
+    string setInboundRateLimitDataString;
+    string setOutboundRateLimitDataString;
     string setEnforcedOptionsString;
 
-    RateLimiter.RateLimitConfig[] public deploymentRateLimitConfigs;
+    PairwiseRateLimiter.RateLimitConfig[] public deploymentRateLimitConfigs;
 
     function _initialize() internal {
         // Some of the transactions are the same cross chain so they are configured here:
         bytes memory setPeerData = abi.encodeWithSignature("setPeer(uint32,bytes32)", DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT));
         setPeerDataString = iToHex(setPeerData);
 
-        RateLimiter.RateLimitConfig[] memory rateLimitConfigs = new RateLimiter.RateLimitConfig[](1);
+        PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfigs = new PairwiseRateLimiter.RateLimitConfig[](1);
         rateLimitConfigs[0] = _getRateLimitConfig(DEPLOYMENT_EID, LIMIT, WINDOW);
-        bytes memory setRateLimitData = abi.encodeWithSignature("setRateLimits((uint32,uint256,uint256)[])", rateLimitConfigs);
-        setRateLimitDataString = iToHex(setRateLimitData);
+        bytes memory setInboundRateLimitData = abi.encodeWithSignature("setInboundRateLimits((uint32,uint256,uint256)[])", rateLimitConfigs);
+        bytes memory setOutboundRateLimitData = abi.encodeWithSignature("setOutboundRateLimits((uint32,uint256,uint256)[])", rateLimitConfigs);
+        setInboundRateLimitDataString = iToHex(setInboundRateLimitData);
+        setOutboundRateLimitDataString = iToHex(setOutboundRateLimitData);
 
         EnforcedOptionParam[] memory enforcedOptions;
         enforcedOptions = new EnforcedOptionParam[](2);
@@ -60,6 +66,10 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setPeerDataString, false));
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setEnforcedOptionsString, false));
 
+        // Configure the rate limiting on the L1
+        MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setInboundRateLimitDataString, false));
+        MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setOutboundRateLimitDataString, false));
+
         // Transactions to update the mainnet LZ endpoint
         string memory setLZConfigSend = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_OFT_ADAPTER, L1_SEND_302, _getDVNConfig(L1_DVN)));
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1EndpointString, setLZConfigSend, false));
@@ -76,9 +86,10 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
 
         string memory L2Json = _getGnosisHeader(_l2.CHAIN_ID);
 
-        // Transactios to update the OFT contract
+        // Transactions to update the OFT contract
         L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setPeerDataString, false));
-        L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setRateLimitDataString, false));
+        L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setInboundRateLimitDataString, false));
+        L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setOutboundRateLimitDataString, false));
         L2Json = string.concat(L2Json, _getGnosisTransaction(l2OftString, setEnforcedOptionsString, false));
 
         // Transactions to update the corresponding chains LZ endpoint
@@ -90,23 +101,6 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
         return L2Json;
     }
 
-    function _deployment_rate_limit_increase() internal returns (string memory) {
-        string memory ProdRateLimitJson = _getGnosisHeader(DEPLOYMENT_CHAIN_ID);
-
-        // Set production rate limits for L1
-        deploymentRateLimitConfigs.push(_getRateLimitConfig(L1_EID, LIMIT, WINDOW));
-
-        // Iterate over each L2 and ad the production rate limit config
-        for (uint256 i = 0; i < L2s.length; i++) {
-            deploymentRateLimitConfigs.push(_getRateLimitConfig(L2s[i].L2_EID, LIMIT, WINDOW));
-        }
-
-        bytes memory setRateLimitData = abi.encodeWithSignature("setRateLimits((uint32,uint256,uint256)[])", deploymentRateLimitConfigs);
-        ProdRateLimitJson = string.concat(ProdRateLimitJson, _getGnosisTransaction(iToHex(abi.encodePacked(DEPLOYMENT_OFT)), iToHex(setRateLimitData), true));
-
-        return ProdRateLimitJson;
-    }
-
     function run() public {
         console.log("Initialize");
         _initialize();
@@ -114,10 +108,6 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
         console.log("Building transaction batch for mainnet");
         string memory MainnetJson = _build_configuration_transaction_L1();
         vm.writeJson(MainnetJson, "./output/mainnet.json");
-
-        console.log("Building transaction batch for deployment chain");
-        string memory ProdRateLimitJson = _deployment_rate_limit_increase();
-        vm.writeJson(ProdRateLimitJson, "./output/productionRateLimit.json");
 
         for (uint256 i = 0; i < L2s.length; i++) {
             console.log("Building transaction batch for %s", L2s[i].NAME);
@@ -166,7 +156,7 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
 
     // Helper function to convert bytes to hex strings 
     function iToHex(bytes memory buffer) public pure returns (string memory) {
-        // Fixed buffer size for hexadecimal convertion
+        // Fixed buffer size for hexadecimal conversion
         bytes memory converted = new bytes(buffer.length * 2);
 
         bytes memory _base = "0123456789abcdef";

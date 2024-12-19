@@ -15,28 +15,33 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAp
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
-import "../../contracts/MintableOFTUpgradeable.sol";
+import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 
+// forge script scripts/OFTDeployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --ledger 
 contract OFTOwnershipTransfer is Script, Constants {
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
+
     using OptionsBuilder for bytes;
     address scriptDeployer;
 
     function run() public {
-        uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        scriptDeployer = vm.addr(privateKey);
+        scriptDeployer = DEPLOYER_ADDRESS;
+        vm.startBroadcast(DEPLOYER_ADDRESS);
 
-        vm.startBroadcast(privateKey);
-
-        MintableOFTUpgradeable oft = MintableOFTUpgradeable(DEPLOYMENT_OFT);
+        EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
         ProxyAdmin oftProxyAdmin = ProxyAdmin(DEPLOYMENT_PROXY_ADMIN_CONTRACT);
-
 
         address owner = oft.owner();
         console.log("OFT owner: %s", owner);
 
         // setting the contract controller as the delegate
         oft.setDelegate(DEPLOYMENT_CONTRACT_CONTROLLER);
+
+        // granting pauser roles
+        oft.grantRole(PAUSER_ROLE, PAUSER_EOA);
+        oft.grantRole(UNPAUSER_ROLE, DEPLOYMENT_CONTRACT_CONTROLLER);
 
         // set the contract controller as the default admin
         oft.grantRole(bytes32(0x0000000000000000000000000000000000000000000000000000000000000000), DEPLOYMENT_CONTRACT_CONTROLLER);

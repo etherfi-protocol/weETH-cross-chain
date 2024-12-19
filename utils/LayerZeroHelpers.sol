@@ -32,7 +32,7 @@ contract LayerZeroHelpers {
     function _getExpectedUln(address lzDvn, address nethermindDvn) public pure returns (bytes memory) {
         address[] memory requiredDVNs = new address[](2);
 
-        // The DVN arrays are sorted in ascending order (enforced by requires statements in the layerzer endpoint contract)
+        // The DVN arrays are sorted in ascending order (enforced by requires statements in the layerzero endpoint contract)
         if (lzDvn > nethermindDvn) {
             requiredDVNs[0] = nethermindDvn;
             requiredDVNs[1] = lzDvn;

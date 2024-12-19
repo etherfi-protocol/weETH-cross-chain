@@ -11,5 +11,8 @@ optimizer_runs = 200
 via_ir = true
 solc_version = "0.8.24"
 
+# remove the hash of the metadata for more deterministic code 
+bytecode_hash = 'none'
+
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

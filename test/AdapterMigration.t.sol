@@ -15,10 +15,10 @@ import "../scripts/AdapterMigration/02_DeployMigrationOFT.s.sol" as DeployMigrat
 
 import "../utils/L2Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
-import "../contracts/MigrationOFT.sol";
+import "../contracts/archive/MigrationOFT.sol";
 import "../contracts/EtherFiOFTAdapter.sol";    
 import "../contracts/EtherfiOFTAdapterUpgradeable.sol";
-import "../contracts/MintableOFTUpgradeable.sol";
+import "../contracts/archive/MintableOFTUpgradeable.sol";
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 

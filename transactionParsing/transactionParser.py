@@ -15,7 +15,7 @@ class LocalTxnParser:
     def _get_function_selector(self, func_name: str, input_types: list) -> str:
         signature = f"{func_name}({','.join(input_types)})"
         selector = Web3.keccak(text=signature)[:4].hex()
-        return "0x" + selector
+        return selector
     
     def _parse_input_tuple(self, input) -> str:
         input_types = ""
@@ -161,15 +161,22 @@ class LocalTxnParser:
             all_results[filename] = results
                 
         return all_results
+    
+# custom decoder for bytes objects
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, bytes):
+            return '0x' + obj.hex()
+        return super().default(obj)
 
 def main():
     # Initialize the parser
     web3 = Web3(Web3.HTTPProvider('https://eth.llamarpc.com', request_kwargs={'timeout': 120}))
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    abis_dir = os.path.join(current_dir, 'OFTContractABIs')
+    abis_dir = os.path.join(current_dir, 'oftContractABIs')
     parent_dir = os.path.dirname(current_dir)
     transactions_dir = os.path.join(parent_dir, 'output')
-    
+   
     parser = LocalTxnParser(web3, abis_dir)
 
     # Process entire directory
@@ -178,7 +185,7 @@ def main():
     # Write results to output file
     output_path = os.path.join(current_dir, 'parsed-transactions.json')
     with open(output_path, 'w') as f:
-        json.dump(results, f, indent=2)
+        json.dump(results, f, indent=2, cls=CustomJSONEncoder)
         
     print(f"\nProcessed transactions written to {output_path}")
     
