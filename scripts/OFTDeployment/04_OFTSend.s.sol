@@ -17,7 +17,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "forge-std/Test.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
 // forge script scripts/OFTDeployment/04_OFTSend.s.sol:CrossChainSend --rpc-url "source chain"  --private-key "dev wallet"

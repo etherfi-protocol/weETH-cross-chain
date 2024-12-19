@@ -10,11 +10,11 @@ import { EnforcedOptionParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oap
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "../../contracts/archive/MigrationOFT.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
 
-contract DeployMigrationOFT is Script, Constants, LayerZeroHelpers {
+contract DeployMigrationOFT is Script, L2Constants, LayerZeroHelpers {
     using OptionsBuilder for bytes;
 
     address public migrationOFTAddress;

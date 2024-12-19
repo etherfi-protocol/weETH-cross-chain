@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "forge-std/Test.sol";
-import "../utils/Constants.sol";
+import "../utils/L2Constants.sol";
 
 interface ILineaBridge {
     struct ClaimMessageWithProofParams {
@@ -24,7 +24,7 @@ interface ILineaBridge {
     ) external;
 }
 
-contract simulationLineaClaim is Test, Constants {
+contract simulationLineaClaim is Test, L2Constants {
 
     address public lineaBridge = 0xd19d4B5d358258f05D7B411E21A1460D11B0876F;
 
@@ -75,7 +75,7 @@ contract simulationLineaClaim is Test, Constants {
         vm.prank(0xC83bb94779c5577AF1D48dF8e2A113dFf0cB127c);
 
         uint256 vampireDummyTokenBalanceBefore = lineaDummyToken.balanceOf(L1_VAMP);
-        uint256 syncPoolEthBalanceBefore = address(L1_SYNC_POOL_ADDRESS).balance;
+        uint256 syncPoolEthBalanceBefore = address(L1_SYNC_POOL).balance;
         uint256 vampireEthBalanceBefore = address(L1_VAMP).balance;
 
         console.log("Vampire Linea Dummy Token Balance Before:", vampireDummyTokenBalanceBefore / 1 ether);
@@ -85,7 +85,7 @@ contract simulationLineaClaim is Test, Constants {
         linea.claimMessageWithProof(params);
 
         uint256 vampireDummyTokenBalanceAfter = lineaDummyToken.balanceOf(L1_VAMP);
-        uint256 syncPoolEthBalanceAfter = address(L1_SYNC_POOL_ADDRESS).balance;
+        uint256 syncPoolEthBalanceAfter = address(L1_SYNC_POOL).balance;
         uint256 vampireEthBalanceAfter = address(L1_VAMP).balance;
 
         console.log("Vampire Linea Dummy Token Balance After:", vampireDummyTokenBalanceAfter / 1 ether);

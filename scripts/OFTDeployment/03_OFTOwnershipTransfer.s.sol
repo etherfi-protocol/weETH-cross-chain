@@ -16,7 +16,7 @@ import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/lib
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 
 // forge script scripts/OFTDeployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --ledger 
 contract OFTOwnershipTransfer is Script, Constants {

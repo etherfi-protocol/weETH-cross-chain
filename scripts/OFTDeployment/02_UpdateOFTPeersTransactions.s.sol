@@ -13,7 +13,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 import "../../contracts/PairwiseRateLimiter.sol";
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
 
