@@ -64,12 +64,10 @@ contract eBTCVerifier is Script, LayerZeroHelpers, Test {
         console.log("Starting verifications of configurations on:", chain.NAME);
         console.log("====================================");
 
-        
-
         for (uint i = 0; i < chains.length; i++) {
 
             address delegate = EndpointDelegates(chain.ENDPOINT).delegates(LAYER_ZERO_TELLER);
-            assertEq(delegate, chain.GNOSIS_SAFE, "Delegate not set correctly");
+            assertEq(delegate, address(0), "Delegate set to zero");
 
             ConfigPerChain memory peerChain = chains[i];
             if (keccak256(abi.encodePacked(chain.NAME)) == keccak256(abi.encodePacked(peerChain.NAME))) {
@@ -134,7 +132,7 @@ contract eBTCVerifier is Script, LayerZeroHelpers, Test {
 
         LAYERZERO_DVN: 0x9e059a54699a285714207b43B055483E78FAac25, 
         NETHERMIND_DVN: 0xcd37CA043f8479064e10635020c65FfC005d36f6,
-        GNOSIS_SAFE: address(0)
+        GNOSIS_SAFE: 0x183fE88858AAB892cc796662200374e3dF6927E3
     });
 
     ConfigPerChain ETH = ConfigPerChain({
@@ -148,7 +146,7 @@ contract eBTCVerifier is Script, LayerZeroHelpers, Test {
 
         LAYERZERO_DVN: 0x589dEDbD617e0CBcB916A9223F4d1300c294236b, 
         NETHERMIND_DVN: 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5,
-        GNOSIS_SAFE: address(0)
+        GNOSIS_SAFE: 0xCEA8039076E35a825854c5C2f85659430b06ec96
     });
 
     ConfigPerChain ARB = ConfigPerChain({
@@ -162,6 +160,6 @@ contract eBTCVerifier is Script, LayerZeroHelpers, Test {
 
         LAYERZERO_DVN: 0x2f55C492897526677C5B68fb199ea31E2c126416, 
         NETHERMIND_DVN: 0xa7b5189bcA84Cd304D8553977c7C614329750d99,
-        GNOSIS_SAFE: address(0)
+        GNOSIS_SAFE: 0x183fE88858AAB892cc796662200374e3dF6927E3
     });
 }
