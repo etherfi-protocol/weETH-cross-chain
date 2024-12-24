@@ -1,0 +1,70 @@
+{
+  "Swell-RateLimitIncrease.json": [
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0xA6cB988942610f6731e664379D15fFcfBf282b44",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30101,
+            30000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "Swell-RateLimitIncrease.json"
+    }
+  ],
+  "Mainnet-RateLimitReset.json": [
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0xcd2eb13D6831d4602D80E5db9230A57596CDCA63",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30335,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "Mainnet-RateLimitReset.json"
+    }
+  ],
+  "Swell-RateLimitReset.json": [
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setInboundRateLimits",
+      "target": "0xA6cB988942610f6731e664379D15fFcfBf282b44",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30101,
+            2000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "Swell-RateLimitReset.json"
+    }
+  ],
+  "Mainnet-RateLimitIncrease.json": [
+    {
+      "contract": "EtherfiOFTUpgradeable || EtherfiOFTAdapterUpgradeable",
+      "function": "setOutboundRateLimits",
+      "target": "0xcd2eb13D6831d4602D80E5db9230A57596CDCA63",
+      "parameters": {
+        "_rateLimitConfigs": [
+          [
+            30335,
+            30000000000000000000000,
+            14400
+          ]
+        ]
+      },
+      "file_source": "Mainnet-RateLimitIncrease.json"
+    }
+  ]
+}
