@@ -42,16 +42,9 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
 
         EnforcedOptionParam[] memory enforcedOptions;
         enforcedOptions = new EnforcedOptionParam[](2);
-        enforcedOptions[0] = EnforcedOptionParam({
-            eid: DEPLOYMENT_EID,
-            msgType: 1,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
-        });
-        enforcedOptions[1] = EnforcedOptionParam({
-            eid: DEPLOYMENT_EID,
-            msgType: 2,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
-        });
+        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200_000, 0);
+        enforcedOptions[0] = EnforcedOptionParam(DEPLOYMENT_EID, 1, options);
+        enforcedOptions[1] = EnforcedOptionParam(DEPLOYMENT_EID, 2, options);
         bytes memory setEnforcedOptionsData = abi.encodeWithSignature("setEnforcedOptions((uint32,uint16,bytes)[])", enforcedOptions);
         setEnforcedOptionsString = iToHex(setEnforcedOptionsData);
     }

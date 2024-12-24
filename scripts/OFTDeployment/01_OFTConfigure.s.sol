@@ -148,15 +148,8 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
 
     // Configures the enforced options for the given destination chain
     function _appendEnforcedOptions(uint32 dstEid) internal {
-        enforcedOptions.push(EnforcedOptionParam({
-            eid: dstEid,
-            msgType: 1,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
-        }));
-        enforcedOptions.push(EnforcedOptionParam({
-            eid: dstEid,
-            msgType: 2,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
-        }));
+        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200_000, 0);
+        enforcedOptions.push(EnforcedOptionParam(dstEid, 1, options));
+        enforcedOptions.push(EnforcedOptionParam(dstEid, 2, options));
     }
 }
