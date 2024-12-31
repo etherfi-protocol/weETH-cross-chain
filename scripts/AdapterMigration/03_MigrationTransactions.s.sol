@@ -12,7 +12,7 @@ import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManage
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 
 import "../../contracts/MintableOFTUpgradeable.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
 contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers {

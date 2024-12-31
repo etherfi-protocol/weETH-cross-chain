@@ -35,7 +35,6 @@ pragma solidity ^0.8.13;
         address L2_EXCHANGE_RATE_PROVIDER;
         address L2_PRICE_ORACLE;
         address L2_MESSENGER;
-        uint32 L2_PRICE_ORACLE_HEART_BEAT;
 
         address L1_MESSENGER;
         address L1_DUMMY_TOKEN;
@@ -47,10 +46,10 @@ pragma solidity ^0.8.13;
         address L1_RECEIVER_PROXY_ADMIN;
     }
 
-contract Constants {
+contract L2Constants {
 
     /*//////////////////////////////////////////////////////////////
-                        CURRENT DEPLOYMENT CONSTANTS
+                        OFT Deployment Parameters
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
@@ -79,10 +78,17 @@ contract Constants {
     // OFT Token Constants
     string constant TOKEN_NAME = "Wrapped eETH";
     string constant TOKEN_SYMBOL = "weETH";
+    
+    // weETH Bridge Rate Limits
+    uint256 constant BUCKET_SIZE = 3600000000000000000000;
+    uint256 constant BUCKET_REFILL_PER_SECOND = 1000000000000000000;
 
-    // Global Production Rate Limits
+    // Global Production weETH Bridge Rate Limits
     uint256 constant LIMIT = 2000 ether;
     uint256 constant WINDOW = 4 hours;
+
+    // Standard Native Minting Rates
+    uint32 constant L2_PRICE_ORACLE_HEART_BEAT = 24 hours;
 
     // Mainnet Constants
     string constant L1_RPC_URL = "https://mainnet.gateway.tenderly.co";
@@ -94,7 +100,7 @@ contract Constants {
     address constant L1_TIMELOCK_GNOSIS = 0xcdd57D11476c22d265722F68390b036f3DA48c21;
     address constant L1_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
 
-    address constant L1_SYNC_POOL_ADDRESS = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
+    address constant L1_SYNC_POOL = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
     address constant L1_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
     address constant L1_OFT_ADAPTER_NEW_IMPL = 0xA82cc578927058af14fD84d96a817Dc85Ac4F946;
     address constant L1_VAMP = 0x9FFDF407cDe9a93c47611799DA23924Af3EF764F;
@@ -151,7 +157,6 @@ contract Constants {
         L2_EXCHANGE_RATE_PROVIDER: 0xc42853c0C6624F42fcB8219aCeb67Ad188087DCB,
         L2_PRICE_ORACLE: 0xcD96262Df56127f298b452FA40759632868A472a,
         L2_MESSENGER: 0x4200000000000000000000000000000000000007,
-        L2_PRICE_ORACLE_HEART_BEAT: 24 hours,
 
         L1_MESSENGER: 0x5D4472f31Bd9385709ec61305AFc749F0fA8e9d0,
         L1_DUMMY_TOKEN: 0x83998e169026136760bE6AF93e776C2F352D4b28,
@@ -187,7 +192,6 @@ contract Constants {
         L2_EXCHANGE_RATE_PROVIDER: 0xc42853c0C6624F42fcB8219aCeb67Ad188087DCB,
         L2_PRICE_ORACLE: 0x7C1DAAE7BB0688C9bfE3A918A4224041c7177256,
         L2_MESSENGER: 0xC0d3c0d3c0D3c0D3C0d3C0D3C0D3c0d3c0d30007,
-        L2_PRICE_ORACLE_HEART_BEAT: 6 hours,
 
         L1_MESSENGER: 0x95bDCA6c8EdEB69C98Bd5bd17660BaCef1298A6f,
         L1_DUMMY_TOKEN: 0xDc400f3da3ea5Df0B7B6C127aE2e54CE55644CF3,
@@ -223,7 +227,6 @@ contract Constants {
         L2_EXCHANGE_RATE_PROVIDER: 0x241a91F095B2020890Bc8518bea168C195518344,
         L2_PRICE_ORACLE: 0x100c8e61aB3BeA812A42976199Fc3daFbcDD7272,
         L2_MESSENGER: 0x508Ca82Df566dCD1B0DE8296e70a96332cD644ec,
-        L2_PRICE_ORACLE_HEART_BEAT: 6 hours,
 
         L1_MESSENGER: 0xd19d4B5d358258f05D7B411E21A1460D11B0876F,
         L1_DUMMY_TOKEN: 0x61Ff310aC15a517A846DA08ac9f9abf2A0f9A2bf,
@@ -260,7 +263,6 @@ contract Constants {
         L2_EXCHANGE_RATE_PROVIDER: 0xF2c5519c634796B73dE90c7Dc27B4fEd560fC3ca,
         L2_PRICE_ORACLE: 0x35e9D7001819Ea3B39Da906aE6b06A62cfe2c181,
         L2_MESSENGER: 0x4200000000000000000000000000000000000007,
-        L2_PRICE_ORACLE_HEART_BEAT: 24 hours,
 
         L1_MESSENGER: 0x866E82a600A1414e583f7F13623F1aC5d58b0Afa,
         L1_DUMMY_TOKEN: 0x0295E0CE709723FB25A28b8f67C54a488BA5aE46,
@@ -299,7 +301,6 @@ contract Constants {
         L2_EXCHANGE_RATE_PROVIDER: address(0),
         L2_PRICE_ORACLE: address(0),
         L2_MESSENGER: address(0),
-        L2_PRICE_ORACLE_HEART_BEAT: 0,
 
         L1_MESSENGER: address(0),
         L1_DUMMY_TOKEN: address(0),
@@ -335,7 +336,6 @@ contract Constants {
         L2_EXCHANGE_RATE_PROVIDER: address(0),
         L2_PRICE_ORACLE: address(0),
         L2_MESSENGER: address(0),
-        L2_PRICE_ORACLE_HEART_BEAT: 0,
 
         L1_MESSENGER: address(0),
         L1_DUMMY_TOKEN: address(0),
@@ -350,7 +350,7 @@ contract Constants {
 
     ConfigPerL2 SCROLL = ConfigPerL2({
         NAME: "scroll",
-        RPC_URL: "https://scroll-mainnet.public.blastapi.io",
+        RPC_URL: "https://rpc.scroll.io",
         CHAIN_ID: "534352",
 
         L2_EID: 30214,
@@ -367,16 +367,15 @@ contract Constants {
         L2_CONTRACT_CONTROLLER_SAFE: 0x3cD08f51D0EA86ac93368DE31822117cd70CECA3,
         L2_OFT_PROXY_ADMIN: 0x99fef08aEF9D6955138B66AD16Ab314DB17878ee,
 
-        L2_SYNC_POOL: address(0),
-        L2_SYNC_POOL_RATE_LIMITER: address(0),
-        L2_EXCHANGE_RATE_PROVIDER: address(0),
-        L2_PRICE_ORACLE: address(0),
-        L2_MESSENGER: address(0),
-        L2_PRICE_ORACLE_HEART_BEAT: 0,
-
-        L1_MESSENGER: address(0),
-        L1_DUMMY_TOKEN: address(0),
-        L1_RECEIVER: address(0),
+        L2_SYNC_POOL: 0x750cf0fd3bc891D8D864B732BC4AD340096e5e68,
+        L2_SYNC_POOL_RATE_LIMITER: 0x2Ebb099290C7Fb42Df5A31203fEc47EbEe15d576,
+        L2_EXCHANGE_RATE_PROVIDER: 0x6233BC9931De25A86be259D51Ca45558bbd6e8A7,
+        L2_PRICE_ORACLE: 0x57bd9E614f542fB3d6FeF2B744f3B813f0cc1258 ,
+        L2_MESSENGER: 0x781e90f1c8Fc4611c9b7497C3B47F99Ef6969CbC,
+        
+        L1_MESSENGER: 0x6774Bcbd5ceCeF1336b5300fb5186a12DDD8b367,
+        L1_DUMMY_TOKEN: 0x641B33A2e1e46F3af8f3f0F9249e9111F24A51B3,
+        L1_RECEIVER: 0xb7c7CC336390c26BF6eC810e2f79BccBDb660567,
 
         L2_SYNC_POOL_PROXY_ADMIN: address(0),
         L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
@@ -408,7 +407,6 @@ contract Constants {
         L2_EXCHANGE_RATE_PROVIDER: address(0),
         L2_PRICE_ORACLE: address(0),
         L2_MESSENGER: address(0),
-        L2_PRICE_ORACLE_HEART_BEAT: 0,
 
         L1_MESSENGER: address(0),
         L1_DUMMY_TOKEN: address(0),
@@ -444,7 +442,6 @@ contract Constants {
         L2_EXCHANGE_RATE_PROVIDER: address(0),
         L2_PRICE_ORACLE: address(0),
         L2_MESSENGER: address(0),
-        L2_PRICE_ORACLE_HEART_BEAT: 0,
 
         L1_MESSENGER: address(0),
         L1_DUMMY_TOKEN: address(0),

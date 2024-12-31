@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
@@ -9,27 +10,28 @@ import {
 import {BaseMessengerUpgradeable} from "../LayerZeroBaseContracts/BaseMessengerUpgradeable.sol";
 import {BaseReceiverUpgradeable} from "../LayerZeroBaseContracts/BaseReceiverUpgradeable.sol";
 import {L2BaseSyncPoolUpgradeable} from "../LayerZeroBaseContracts/L2BaseSyncPoolUpgradeable.sol";
-import {ICrossDomainMessenger} from "../../../interfaces/ICrossDomainMessenger.sol";
+import {IL2ScrollMessenger} from "../../../interfaces/IL2ScrollMessenger.sol";
 import {Constants} from "../../libraries/Constants.sol";
 import {IL1Receiver} from "../../../interfaces/IL1Receiver.sol";
 
 /**
- * @title L2 Mode Sync Pool for ETH
- * @dev A sync pool that only supports ETH on Mode L2
+ * @title L2 Scroll Stack Sync Pool for ETH
+ * @dev A sync pool that only supports ETH on Scroll Stack L2s
  * This contract allows to send ETH from L2 to L1 during the sync process
  */
-contract L2ModeSyncPoolETHUpgradeable is
-    L2BaseSyncPoolUpgradeable,
-    BaseMessengerUpgradeable,
-    BaseReceiverUpgradeable
-{
-    error L2ModeSyncPoolETH__OnlyETH();
+contract L2ScrollSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessengerUpgradeable, BaseReceiverUpgradeable {
+
+    event DepositWithReferral(address indexed sender, uint256 amount, address referral);
+
+    error L2ScrollStackSyncPoolETH__OnlyETH();
 
     /**
-     * @dev Constructor for L2 Mode Sync Pool for ETH
+     * @dev Constructor for L2 Scroll Stack Sync Pool for ETH
      * @param endpoint Address of the LayerZero endpoint
      */
-    constructor(address endpoint) L2BaseSyncPoolUpgradeable(endpoint) {}
+    constructor(address endpoint) L2BaseSyncPoolUpgradeable(endpoint) {
+        _disableInitializers();
+    }
 
     /**
      * @dev Initialize the contract
@@ -50,6 +52,7 @@ contract L2ModeSyncPoolETHUpgradeable is
         address receiver,
         address delegate
     ) external virtual initializer {
+        
         __L2BaseSyncPool_init(l2ExchangeRateProvider, rateLimiter, tokenOut, dstEid, delegate);
         __BaseMessenger_init(messenger);
         __BaseReceiver_init(receiver);
@@ -62,7 +65,7 @@ contract L2ModeSyncPoolETHUpgradeable is
      * @param amountIn The amount of tokens
      */
     function _receiveTokenIn(address tokenIn, uint256 amountIn) internal virtual override {
-        if (tokenIn != Constants.ETH_ADDRESS) revert L2ModeSyncPoolETH__OnlyETH();
+        if (tokenIn != Constants.ETH_ADDRESS) revert L2ScrollStackSyncPoolETH__OnlyETH();
 
         super._receiveTokenIn(tokenIn, amountIn);
     }
@@ -89,7 +92,7 @@ contract L2ModeSyncPoolETHUpgradeable is
         MessagingFee calldata fee
     ) internal virtual override returns (MessagingReceipt memory) {
         if (l1TokenIn != Constants.ETH_ADDRESS || l2TokenIn != Constants.ETH_ADDRESS) {
-            revert L2ModeSyncPoolETH__OnlyETH();
+            revert L2ScrollStackSyncPoolETH__OnlyETH();
         }
 
         address receiver = getReceiver();
@@ -103,8 +106,21 @@ contract L2ModeSyncPoolETHUpgradeable is
         bytes memory data = abi.encode(originEid, receipt.guid, l1TokenIn, amountIn, amountOut);
         bytes memory message = abi.encodeCall(IL1Receiver.onMessageReceived, data);
 
-        ICrossDomainMessenger(messenger).sendMessage{value: amountIn}(receiver, message, 0);
+        IL2ScrollMessenger(messenger).sendMessage{value: amountIn}(receiver, amountIn, message, 0);
 
         return receipt;
+    }
+
+    /** 
+     * @dev Deposit function with referral event 
+     */
+    function deposit(
+        address tokenIn,
+        uint256 amountIn, 
+        uint256 minAmountOut, 
+        address referral
+    ) public payable returns (uint256 amountOut) {
+        emit DepositWithReferral(msg.sender, msg.value, referral);
+        return super.deposit(tokenIn, amountIn, minAmountOut);
     }
 }
