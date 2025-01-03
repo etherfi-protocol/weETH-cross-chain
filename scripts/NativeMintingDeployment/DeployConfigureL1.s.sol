@@ -19,40 +19,40 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         
         // vm.startBroadcast(DEPLOYER_ADDRESS);
 
-        console.log("Deploying contracts on L1...");
+        // console.log("Deploying contracts on L1...");
         
-        address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("ScrollDummyTokenImpl")}(18));
-        address dummyTokenProxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("ScrollDummyToken")}(
-                dummyTokenImpl, 
-                L1_TIMELOCK, 
-                abi.encodeWithSelector(
-                    DummyTokenUpgradeable.initialize.selector, "Scroll Dummy ETH", "scrollETH", DEPLOYER_ADDRESS
-                )
-            )
-        );
-        console.log("DummyToken deployed at: ", dummyTokenProxy);
-        require(dummyTokenProxy == SCROLL.L1_DUMMY_TOKEN, "Dummy Token address mismatch");
+        // address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("ScrollDummyTokenImpl")}(18));
+        // address dummyTokenProxy = address(
+        //     new TransparentUpgradeableProxy{salt: keccak256("ScrollDummyToken")}(
+        //         dummyTokenImpl, 
+        //         L1_TIMELOCK, 
+        //         abi.encodeWithSelector(
+        //             DummyTokenUpgradeable.initialize.selector, "Scroll Dummy ETH", "scrollETH", DEPLOYER_ADDRESS
+        //         )
+        //     )
+        // );
+        // console.log("DummyToken deployed at: ", dummyTokenProxy);
+        // require(dummyTokenProxy == SCROLL.L1_DUMMY_TOKEN, "Dummy Token address mismatch");
 
-        DummyTokenUpgradeable dummyToken = DummyTokenUpgradeable(dummyTokenProxy);
-        dummyToken.grantRole(MINTER_ROLE, L1_SYNC_POOL);
-        dummyToken.grantRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
-        dummyToken.renounceRole(DEFAULT_ADMIN_ROLE, DEPLOYER_ADDRESS);
+        // DummyTokenUpgradeable dummyToken = DummyTokenUpgradeable(dummyTokenProxy);
+        // dummyToken.grantRole(MINTER_ROLE, L1_SYNC_POOL);
+        // dummyToken.grantRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
+        // dummyToken.renounceRole(DEFAULT_ADMIN_ROLE, DEPLOYER_ADDRESS);
 
-        address scrollReceiverImpl = address(new L1ScrollReceiverETHUpgradeable{salt: keccak256("ScrollReceiverImpl")}());
-        address scrollReceiverProxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("ScrollReceiver")}(
-                scrollReceiverImpl, 
-                L1_TIMELOCK, 
-                abi.encodeWithSelector(
-                    L1ScrollReceiverETHUpgradeable.initialize.selector, L1_SYNC_POOL, SCROLL.L1_MESSENGER, L1_CONTRACT_CONTROLLER
-                )
-            )
-        );
-        console.log("ScrollReceiver deployed at: ", scrollReceiverProxy);
-        require(scrollReceiverProxy == SCROLL.L1_RECEIVER, "ScrollReceiver address mismatch");
+        // address scrollReceiverImpl = address(new L1ScrollReceiverETHUpgradeable{salt: keccak256("ScrollReceiverImpl")}());
+        // address scrollReceiverProxy = address(
+        //     new TransparentUpgradeableProxy{salt: keccak256("ScrollReceiver")}(
+        //         scrollReceiverImpl, 
+        //         L1_TIMELOCK, 
+        //         abi.encodeWithSelector(
+        //             L1ScrollReceiverETHUpgradeable.initialize.selector, L1_SYNC_POOL, SCROLL.L1_MESSENGER, L1_CONTRACT_CONTROLLER
+        //         )
+        //     )
+        // );
+        // console.log("ScrollReceiver deployed at: ", scrollReceiverProxy);
+        // require(scrollReceiverProxy == SCROLL.L1_RECEIVER, "ScrollReceiver address mismatch");
         
-        console.log("Generating L1 transactions for native minting...");
+        // console.log("Generating L1 transactions for native minting...");
 
         // the require transactions to integrate native minting on the L1 side are spilt between the timelock and the L1 contract controller
         
@@ -61,13 +61,13 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         string memory timelock_execute_transactions = _getGnosisHeader("1");
         
         // registers the new dummy token as an acceptable token for the vamp contract
-        bytes memory setTokenData = abi.encodeWithSignature("registerToken(address,address,bool,uint16,uint32,uint32,bool)", dummyTokenProxy, address(0), true, 0, 20_000, 200_000, true); 
+        bytes memory setTokenData = abi.encodeWithSignature("registerToken(address,address,bool,uint16,uint32,uint32,bool)", SCROLL.L1_DUMMY_TOKEN, address(0), true, 0, 20_000, 200_000, true); 
         timelock_schedule_transactions = string.concat(timelock_schedule_transactions, _getGnosisScheduleTransaction(L1_VAMP, setTokenData, false));
         timelock_execute_transactions = string.concat(timelock_execute_transactions, _getGnosisExecuteTransaction(L1_VAMP, setTokenData, false));
 
         // set {receiver, dummy} token on the L1 sync pool
-        bytes memory setReceiverData = abi.encodeWithSignature("setReceiver(uint32,address)", SCROLL.L2_EID, scrollReceiverProxy);
-        bytes memory setDummyTokenData = abi.encodeWithSignature("setDummyToken(uint32,address)", SCROLL.L2_EID, dummyTokenProxy);
+        bytes memory setReceiverData = abi.encodeWithSignature("setReceiver(uint32,address)", SCROLL.L2_EID, SCROLL.L1_RECEIVER);
+        bytes memory setDummyTokenData = abi.encodeWithSignature("setDummyToken(uint32,address)", SCROLL.L2_EID, SCROLL.L1_DUMMY_TOKEN);
         timelock_schedule_transactions = string.concat(timelock_schedule_transactions, _getGnosisScheduleTransaction(L1_SYNC_POOL, setReceiverData, false));
         timelock_schedule_transactions = string.concat(timelock_schedule_transactions, _getGnosisScheduleTransaction(L1_SYNC_POOL, setDummyTokenData, false));
         timelock_execute_transactions = string.concat(timelock_execute_transactions, _getGnosisExecuteTransaction(L1_SYNC_POOL, setReceiverData, false));

@@ -80,7 +80,7 @@ class LocalTxnParser:
             else:
                 decoded = decode(input_types, bytes.fromhex(parameters_data))
                 parameters = dict(zip(input_names, decoded))
-                
+
                 for key, value in parameters.items():
                     if isinstance(value, bytes):
                         parameters[key] = '0x' + value.hex()
@@ -112,6 +112,7 @@ class LocalTxnParser:
                         "parameters": parameters
                     }
 
+            print(contract_name)
             return {
                 "contract": contract_name,
                 "function": func_abi['name'],
@@ -162,6 +163,13 @@ class LocalTxnParser:
                 
         return all_results
     
+# custom decoder for bytes objects
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, bytes):
+            return '0x' + obj.hex()
+        return super().default(obj)
+
 # custom decoder for bytes objects
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj: Any) -> Any:

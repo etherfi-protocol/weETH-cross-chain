@@ -112,10 +112,11 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
 
         console.log("Deploying contracts on L2...");
         
+        // Contracts are already deployed
         // deploy and configure the native minting related contracts
-        address exchangeRateProvider = deployConfigureExchangeRateProvider(DEPLOYER_ADDRESS);
-        address rateLimiter = deployConfigureBucketRateLimiter(DEPLOYER_ADDRESS);
-        deployConfigureSyncPool(DEPLOYER_ADDRESS, exchangeRateProvider, rateLimiter);
+        // address exchangeRateProvider = deployConfigureExchangeRateProvider(DEPLOYER_ADDRESS);
+        // address rateLimiter = deployConfigureBucketRateLimiter(DEPLOYER_ADDRESS);
+        // deployConfigureSyncPool(DEPLOYER_ADDRESS, exchangeRateProvider, rateLimiter);
 
         // generate the transactions required by the L2 contract controller
 
