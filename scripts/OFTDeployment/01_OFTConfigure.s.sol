@@ -23,8 +23,8 @@ struct OFTDeployment {
     EtherfiOFTUpgradeable tokenContract;
 }
 
-// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --evm-version "paris" --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
-contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
+// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --evm-version "paris" --via-ir --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
+contract DeployOFTScript is Script, L2Constants {
     using OptionsBuilder for bytes;
 
     address scriptDeployer;
@@ -73,9 +73,9 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
         console.log("Configuring rate limits...");
         // Individual rate limits must be set for each chain
 
-        rateLimitConfigs.push(_getRateLimitConfig(L1_EID, LIMIT, WINDOW));
+        rateLimitConfigs.push(LayerZeroHelpers._getRateLimitConfig(L1_EID, LIMIT, WINDOW));
         for (uint256 i = 0; i < L2s.length; i++) {
-            rateLimitConfigs.push(_getRateLimitConfig(L2s[i].L2_EID, LIMIT, WINDOW));
+            rateLimitConfigs.push(LayerZeroHelpers._getRateLimitConfig(L2s[i].L2_EID, LIMIT, WINDOW));
         }
 
         oftDeployment.tokenContract.setInboundRateLimits(rateLimitConfigs);
@@ -86,11 +86,11 @@ contract DeployOFTScript is Script, Constants, LayerZeroHelpers {
         console.log("Configuring peers...");
 
         // Setting L1 peer
-        oftDeployment.tokenContract.setPeer(L1_EID, _toBytes32(L1_OFT_ADAPTER));
+        oftDeployment.tokenContract.setPeer(L1_EID, LayerZeroHelpers._toBytes32(L1_OFT_ADAPTER));
 
         // Iterating through all existing L2s to set peers 
         for (uint256 i = 0; i < L2s.length; i++) {
-            oftDeployment.tokenContract.setPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT));
+            oftDeployment.tokenContract.setPeer(L2s[i].L2_EID, LayerZeroHelpers._toBytes32(L2s[i].L2_OFT));
         }
 
     }

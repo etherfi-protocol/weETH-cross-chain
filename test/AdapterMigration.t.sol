@@ -27,7 +27,7 @@ interface EndpointDelegates {
     function delegates(address) external view returns (address);
 }
 
-contract OFTMigrationUnitTests is Test, L2Constants, LayerZeroHelpers {
+contract OFTMigrationUnitTests is Test, L2Constants {
 
     address constant DEPLOYMENT_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
     
@@ -77,8 +77,8 @@ contract OFTMigrationUnitTests is Test, L2Constants, LayerZeroHelpers {
         endpoint.getConfig(address(migrationOFT), DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2);
         endpoint.getConfig(address(migrationOFT), DEPLOYMENT_SEND_LID_302, L1_EID, 2);
 
-        assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_SEND_LID_302, L1_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
-        assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2), _getDeadUln());
+        assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_SEND_LID_302, L1_EID, 2), LayerZeroHelpers._getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+        assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2), LayerZeroHelpers._getDeadUln());
     }
     
     // Deplooys new upgradeable adapter and sends cross chain messages to all L2s
@@ -93,11 +93,11 @@ contract OFTMigrationUnitTests is Test, L2Constants, LayerZeroHelpers {
             _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT_ADAPTER,  1 ether, false);
 
             // confirm all configuration variables for this L2
-            assertTrue(adapter.isPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT)));
+            assertTrue(adapter.isPeer(L2s[i].L2_EID, LayerZeroHelpers._toBytes32(L2s[i].L2_OFT)));
             assertEq(adapter.enforcedOptions(L2s[i].L2_EID, 1), hex"000301001101000000000000000000000000000f4240");
             assertEq(adapter.enforcedOptions(L2s[i].L2_EID, 2), hex"000301001101000000000000000000000000000f4240");
-            assertEq(endpoint.getConfig(DEPLOYMENT_OFT_ADAPTER, L1_SEND_302, L2s[i].L2_EID, 2), _getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
-            assertEq(endpoint.getConfig(DEPLOYMENT_OFT_ADAPTER, L1_RECEIVE_302, L2s[i].L2_EID, 2), _getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(DEPLOYMENT_OFT_ADAPTER, L1_SEND_302, L2s[i].L2_EID, 2), LayerZeroHelpers._getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(DEPLOYMENT_OFT_ADAPTER, L1_RECEIVE_302, L2s[i].L2_EID, 2), LayerZeroHelpers._getExpectedUln(L1_LZ_DVN, L1_NETHERMIND_DVN));
         }
 
     }
@@ -111,12 +111,12 @@ contract OFTMigrationUnitTests is Test, L2Constants, LayerZeroHelpers {
         executeGnosisTransactionBundle("./transactions/01_migrationSetup/connnect-migration-peer.json", L1_CONTRACT_CONTROLLER);
 
         // Assert that the adapter is properly configured
-        assertTrue(adapter.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
+        assertTrue(adapter.isPeer(DEPLOYMENT_EID, LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT)));
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 1), hex"000301001101000000000000000000000000000f4240");
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
         // Assert that the endpoint is properly configured to __receive__ messages from the migration peer
-        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), _getExpectedUln(L1_DVN[0], L1_DVN[1]));
+        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), LayerZeroHelpers._getExpectedUln(L1_DVN[0], L1_DVN[1]));
 
         _sendCrossChain(DEPLOYMENT_EID, L1_OFT_ADAPTER, 1 ether, true);
     }
@@ -159,7 +159,7 @@ contract OFTMigrationUnitTests is Test, L2Constants, LayerZeroHelpers {
                     // skip send to self chain, test L2 -> mainnet here instead
                     _sendCrossChain(L1_EID, L2s[i].L2_OFT, 0.01 ether, false);
                     // assert that the new adapter has been set as the peer
-                    assertTrue(MintableOFTUpgradeable(L2s[i].L2_OFT).isPeer(L1_EID, _toBytes32(DEPLOYMENT_OFT_ADAPTER)));
+                    assertTrue(MintableOFTUpgradeable(L2s[i].L2_OFT).isPeer(L1_EID, LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT_ADAPTER)));
                     continue;
                 }
                 _sendCrossChain(L2s[j].L2_EID, L2s[i].L2_OFT, 0.01 ether, false);
@@ -211,7 +211,7 @@ contract OFTMigrationUnitTests is Test, L2Constants, LayerZeroHelpers {
 
         SendParam memory param = SendParam({
             dstEid: dstEid,
-            to: _toBytes32(sender),
+            to: LayerZeroHelpers._toBytes32(sender),
             amountLD: amount,
             minAmountLD: amount,
             extraOptions: hex"",

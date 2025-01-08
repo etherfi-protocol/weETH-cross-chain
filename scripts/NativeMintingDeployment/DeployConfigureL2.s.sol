@@ -18,11 +18,9 @@ import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 import "../../utils/GnosisHelpers.sol";
 
-contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisHelpers {
+contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
     using OptionsBuilder for bytes;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-
-    EnforcedOptionParam[] public enforcedOptions;
 
     function deployConfigureExchangeRateProvider(address scriptDeployer) private returns (address) {
         address impl = address(new EtherfiL2ExchangeRateProvider{salt: keccak256("ExchangeRateProviderImpl")}());
@@ -64,6 +62,28 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         return address(proxy);
     }
 
+    function getEnforcedOptions(uint32 _eid) public pure returns (EnforcedOptionParam[] memory) {
+        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](3);
+
+        enforcedOptions[0] = EnforcedOptionParam({
+            eid: _eid,
+            msgType: 0,
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+        });
+        enforcedOptions[1] = EnforcedOptionParam({
+            eid: _eid,
+            msgType: 1,
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+        });
+        enforcedOptions[2] = EnforcedOptionParam({
+            eid: _eid,
+            msgType: 2,
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+        });
+
+        return enforcedOptions; 
+    }
+
     function deployConfigureSyncPool(
         address scriptDeployer,
         address exchangeRateProvider,
@@ -93,12 +113,12 @@ contract L2NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         L2ScrollSyncPoolETHUpgradeable syncPool = L2ScrollSyncPoolETHUpgradeable(proxy);
 
         // set all LayerZero configurations and sync pool specific configurations
-        syncPool.setPeer(L1_EID, _toBytes32(L1_SYNC_POOL));
+        syncPool.setPeer(L1_EID, LayerZeroHelpers._toBytes32(L1_SYNC_POOL));
         IOAppOptionsType3(proxy).setEnforcedOptions(getEnforcedOptions(L1_EID));
         ILayerZeroEndpointV2(SCROLL.L2_ENDPOINT).setConfig(
             address(syncPool),
             SCROLL.SEND_302,
-            getDVNConfig(L1_EID, SCROLL.LZ_DVN)
+            LayerZeroHelpers.getDVNConfig(L1_EID, SCROLL.LZ_DVN)
         );
 
         syncPool.setL1TokenIn(Constants.ETH_ADDRESS, Constants.ETH_ADDRESS);

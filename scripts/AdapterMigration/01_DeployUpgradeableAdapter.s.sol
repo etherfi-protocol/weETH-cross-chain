@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
-// import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
+import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 
 import "../../contracts/EtherFiOFTAdapterUpgradeable.sol";
@@ -18,7 +18,7 @@ import "../../utils/L2Constants.sol";
 
 import "../../utils/LayerZeroHelpers.sol";
 
-contract DeployUpgradeableOFTAdapter is Script, L2Constants, LayerZeroHelpers {
+contract DeployUpgradeableOFTAdapter is Script, L2Constants {
     using OptionsBuilder for bytes;
     
     EnforcedOptionParam[] public enforcedOptions;
@@ -51,7 +51,7 @@ contract DeployUpgradeableOFTAdapter is Script, L2Constants, LayerZeroHelpers {
         
         console.log("Setting L2s as peers...");
         for (uint256 i = 0; i < L2s.length; i++) {
-            adapter.setPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT));
+            adapter.setPeer(L2s[i].L2_EID, LayerZeroHelpers._toBytes32(L2s[i].L2_OFT));
         }
 
         console.log("Setting DVN config for each L2...");

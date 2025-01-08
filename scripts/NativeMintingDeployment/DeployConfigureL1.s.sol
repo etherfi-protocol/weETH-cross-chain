@@ -11,48 +11,48 @@ import "../../utils/GnosisHelpers.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
-contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisHelpers {
+contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     
     function run() public {
         
-        // vm.startBroadcast(DEPLOYER_ADDRESS);
+        vm.startBroadcast(DEPLOYER_ADDRESS);
 
-        // console.log("Deploying contracts on L1...");
+        console.log("Deploying contracts on L1...");
         
-        // address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("ScrollDummyTokenImpl")}(18));
-        // address dummyTokenProxy = address(
-        //     new TransparentUpgradeableProxy{salt: keccak256("ScrollDummyToken")}(
-        //         dummyTokenImpl, 
-        //         L1_TIMELOCK, 
-        //         abi.encodeWithSelector(
-        //             DummyTokenUpgradeable.initialize.selector, "Scroll Dummy ETH", "scrollETH", DEPLOYER_ADDRESS
-        //         )
-        //     )
-        // );
-        // console.log("DummyToken deployed at: ", dummyTokenProxy);
-        // require(dummyTokenProxy == SCROLL.L1_DUMMY_TOKEN, "Dummy Token address mismatch");
+        address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("ScrollDummyTokenImpl")}(18));
+        address dummyTokenProxy = address(
+            new TransparentUpgradeableProxy{salt: keccak256("ScrollDummyToken")}(
+                dummyTokenImpl, 
+                L1_TIMELOCK, 
+                abi.encodeWithSelector(
+                    DummyTokenUpgradeable.initialize.selector, "Scroll Dummy ETH", "scrollETH", DEPLOYER_ADDRESS
+                )
+            )
+        );
+        console.log("DummyToken deployed at: ", dummyTokenProxy);
+        require(dummyTokenProxy == SCROLL.L1_DUMMY_TOKEN, "Dummy Token address mismatch");
 
-        // DummyTokenUpgradeable dummyToken = DummyTokenUpgradeable(dummyTokenProxy);
-        // dummyToken.grantRole(MINTER_ROLE, L1_SYNC_POOL);
-        // dummyToken.grantRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
-        // dummyToken.renounceRole(DEFAULT_ADMIN_ROLE, DEPLOYER_ADDRESS);
+        DummyTokenUpgradeable dummyToken = DummyTokenUpgradeable(dummyTokenProxy);
+        dummyToken.grantRole(MINTER_ROLE, L1_SYNC_POOL);
+        dummyToken.grantRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
+        dummyToken.renounceRole(DEFAULT_ADMIN_ROLE, DEPLOYER_ADDRESS);
 
-        // address scrollReceiverImpl = address(new L1ScrollReceiverETHUpgradeable{salt: keccak256("ScrollReceiverImpl")}());
-        // address scrollReceiverProxy = address(
-        //     new TransparentUpgradeableProxy{salt: keccak256("ScrollReceiver")}(
-        //         scrollReceiverImpl, 
-        //         L1_TIMELOCK, 
-        //         abi.encodeWithSelector(
-        //             L1ScrollReceiverETHUpgradeable.initialize.selector, L1_SYNC_POOL, SCROLL.L1_MESSENGER, L1_CONTRACT_CONTROLLER
-        //         )
-        //     )
-        // );
-        // console.log("ScrollReceiver deployed at: ", scrollReceiverProxy);
-        // require(scrollReceiverProxy == SCROLL.L1_RECEIVER, "ScrollReceiver address mismatch");
+        address scrollReceiverImpl = address(new L1ScrollReceiverETHUpgradeable{salt: keccak256("ScrollReceiverImpl")}());
+        address scrollReceiverProxy = address(
+            new TransparentUpgradeableProxy{salt: keccak256("ScrollReceiver")}(
+                scrollReceiverImpl, 
+                L1_TIMELOCK, 
+                abi.encodeWithSelector(
+                    L1ScrollReceiverETHUpgradeable.initialize.selector, L1_SYNC_POOL, SCROLL.L1_MESSENGER, L1_CONTRACT_CONTROLLER
+                )
+            )
+        );
+        console.log("ScrollReceiver deployed at: ", scrollReceiverProxy);
+        require(scrollReceiverProxy == SCROLL.L1_RECEIVER, "ScrollReceiver address mismatch");
         
-        // console.log("Generating L1 transactions for native minting...");
+        console.log("Generating L1 transactions for native minting...");
 
         // the require transactions to integrate native minting on the L1 side are spilt between the timelock and the L1 contract controller
         
@@ -74,7 +74,7 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         timelock_execute_transactions = string.concat(timelock_execute_transactions, _getGnosisExecuteTransaction(L1_SYNC_POOL, setDummyTokenData, false));
 
         // set OFT peer to scroll L2 sync pool that require the timelock for the L1 sync pool
-        bytes memory setPeerData = abi.encodeWithSignature("setPeer(uint32,bytes32)", SCROLL.L2_EID, _toBytes32(SCROLL.L2_SYNC_POOL));
+        bytes memory setPeerData = abi.encodeWithSignature("setPeer(uint32,bytes32)", SCROLL.L2_EID, LayerZeroHelpers._toBytes32(SCROLL.L2_SYNC_POOL));
         timelock_schedule_transactions = string.concat(timelock_schedule_transactions, _getGnosisScheduleTransaction(L1_SYNC_POOL, setPeerData, false));
         timelock_execute_transactions = string.concat(timelock_execute_transactions, _getGnosisExecuteTransaction(L1_SYNC_POOL, setPeerData, false));
 
@@ -90,7 +90,7 @@ contract L1NativeMintingScript is Script, L2Constants, LayerZeroHelpers, GnosisH
         string memory l1_contract_controller_transaction = _getGnosisHeader("1");
 
         // set DVN receive config for the L1 sync to receive messages from the L2 sync pool
-        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_SYNC_POOL, L1_RECEIVE_302, getDVNConfig(SCROLL.L2_EID, L1_DVN)));
+        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_SYNC_POOL, L1_RECEIVE_302, LayerZeroHelpers.getDVNConfig(SCROLL.L2_EID, L1_DVN)));
         l1_contract_controller_transaction = string.concat(l1_contract_controller_transaction, _getGnosisTransaction(iToHex(abi.encodePacked(L1_ENDPOINT)), setLZConfigReceive, true));
 
         vm.writeJson(l1_contract_controller_transaction, "./output/L1NativeMintingSetConfig.json");

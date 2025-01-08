@@ -63,7 +63,7 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
         string memory l2OftString = iToHex(abi.encodePacked(_l2.L2_OFT));
         string memory l2EndpointString = iToHex(abi.encodePacked(_l2.L2_ENDPOINT));
 
-        string memory setPeer = iToHex(abi.encodeWithSignature("setPeer(uint32,bytes32)", L1_EID, _toBytes32(DEPLOYMENT_OFT_ADAPTER)));
+        string memory setPeer = iToHex(abi.encodeWithSignature("setPeer(uint32,bytes32)", L1_EID,LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT_ADAPTER)));
         transactionJson = string.concat(transactionJson, _getGnosisTransaction(l2OftString, setPeer, false));
 
         string memory setLZConfigSend = "";
@@ -87,7 +87,7 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
         string memory MainnetJson = _getGnosisHeader("1");
 
         // Adding the transactions to update the OFT adapter
-        string memory setPeerDataString = iToHex(abi.encodeWithSignature("setPeer(uint32,bytes32)", DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
+        string memory setPeerDataString = iToHex(abi.encodeWithSignature("setPeer(uint32,bytes32)", DEPLOYMENT_EID,LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT)));
         MainnetJson = string.concat(MainnetJson, _getGnosisTransaction(l1OftAdapterString, setPeerDataString, false));
         EnforcedOptionParam[] memory enforcedOptions;
         enforcedOptions = new EnforcedOptionParam[](2);

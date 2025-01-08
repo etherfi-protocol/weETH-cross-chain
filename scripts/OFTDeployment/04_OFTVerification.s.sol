@@ -8,11 +8,11 @@ import "forge-std/Test.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
-import "../../utils/Constants.sol";
+import "../../utils/L2Constants.sol";
 import "../ContractCodeChecker.s.sol";
 
-// forge script scripts/OFTDeployment/05_OFTVerification.s.sol:verifyOFT --evm-version "paris"
-contract verifyOFT is ContractCodeChecker, Script, Constants, Test {
+// forge script scripts/OFTDeployment/04_OFTVerification.s.sol:verifyOFT --evm-version "paris" --via-ir
+contract verifyOFT is ContractCodeChecker, Script, L2Constants, Test {
 
     function run() public {
         vm.createSelectFork(DEPLOYMENT_RPC_URL);

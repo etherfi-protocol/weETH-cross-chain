@@ -3,14 +3,13 @@ pragma solidity ^0.8.0;
 
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType3.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 
 import "../contracts/PairwiseRateLimiter.sol";
 
 import "./L2Constants.sol";
 
-contract LayerZeroHelpers {
+library LayerZeroHelpers {
     using OptionsBuilder for bytes;
     // TODO: move all layerzero helper functions here
 
@@ -69,29 +68,6 @@ contract LayerZeroHelpers {
         });
 
         return abi.encode(ulnConfig);
-    }
-
-    function getEnforcedOptions(uint32 _eid) public pure returns (EnforcedOptionParam[] memory) {
-        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](3);
-
-        enforcedOptions[0] = EnforcedOptionParam({
-            eid: _eid,
-            msgType: 0,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
-        });
-
-        enforcedOptions[1] = EnforcedOptionParam({
-            eid: _eid,
-            msgType: 1,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
-        });
-        enforcedOptions[2] = EnforcedOptionParam({
-            eid: _eid,
-            msgType: 2,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
-        });
-
-        return enforcedOptions; 
     }
 
     function getDVNConfig(uint32 eid, address[2] memory lzDvn) internal pure returns (SetConfigParam[] memory) {

@@ -20,8 +20,8 @@ import "forge-std/Test.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
-// forge script scripts/OFTDeployment/04_OFTSend.s.sol:CrossChainSend --rpc-url "source chain"  --private-key "dev wallet"
-contract CrossChainSend is Script, Constants, LayerZeroHelpers {
+// forge script scripts/OFTDeployment/05_OFTSend.s.sol:CrossChainSend --rpc-url "source chain"  --private-key "dev wallet"
+contract CrossChainSend is Script, L2Constants {
 
     function run() public {
         // script deployer is both the sender and the recipient of this cross-chain send
@@ -54,7 +54,7 @@ contract CrossChainSend is Script, Constants, LayerZeroHelpers {
         // Define the SendParam struct (script deployer is the recipient)
         SendParam memory param = SendParam({
             dstEid: DST_EID,
-            to: _toBytes32(scriptDeployer),
+            to: LayerZeroHelpers._toBytes32(scriptDeployer),
             amountLD: 50000000000000,
             minAmountLD: 50000000000000,
             extraOptions: "",
