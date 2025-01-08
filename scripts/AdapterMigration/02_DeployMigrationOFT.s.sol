@@ -14,7 +14,7 @@ import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
 
-contract DeployMigrationOFT is Script, L2Constants, LayerZeroHelpers {
+contract DeployMigrationOFT is Script, L2Constants {
     using OptionsBuilder for bytes;
 
     address public migrationOFTAddress;
@@ -33,7 +33,7 @@ contract DeployMigrationOFT is Script, L2Constants, LayerZeroHelpers {
         migrationOFTAddress = address(migrationOFT);
         console.log("MigrationOFT: ", migrationOFTAddress);
 
-        migrationOFT.setPeer(L1_EID, _toBytes32(L1_OFT_ADAPTER));
+        migrationOFT.setPeer(L1_EID, LayerZeroHelpers._toBytes32(L1_OFT_ADAPTER));
         _setDVN(L1_EID);
         _appendEnforcedOptions(L1_EID);
 

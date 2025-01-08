@@ -20,7 +20,7 @@ import "../utils/LayerZeroHelpers.sol";
 
 import "forge-std/Test.sol";
 
-contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
+contract OFTDeploymentTest is Test, L2Constants {
     using OptionsBuilder for bytes;
 
     function testGnosisMainnet() public {
@@ -45,14 +45,14 @@ contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
 
         console.log("Confirming that the OFT for mainnet has added the deployment as a peer");
         EtherFiOFTAdapter adapter = EtherFiOFTAdapter(L1_OFT_ADAPTER);
-        assertTrue(adapter.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
+        assertTrue(adapter.isPeer(DEPLOYMENT_EID,LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT)));
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 1), hex"000301001101000000000000000000000000000f4240");
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
         console.log("Confirming that the layerzero endpoint for mainnet is properly configured");
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L1_ENDPOINT);
-        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_SEND_302, DEPLOYMENT_EID, 2), _getExpectedUln(L1_DVN[0], L1_DVN[1]));
-        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), _getExpectedUln(L1_DVN[0], L1_DVN[1]));
+        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_SEND_302, DEPLOYMENT_EID, 2), LayerZeroHelpers._getExpectedUln(L1_DVN[0], L1_DVN[1]));
+        assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), LayerZeroHelpers._getExpectedUln(L1_DVN[0], L1_DVN[1]));
 
         _sendCrossChain(DEPLOYMENT_EID, L1_OFT_ADAPTER, 1 ether, false);
     }
@@ -89,7 +89,7 @@ contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
 
             console.log("Confirming that the OFT for %s has added the deployment as a peer", L2s[i].NAME);
             EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(L2s[i].L2_OFT);
-            assertTrue(oft.isPeer(DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT)));
+            assertTrue(oft.isPeer(DEPLOYMENT_EID,LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT)));
             (,,uint256 limit, uint256 window) = oft.inboundRateLimits(DEPLOYMENT_EID);
             assertEq(limit, 2000 ether);
             assertEq(window, 4 hours);
@@ -102,8 +102,8 @@ contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
 
             console.log("Confirming that the layerzero endpoint for %s is properly configured", L2s[i].NAME);
             ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(L2s[i].L2_ENDPOINT);
-            assertEq(endpoint.getConfig(L2s[i].L2_OFT, L2s[i].SEND_302, DEPLOYMENT_EID, 2), _getExpectedUln(L2s[i].LZ_DVN[0], L2s[i].LZ_DVN[1]));
-            assertEq(endpoint.getConfig(L2s[i].L2_OFT, L2s[i].RECEIVE_302, DEPLOYMENT_EID, 2), _getExpectedUln(L2s[i].LZ_DVN[0], L2s[i].LZ_DVN[1]));
+            assertEq(endpoint.getConfig(L2s[i].L2_OFT, L2s[i].SEND_302, DEPLOYMENT_EID, 2), LayerZeroHelpers._getExpectedUln(L2s[i].LZ_DVN[0], L2s[i].LZ_DVN[1]));
+            assertEq(endpoint.getConfig(L2s[i].L2_OFT, L2s[i].RECEIVE_302, DEPLOYMENT_EID, 2), LayerZeroHelpers._getExpectedUln(L2s[i].LZ_DVN[0], L2s[i].LZ_DVN[1]));
 
             _sendCrossChain(DEPLOYMENT_EID, L2s[i].L2_OFT, 1 ether, false);
         }
@@ -134,7 +134,7 @@ contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
         }
 
         console.log("confirming that L2 -> L1 configuration is correct");
-        assertTrue(oft.isPeer(L1_EID, _toBytes32(L1_OFT_ADAPTER)));
+        assertTrue(oft.isPeer(L1_EID,LayerZeroHelpers._toBytes32(L1_OFT_ADAPTER)));
         (,,uint256 limit, uint256 window) = oft.inboundRateLimits(L1_EID);
         assertEq(limit, 2000 ether);
         assertEq(window, 4 hours);
@@ -145,12 +145,12 @@ contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
         assertEq(oft.enforcedOptions(L1_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT);
-        assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302, L1_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
-        assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+        assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302, L1_EID, 2), LayerZeroHelpers._getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+        assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2), LayerZeroHelpers._getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
 
         for (i = 0; i < L2s.length; i++) {
             console.log("confirming that deployment -> %s configuration is correct", L2s[i].NAME);
-            assertTrue(oft.isPeer(L2s[i].L2_EID, _toBytes32(L2s[i].L2_OFT)));
+            assertTrue(oft.isPeer(L2s[i].L2_EID,LayerZeroHelpers._toBytes32(L2s[i].L2_OFT)));
             (,,limit, window) = oft.inboundRateLimits(L2s[i].L2_EID);
             assertEq(limit, 2000 ether);
             assertEq(window, 4 hours);
@@ -160,8 +160,8 @@ contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
             assertEq(oft.enforcedOptions(L2s[i].L2_EID, 1), hex"000301001101000000000000000000000000000f4240"); 
             assertEq(oft.enforcedOptions(L2s[i].L2_EID, 2), hex"000301001101000000000000000000000000000f4240");
 
-            assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302, L2s[i].L2_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
-            assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, L2s[i].L2_EID, 2), _getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_SEND_LID_302, L2s[i].L2_EID, 2), LayerZeroHelpers._getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+            assertEq(endpoint.getConfig(DEPLOYMENT_OFT, DEPLOYMENT_RECEIVE_LIB_302, L2s[i].L2_EID, 2), LayerZeroHelpers._getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
         }
 
         console.log("Testing successful cross chains");
@@ -193,7 +193,7 @@ contract OFTDeploymentTest is Test, L2Constants, LayerZeroHelpers {
 
         SendParam memory param = SendParam({
             dstEid: dstEid,
-            to: _toBytes32(sender),
+            to:LayerZeroHelpers._toBytes32(sender),
             amountLD: amount,
             minAmountLD: amount,
             extraOptions: hex"",

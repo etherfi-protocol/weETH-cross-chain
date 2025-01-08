@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.20;
 
 import "../scripts/NativeMintingDeployment/DeployConfigureL1.s.sol";
 import "../scripts/NativeMintingDeployment/DeployConfigureL2.s.sol";
@@ -21,7 +21,7 @@ import "forge-std/console.sol";
  * @title Native Minting Unit Tests
  * @notice Test suite for verifying native minting functionality across L1 and L2
  */
-contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHelpers {
+contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {
     // Events for verifying bridge messages
     event SentMessage(
         address indexed sender,
@@ -99,7 +99,7 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers, LayerZeroHe
         // https://layerzeroscan.com/tx/0x1107ae898ad34e942d2e007dbb358c26d24ec578d8e9628fafa9b6c1727ae92d
         Origin memory origin = Origin({
             srcEid: SCROLL.L2_EID,
-            sender: _toBytes32(SCROLL.L2_SYNC_POOL),
+            sender:LayerZeroHelpers._toBytes32(SCROLL.L2_SYNC_POOL),
             nonce: 1
         });
         bytes32 guid = 0x1fb4f4c346dd3904d20a62a68ba66df159e012db8526b776cd5bb07b2f80f20e;

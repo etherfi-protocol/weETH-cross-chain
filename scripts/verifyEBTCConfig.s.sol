@@ -75,13 +75,13 @@ contract eBTCVerifier is Script, LayerZeroHelpers, Test {
             }
             console.log("Verifying LZ configurations for peer:", peerChain.NAME);
             
-            assertEq(endpoint.getConfig(LAYER_ZERO_TELLER, chain.SEND_302, peerChain.EID, 2), _getExpectedUln(chain.LAYERZERO_DVN, chain.NETHERMIND_DVN), "Send config not set correctly");
-            assertEq(endpoint.getConfig(LAYER_ZERO_TELLER, chain.RECEIVE_302, peerChain.EID, 2), _getExpectedUln(chain.LAYERZERO_DVN, chain.NETHERMIND_DVN), "Receive config not set correctly");
+            assertEq(endpoint.getConfig(LAYER_ZERO_TELLER, chain.SEND_302, peerChain.EID, 2), LayerZeroHelpers._getExpectedUln(chain.LAYERZERO_DVN, chain.NETHERMIND_DVN), "Send config not set correctly");
+            assertEq(endpoint.getConfig(LAYER_ZERO_TELLER, chain.RECEIVE_302, peerChain.EID, 2), LayerZeroHelpers._getExpectedUln(chain.LAYERZERO_DVN, chain.NETHERMIND_DVN), "Receive config not set correctly");
 
             // verify peer on both the LayerZeroTeller and the endpoint
             bytes32 peerContract = LayerZeroTeller.peers(peerChain.EID);
-            assertEq(peerContract, _toBytes32(LAYER_ZERO_TELLER), "Peer contract not set correctly");
-            assertEq(peerContract, _toBytes32(LAYER_ZERO_TELLER), "Peer contract not set correctly");
+            assertEq(peerContract,LayerZeroHelpers._toBytes32(LAYER_ZERO_TELLER), "Peer contract not set correctly");
+            assertEq(peerContract,LayerZeroHelpers._toBytes32(LAYER_ZERO_TELLER), "Peer contract not set correctly");
 
             (,,uint256 limit, uint256 window) = LayerZeroTeller.outboundRateLimits(peerChain.EID);
             assertEq(limit, LIMIT, "Limit not set correctly for peer");

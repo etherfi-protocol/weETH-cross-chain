@@ -6,8 +6,6 @@ import "forge-std/Script.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/libs/OptionsBuilder.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
 import "../../contracts/PairwiseRateLimiter.sol";
@@ -18,7 +16,7 @@ import "../../utils/LayerZeroHelpers.sol";
 
 
 // forge script scripts/OFTDeployment/02_UpdateOFTPeersTransactions.s.sol:UpdateOFTPeersTransactions
-contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
+contract UpdateOFTPeersTransactions is Script, L2Constants {
     using OptionsBuilder for bytes;
 
     string setPeerDataString;
@@ -30,11 +28,11 @@ contract UpdateOFTPeersTransactions is Script, Constants, LayerZeroHelpers {
 
     function _initialize() internal {
         // Some of the transactions are the same cross chain so they are configured here:
-        bytes memory setPeerData = abi.encodeWithSignature("setPeer(uint32,bytes32)", DEPLOYMENT_EID, _toBytes32(DEPLOYMENT_OFT));
+        bytes memory setPeerData = abi.encodeWithSignature("setPeer(uint32,bytes32)", DEPLOYMENT_EID, LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT));
         setPeerDataString = iToHex(setPeerData);
 
         PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfigs = new PairwiseRateLimiter.RateLimitConfig[](1);
-        rateLimitConfigs[0] = _getRateLimitConfig(DEPLOYMENT_EID, LIMIT, WINDOW);
+        rateLimitConfigs[0] = LayerZeroHelpers._getRateLimitConfig(DEPLOYMENT_EID, LIMIT, WINDOW);
         bytes memory setInboundRateLimitData = abi.encodeWithSignature("setInboundRateLimits((uint32,uint256,uint256)[])", rateLimitConfigs);
         bytes memory setOutboundRateLimitData = abi.encodeWithSignature("setOutboundRateLimits((uint32,uint256,uint256)[])", rateLimitConfigs);
         setInboundRateLimitDataString = iToHex(setInboundRateLimitData);
