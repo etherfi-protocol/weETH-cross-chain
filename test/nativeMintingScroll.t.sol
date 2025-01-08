@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.20;
 
 import "../scripts/NativeMintingDeployment/DeployConfigureL1.s.sol";
 import "../scripts/NativeMintingDeployment/DeployConfigureL2.s.sol";
