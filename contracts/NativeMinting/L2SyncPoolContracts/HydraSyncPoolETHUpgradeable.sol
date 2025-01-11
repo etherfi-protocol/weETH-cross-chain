@@ -14,6 +14,8 @@ import { MessagingFee, OFTReceipt, SendParam } from "@layerzerolabs/lz-evm-oapp-
 import {Constants} from "../../libraries/Constants.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import "forge-std/console.sol";
+
 /**
  * @title Hydra Cross-Chain Sync Pool for ETH
  * @dev A sync pool that supports ETH transfers across hydra enabled blockchain networks
@@ -165,7 +167,6 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
 
         (SendParam memory sendParam, MessagingFee memory messagingFee) = _buildSendParam(sourceTokenAddress, amountIn, amountOut, receipt.guid);
 
-
         IERC20(HYDRA_WETH).approve(address(stargate), amountIn);
         stargate.sendToken{ value: messagingFee.nativeFee }(sendParam, messagingFee, address(0x0));
 
@@ -195,18 +196,22 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
         
         bytes memory composeMsg = abi.encode(originEid, guid, tokenIn, amountIn, amountOut);
 
+        console.logBytes(composeMsg);
+
         SendParam memory sendParam = SendParam({
             dstEid: dstEid,
             to: _addressToBytes32(receiver),
             amountLD: amountIn,
             minAmountLD: amountIn,
-            extraOptions: OptionsBuilder.newOptions().addExecutorLzComposeOption(0, 200_000, 0),
+            extraOptions: OptionsBuilder.newOptions().addExecutorLzComposeOption(0, 1_000_000, 0),
             composeMsg: composeMsg,
             oftCmd: ""
         });
 
         (, ,OFTReceipt memory receipt) = stargate.quoteOFT(sendParam);
         sendParam.minAmountLD = receipt.amountReceivedLD;
+
+        console.log(receipt.amountReceivedLD);
 
         MessagingFee memory messagingFee = stargate.quoteSend(sendParam, false);
 

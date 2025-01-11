@@ -29,6 +29,7 @@ contract DeployMockNativeMintingL2 is Script {
         address berawETH = 0x2d93FbcE4CffC15DD385A80B3f4CC1D4E76C38b3;
         address stargateOFTETH = 0x4F5F42799d1E01662B629Ede265baEa223e9f9C7;
         address l1Receiver = 0x167d88572219bBc51D0DF80fb15C2D3f8CD4A153;
+        address l1syncPool = 0x8DF470Eb1ed7D723264752b03914b2C71ea91DDB;
         // address[2] beraDVN = [0x6C7Ab2202C98C4227C5c46f1417D81144DA716Ff, 0x6C7Ab2202C98C4227C5c46f1417D81144DA716Ff];
         // address sendlib = 0xd682ECF100f6F4284138AA925348633B0611Ae21;
         uint32 l1Eid = 40161;
@@ -45,7 +46,7 @@ contract DeployMockNativeMintingL2 is Script {
 
         poolProxy.initialize(address(rateProvider), address(0x0), address(token), l1Eid, stargateOFTETH, l1Receiver, deployer);
 
-        poolProxy.setPeer(l1Eid, LayerZeroHelpers._toBytes32(l1Receiver));
+        poolProxy.setPeer(l1Eid, LayerZeroHelpers._toBytes32(l1syncPool));
 
         IOAppOptionsType3(address(poolProxy)).setEnforcedOptions(getEnforcedOptions(l1Eid));
 
