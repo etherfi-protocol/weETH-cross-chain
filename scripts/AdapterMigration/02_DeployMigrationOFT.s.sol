@@ -72,7 +72,7 @@ contract DeployMigrationOFT is Script, L2Constants {
 
         params[0] = SetConfigParam(dstEid, 2, abi.encode(ulnConfig));
 
-        ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(migrationOFTAddress, DEPLOYMENT_SEND_LID_302, params);
+        ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(migrationOFTAddress, DEPLOYMENT_SEND_LIB_302, params);
 
         address[] memory deadDVN = new address[](1);
         deadDVN[0] = DEAD_DVN;

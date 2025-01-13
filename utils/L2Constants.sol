@@ -53,12 +53,12 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "";
-    string constant DEPLOYMENT_CHAIN_ID = "";
+    string constant DEPLOYMENT_RPC_URL = "https://rpc.morphl2.io";
+    string constant DEPLOYMENT_CHAIN_ID = "2818";
     
     // LayerZero addresses
     uint32 constant DEPLOYMENT_EID = 0;
-    address constant DEPLOYMENT_SEND_LID_302 = address(0);
+    address constant DEPLOYMENT_SEND_LIB_302 = address(0);
     address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
     address constant DEPLOYMENT_LZ_DVN = address(0);
     address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
@@ -79,11 +79,11 @@ contract L2Constants {
     string constant TOKEN_NAME = "Wrapped eETH";
     string constant TOKEN_SYMBOL = "weETH";
     
-    // weETH Bridge Rate Limits
+    // weETH Bridge Rate Limits for Native Minting
     uint256 constant BUCKET_SIZE = 3600000000000000000000;
     uint256 constant BUCKET_REFILL_PER_SECOND = 1000000000000000000;
 
-    // Global Production weETH Bridge Rate Limits
+    // Global Production for OFT weETH Bridge Rate Limits
     uint256 constant LIMIT = 2000 ether;
     uint256 constant WINDOW = 4 hours;
 
@@ -131,6 +131,7 @@ contract L2Constants {
         L2s.push(LINEA);
         L2s.push(ZKSYNC);
         L2s.push(SWELL);
+        L2s.push(MORPH);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -295,6 +296,41 @@ contract L2Constants {
         L2_OFT_IMPL: 0x70d7E0C93D8443325550Ba3F71576F5f346b8aA9,
         L2_CONTRACT_CONTROLLER_SAFE: 0xD568c4D42147224a701A14468bEC9E9bccF571F5,
         L2_OFT_PROXY_ADMIN: 0x2F6f3cc4a275C7951FB79199F01eD82421eDFb68,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
+    ConfigPerL2 MORPH = ConfigPerL2({
+        NAME: "morph",
+        RPC_URL: "https://rpc.morphl2.io",
+        CHAIN_ID: "2818",
+
+        L2_EID: 30322,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7,
+        RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043,
+
+        LAYERZERO_DVN: 0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842,
+        NETHERMIND_DVN: 0xdf30C9f6A70cE65A152c5Bd09826525D7E97Ba49,
+        LZ_DVN: [0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842, 0xdf30C9f6A70cE65A152c5Bd09826525D7E97Ba49],
+
+        L2_OFT: 0x761D8bE0EA7444e3771B87472d632a41fAeC8C02,
+        L2_OFT_IMPL: 0xD5a547bf6D20865A9238B421B8C5DA1f88e430b8,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x770099bca35DE404C1843eaA36bA1C8986514a93,
+        L2_OFT_PROXY_ADMIN: 0xcCbABDF71606fCc6e39Db76c386CB3dac7236FB1,
 
         L2_SYNC_POOL: address(0),
         L2_SYNC_POOL_RATE_LIMITER: address(0),

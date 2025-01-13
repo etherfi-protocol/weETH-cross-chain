@@ -8,12 +8,12 @@ import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpoin
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
+import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType3.sol";
 import "../../contracts/PairwiseRateLimiter.sol";
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
-
 
 // forge script scripts/OFTDeployment/02_UpdateOFTPeersTransactions.s.sol:UpdateOFTPeersTransactions
 contract UpdateOFTPeersTransactions is Script, L2Constants {

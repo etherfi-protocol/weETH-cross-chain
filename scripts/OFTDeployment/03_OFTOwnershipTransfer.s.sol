@@ -18,7 +18,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 
-// forge script scripts/OFTDeployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --ledger 
+// forge script scripts/OFTDeployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --ledger --broadcast
 contract OFTOwnershipTransfer is Script, L2Constants {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
@@ -28,7 +28,7 @@ contract OFTOwnershipTransfer is Script, L2Constants {
 
     function run() public {
         scriptDeployer = DEPLOYER_ADDRESS;
-        vm.startBroadcast(DEPLOYER_ADDRESS);
+        vm.startBroadcast();
 
         EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
         ProxyAdmin oftProxyAdmin = ProxyAdmin(DEPLOYMENT_PROXY_ADMIN_CONTRACT);
