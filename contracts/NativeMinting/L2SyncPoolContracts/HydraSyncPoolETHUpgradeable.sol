@@ -79,7 +79,7 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
         uint256 minAmountOut, 
         address referral
     ) public payable returns (uint256 amountOut) {
-        emit DepositWithReferral(msg.sender, msg.value, referral);
+        emit DepositWithReferral(msg.sender, amountIn, referral);
         return super.deposit(tokenIn, amountIn, minAmountOut);
     }
 
