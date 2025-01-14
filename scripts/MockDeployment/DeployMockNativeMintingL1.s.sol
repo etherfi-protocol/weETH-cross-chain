@@ -8,7 +8,7 @@ import {MockL1SyncPool} from "../../test/mock/MockL1SyncPool.sol";
 import {L1HydraReceiverETHUpgradeable} from "../../contracts/NativeMinting/ReceiverContracts/L1HydraReceiverETHUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-// forge script scripts/MockDeployment/DeployMockNativeMintingL1.s.sol:DeployMockNativeMintingL1 --rpc-url https://eth-sepolia.public.blastapi.io --via-ir --etherscan-api-key XZFNUB193BK4SD86U2NJXPB7HTRK2NNJ6J 
+// forge script scripts/MockDeployment/DeployMockNativeMintingL1.s.sol:DeployMockNativeMintingL1 --rpc-url https://eth-sepolia.public.blastapi.io --via-ir
 contract DeployMockNativeMintingL1 is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");

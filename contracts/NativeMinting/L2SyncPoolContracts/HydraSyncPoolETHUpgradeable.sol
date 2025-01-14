@@ -45,7 +45,7 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
      * @param rateLimiter Address of the rate limiter
      * @param tokenOut Address of the token to mint on the target chain
      * @param targetChainId Target chain endpoint ID
-     * @param messenger Address of the messenger contract typically `StargateOFTETH` for hydra chains
+     * @param messenger Address of the messenger contract typically `StargateOFTETH` for Hydra chains
      * @param receiver Address of the receiver contract on the target chain
      * @param delegate Address of the owner
      */
@@ -88,8 +88,8 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
      * @param tokenIn Address of the token
      * @param extraOptions Extra options for the messaging protocol
      * @param payInLzToken Whether to pay the fee in LZ token
-     * @return standardFee Messaging fee for the standard message
-     * @return totalFee total native fee for both Hydra and LZ messaging
+     * @return standardFee Messaging fee for the standard sync message
+     * @return totalFee total native fee for both Hydra and sync messaging
      */
     function quoteSyncTotal(address tokenIn, bytes calldata extraOptions, bool payInLzToken)
         public
@@ -159,7 +159,7 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
         (MessagingReceipt memory _msgReceipt, OFTReceipt memory oftReceipt,) = stargate.sendToken{ value: hydraFee.nativeFee }(sendParam, hydraFee, address(0x0));
         msgReceipt = _msgReceipt;
 
-        // amount of ETH received on mainnet will be less then the amount of wETH deposited due to stargate fee
+        // amount of ETH received on mainnet will be less then the amount of wETH sent due to stargate fee
         amountIn = oftReceipt.amountReceivedLD;
         MessagingReceipt memory receipt = super._sync(dstEid, l2TokenIn, l1TokenIn, amountIn, amountOut, extraOptions, fee);
 
@@ -169,6 +169,7 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
     /**
      * @dev Builds the parameters needed for sending tokens through Stargate and quotes the messaging fee
      * @param amountIn Amount of tokens to be sent from source chain
+     * @param amountOut Amount of weETH minted on source chain 
      * @return SendParam Constructed parameters for Stargate's sendToken function
      * @return MessagingFee The quoted messaging fee
      */

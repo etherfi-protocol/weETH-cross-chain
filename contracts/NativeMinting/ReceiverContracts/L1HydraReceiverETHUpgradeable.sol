@@ -8,17 +8,16 @@ import {Constants} from "../../libraries/Constants.sol";
 
 /**
  * @title L1 Hydra Receiver ETH
- * @notice L1 receiver contract for ETH from hydra pools
- * @dev This contract receives messages from a hydra alt chain messenger and forwards them to the L1 sync pool
+ * @notice L1 receiver contract for ETH from Hydra pools
+ * @dev This contract receives messages from a Hydra alt chain messenger and forwards them to the L1 sync pool
  * It only supports ETH
  */
 contract L1HydraReceiverETHUpgradeable is L1BaseReceiverUpgradeable, ILayerZeroComposer {
-    error L1HydraReceiverETH__OnlyETH();
 
     address immutable STARGATE_OAPP;
 
     /**
-     * @param stargate Address of the stargate OApp `StargatePoolNative`
+     * @param stargate Address of the Stargate OApp `StargatePoolNative`
      */
     constructor(address stargate) {
         STARGATE_OAPP = stargate;
@@ -39,12 +38,11 @@ contract L1HydraReceiverETHUpgradeable is L1BaseReceiverUpgradeable, ILayerZeroC
     }
 
     /**
-     * @dev receive compose message from the LayerZero Endpoint. Technically anyone could utilize this function but it would just be an ETH donation
-     * While anyone could send a message to execute from this function, unauthorized calls will only result in ETH donations to the L1SyncPool
+     * @dev Receive compose message from the LayerZero Endpoint
+     * It is permissionless to send messages to this function via Stargate; Unexpected calls will result in ETH donations to `L1SyncPool`
      * @param _from Address of the sender, the Stargate L1 OApp
      * @param _guid Guid of the message
      * @param _message Compose message constructed on the source chain
-     * 
      */
     function lzCompose(
         address _from,
@@ -66,7 +64,7 @@ contract L1HydraReceiverETHUpgradeable is L1BaseReceiverUpgradeable, ILayerZeroC
     }
 
     /**
-     * @dev In the case of utilizing the Stargate OApp, the message is send from the Stargate OApp
+     * @dev In the case of utilizing the Stargate OApp, the message is sent from the Stargate OApp not the L2 sync pool
      */
     function _getAuthorizedL2Address(uint32 /*originEid*/) internal view virtual override returns (bytes32) {
         return _addressToBytes32(STARGATE_OAPP);

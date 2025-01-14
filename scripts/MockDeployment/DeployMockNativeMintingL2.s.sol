@@ -13,9 +13,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import { MessagingFee } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
-// forge script scripts/MockDeployment/DeployMockNativeMintingL2.s.sol:DeployMockNativeMintingL2 --rpc-url https://rockbeard-eth-cartio.berachain.com  --via-ir --broadcast
-
-
+// forge script scripts/MockDeployment/DeployMockNativeMintingL2.s.sol:DeployMockNativeMintingL2 --rpc-url https://rockbeard-eth-cartio.berachain.com  --via-ir
 contract DeployMockNativeMintingL2 is Script {
     using OptionsBuilder for bytes;
 
