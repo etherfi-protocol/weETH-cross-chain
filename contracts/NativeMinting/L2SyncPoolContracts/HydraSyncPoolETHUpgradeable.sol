@@ -101,7 +101,7 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
         
         Token memory token = getTokenData(tokenIn);
 
-        (, MessagingFee memory hydraFee) = _buildSendParam(tokenIn, token.unsyncedAmountIn, token.unsyncedAmountOut, bytes32(0));
+        (, MessagingFee memory hydraFee) = _buildSendParam(token.unsyncedAmountIn, token.unsyncedAmountOut);
 
         totalFee = standardFee.nativeFee + hydraFee.nativeFee;
     }
@@ -118,13 +118,7 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
     }
 
     /**
-     * @dev Internal function to pay the native fee associated with the message.
-     * @param _nativeFee The native fee to be paid.
-     * @return nativeFee The amount of native currency paid.
-     *
-     * @dev Override of base _payNative that allows msg.value to be greater than the required fee
-     * @dev necessary when to send multiple LayerZero messages in a single transaction
-     * @dev where msg.value contains multiple lzFees
+     * @dev Override the _payNative function to allow multiple LayerZero messages in a single transaction
      */
     function _payNative(uint256 _nativeFee) internal virtual override returns (uint256 nativeFee) {
         if (msg.value < _nativeFee) revert NotEnoughNative(msg.value);
@@ -133,74 +127,69 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
 
     /**
      * @dev Internal function to sync tokens across chains
-     * This will send a message through the Hydra messenger after the LZ message
-     * The message will contain the ETH amount to be bridged to the target chain
-     * @param targetChainId Target chain endpoint ID
-     * @param sourceTokenAddress Address of the token on source chain
-     * @param targetTokenAddress Address of the token on target chain
-     * @param amountIn Amount of tokens deposited on source chain
-     * @param amountOut Amount of tokens to be minted on target chain
+     * sync message is sent with the stargate token transfer as a composed message
+     * @param dstEid Destination endpoint ID
+     * @param l2TokenIn Address of the deposit token on Layer 2
+     * @param l1TokenIn Address of the deposit token on Layer 1
+     * @param amountIn Amount of tokens deposited on Layer 2
+     * @param amountOut Amount of weETH minted on Layer 2
      * @param extraOptions Extra options for the messaging protocol
      * @param fee Messaging fee
-     * @return receipt Messaging receipt
      */
     function _sync(
-        uint32 targetChainId,
-        address sourceTokenAddress,
-        address targetTokenAddress,
+        uint32 dstEid,
+        address l2TokenIn,
+        address l1TokenIn,
         uint256 amountIn,
         uint256 amountOut,
         bytes calldata extraOptions,
         MessagingFee calldata fee
-    ) internal virtual override returns (MessagingReceipt memory) {
+    ) internal virtual override returns (MessagingReceipt memory msgReceipt) {
         // wETH deposited on alt chain will be unwrapped for ETH on mainnet
-        if (targetTokenAddress != Constants.ETH_ADDRESS || sourceTokenAddress != HYDRA_WETH) {
+        if (l1TokenIn != Constants.ETH_ADDRESS || l2TokenIn != HYDRA_WETH) {
             revert HydraSyncPoolETH__OnlyETH();
         }
-
+        
         IStargate stargate = IStargate(getMessenger());
 
-        MessagingReceipt memory receipt =
-            super._sync(targetChainId, sourceTokenAddress, targetTokenAddress, amountIn, amountOut, extraOptions, fee);
-
-        (SendParam memory sendParam, MessagingFee memory messagingFee) = _buildSendParam(sourceTokenAddress, amountIn, amountOut, receipt.guid);
+        (SendParam memory sendParam, MessagingFee memory hydraFee) = _buildSendParam(amountIn, amountOut);
 
         IERC20(HYDRA_WETH).approve(address(stargate), amountIn);
-        stargate.sendToken{ value: messagingFee.nativeFee }(sendParam, messagingFee, address(0x0));
+        
+        (MessagingReceipt memory _msgReceipt, OFTReceipt memory oftReceipt,) = stargate.sendToken{ value: hydraFee.nativeFee }(sendParam, hydraFee, address(0x0));
+        msgReceipt = _msgReceipt;
+
+        // amount of ETH received on mainnet will be less then the amount of wETH deposited due to stargate fee
+        amountIn = oftReceipt.amountReceivedLD;
+        MessagingReceipt memory receipt = super._sync(dstEid, l2TokenIn, l1TokenIn, amountIn, amountOut, extraOptions, fee);
 
         return receipt;
     }
 
     /**
      * @dev Builds the parameters needed for sending tokens through Stargate and quotes the messaging fee
-     * @param tokenIn Address of the input token (WETH) on the source chain
      * @param amountIn Amount of tokens to be sent from source chain
-     * @param amountOut Amount of tokens to be received on target chain
-     * @param guid Unique identifier of the previous LayerZero message (used for message correlation)
      * @return SendParam Constructed parameters for Stargate's sendToken function
      * @return MessagingFee The quoted messaging fee
      */
     function _buildSendParam(
-        address tokenIn,
         uint256 amountIn,
-        uint256 amountOut,
-        bytes32 guid
+        uint256 amountOut
     ) internal view returns (SendParam memory, MessagingFee memory) {
 
         address receiver = getReceiver();
         uint32 dstEid = getDstEid();
-        uint32 originEid = endpoint.eid();
         IStargate stargate = IStargate(getMessenger());
-        
-        bytes memory composeMsg = abi.encode(originEid, guid, tokenIn, amountIn, amountOut);
+
+        bytes memory message = abi.encode(amountOut);
 
         SendParam memory sendParam = SendParam({
             dstEid: dstEid,
             to: _addressToBytes32(receiver),
             amountLD: amountIn,
             minAmountLD: amountIn,
-            extraOptions: OptionsBuilder.newOptions().addExecutorLzComposeOption(0, 1_000_000, 0),
-            composeMsg: composeMsg,
+            extraOptions: OptionsBuilder.newOptions().addExecutorLzComposeOption(0, 300_000, 0),
+            composeMsg: message,
             oftCmd: ""
         });
 

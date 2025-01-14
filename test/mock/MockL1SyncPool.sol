@@ -18,9 +18,7 @@ contract MockL1SyncPool is OAppReceiverUpgradeable, ReentrancyGuardUpgradeable {
         uint256 amountOut
     );
     
-    event LZMessageReceived(
-        uint32 indexed srcEid,
-        bytes32 indexed guid,
+    event anticipatedDeposit(
         address tokenIn,
         uint256 amountIn,
         uint256 amountOut
@@ -60,19 +58,14 @@ contract MockL1SyncPool is OAppReceiverUpgradeable, ReentrancyGuardUpgradeable {
     }
 
     function _lzReceive(
-        Origin calldata origin,
-        bytes32 guid,
-        bytes calldata message,
-        address,
-        bytes calldata
-    ) internal override {
-        (address tokenIn, uint256 amountIn, uint256 amountOut) = abi.decode(
-            message,
-            (address, uint256, uint256)
-        );
+        Origin calldata _origin,
+        bytes32 _guid,
+        bytes calldata _message,
+        address _executor,
+        bytes calldata _extraData
+    ) internal virtual override {
+        (address tokenIn, uint256 amountIn, uint256 amountOut) = abi.decode(_message, (address, uint256, uint256));
 
-        if (tokenIn != 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) revert EtherfiL1SyncPoolETH__OnlyETH();
-
-        emit LZMessageReceived(origin.srcEid, guid, tokenIn, amountIn, amountOut);
+        emit anticipatedDeposit(tokenIn, amountIn, amountOut);
     }
 }

@@ -15,7 +15,14 @@ import {Constants} from "../../libraries/Constants.sol";
 contract L1HydraReceiverETHUpgradeable is L1BaseReceiverUpgradeable, ILayerZeroComposer {
     error L1HydraReceiverETH__OnlyETH();
 
-    constructor() {
+    address immutable STARGATE_OAPP;
+
+    /**
+     * @param stargate Address of the stargate OApp `StargatePoolNative`
+     */
+    constructor(address stargate) {
+        STARGATE_OAPP = stargate;
+
         _disableInitializers();
     }
 
@@ -32,28 +39,49 @@ contract L1HydraReceiverETHUpgradeable is L1BaseReceiverUpgradeable, ILayerZeroC
     }
 
     /**
-     * @dev receive compose message from the LayerZero Endpoint
+     * @dev receive compose message from the LayerZero Endpoint. Technically anyone could utilize this function but it would just be an ETH donation
+     * While anyone could send a message to execute from this function, unauthorized calls will only result in ETH donations to the L1SyncPool
+     * @param _from Address of the sender, the Stargate L1 OApp
+     * @param _guid Guid of the message
+     * @param _message Compose message constructed on the source chain
+     * 
      */
     function lzCompose(
         address _from,
-        bytes32 /* _guid */,
+        bytes32 _guid,
         bytes calldata _message,
-        address /* _executor */,
-        bytes calldata /* _extraData */
+        address _executor,
+        bytes calldata _extraData
     ) external payable {
 
+        uint32 originEid = OFTComposeMsgCodec.srcEid(_message);
         uint256 amountLD = OFTComposeMsgCodec.amountLD(_message);
         bytes memory composeMessage = OFTComposeMsgCodec.composeMsg(_message);
 
-        (uint32 originEid, bytes32 guid, address tokenIn, , uint256 amountOut) =
-            abi.decode(composeMessage, (uint32, bytes32, address, uint256, uint256));
-
-        if (tokenIn != Constants.ETH_ADDRESS) revert L1HydraReceiverETH__OnlyETH();
+        (uint256 amountOut) = abi.decode(composeMessage, (uint256));
 
         _forwardToL1SyncPool(
-            originEid, bytes32(uint256(uint160(_from))), guid, tokenIn, amountLD, amountOut, amountLD
+            originEid, bytes32(uint256(uint160(_from))), _guid, Constants.ETH_ADDRESS, amountLD, amountOut, amountLD
         );
     }
 
+    /**
+     * @dev In the case of utilizing the Stargate OApp, the message is send from the Stargate OApp
+     */
+    function _getAuthorizedL2Address(uint32 /*originEid*/) internal view virtual override returns (bytes32) {
+        return _addressToBytes32(STARGATE_OAPP);
+    }
+
+    /**
+     * @dev Convert an address to bytes32
+     * @param _addr Address to convert
+     * @return bytes32 representation of the address
+     */
+    function _addressToBytes32(address _addr) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
+    }
+
     function onMessageReceived(bytes calldata message) external payable virtual override {}
+    fallback() external payable {}
+    receive() external payable {}
 }

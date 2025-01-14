@@ -13,7 +13,8 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import { MessagingFee } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
-// forge script scripts/MockDeployment/DeployMockNativeMintingL2.s.sol:DeployMockNativeMintingL2 --rpc-url https://rockbeard-eth-cartio.berachain.com  --via-ir
+// forge script scripts/MockDeployment/DeployMockNativeMintingL2.s.sol:DeployMockNativeMintingL2 --rpc-url https://rockbeard-eth-cartio.berachain.com  --via-ir --broadcast
+
 
 contract DeployMockNativeMintingL2 is Script {
     using OptionsBuilder for bytes;
@@ -28,10 +29,8 @@ contract DeployMockNativeMintingL2 is Script {
         address endpoint = 0x6C7Ab2202C98C4227C5c46f1417D81144DA716Ff;
         address berawETH = 0x2d93FbcE4CffC15DD385A80B3f4CC1D4E76C38b3;
         address stargateOFTETH = 0x4F5F42799d1E01662B629Ede265baEa223e9f9C7;
-        address l1Receiver = 0x167d88572219bBc51D0DF80fb15C2D3f8CD4A153;
-        address l1syncPool = 0x8DF470Eb1ed7D723264752b03914b2C71ea91DDB;
-        // address[2] beraDVN = [0x6C7Ab2202C98C4227C5c46f1417D81144DA716Ff, 0x6C7Ab2202C98C4227C5c46f1417D81144DA716Ff];
-        // address sendlib = 0xd682ECF100f6F4284138AA925348633B0611Ae21;
+        address l1Receiver = 0xE8C337A39601BC8DAf241E50A829dF109B82Fd56;
+        address l1syncPool = 0xBb03aAbA47BBE950fF1C263F61651543839d9f2a;
         uint32 l1Eid = 40161;
 
         MockMintableToken token = new MockMintableToken("Mock weETH", "weETH");
@@ -56,9 +55,9 @@ contract DeployMockNativeMintingL2 is Script {
 
         poolProxy.deposit(berawETH, 0.1 ether, 0.09 ether);
 
-        (MessagingFee memory standardFee, uint256 sendAmount) = poolProxy.quoteSyncTotal(berawETH, hex"", false);
+        (MessagingFee memory standardFee, uint256 fee) = poolProxy.quoteSyncTotal(berawETH, hex"", false);
 
-        poolProxy.sync{value: sendAmount}(berawETH, hex"", standardFee);
+        poolProxy.sync{value: fee}(berawETH, hex"", standardFee);
 
         vm.stopBroadcast();
     }
