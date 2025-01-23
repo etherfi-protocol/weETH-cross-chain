@@ -151,12 +151,12 @@ contract DeployOFTScript is Script, L2Constants {
         enforcedOptions.push(EnforcedOptionParam({
             eid: dstEid,
             msgType: 1,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(150_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(170_000, 0)
         }));
         enforcedOptions.push(EnforcedOptionParam({
             eid: dstEid,
             msgType: 2,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(150_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(170_000, 0)
         }));
     }
 }

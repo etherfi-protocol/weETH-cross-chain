@@ -18,7 +18,6 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "forge-std/Test.sol";
 import "../../utils/L2Constants.sol";
-import "../../utils/LayerZeroHelpers.sol";
 
 // forge script scripts/OFTDeployment/05_OFTSend.s.sol:CrossChainSend --rpc-url "source chain"  --private-key "dev wallet"
 contract CrossChainSend is Script, L2Constants {
@@ -35,11 +34,11 @@ contract CrossChainSend is Script, L2Constants {
         //////////////////////////////////////////////////////////////*/
         
         // Initializing the sending OFT (only set if sending from L2)
-        IOFT SENDING_OFT = IOFT(0xA6cB988942610f6731e664379D15fFcfBf282b44);
-        IERC20 SENDING_ERC20 = IERC20(0xA6cB988942610f6731e664379D15fFcfBf282b44);
+        IOFT SENDING_OFT = IOFT(0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7);
+        IERC20 SENDING_ERC20 = IERC20(address(SENDING_OFT));
 
         // Desintation EID
-        uint32 DST_EID = 30335;
+        uint32 DST_EID = 30101;
 
         /*//////////////////////////////////////////////////////////////
                     
@@ -54,7 +53,7 @@ contract CrossChainSend is Script, L2Constants {
         // Define the SendParam struct (script deployer is the recipient)
         SendParam memory param = SendParam({
             dstEid: DST_EID,
-            to: LayerZeroHelpers._toBytes32(scriptDeployer),
+            to: _toBytes32(scriptDeployer),
             amountLD: 50000000000000,
             minAmountLD: 50000000000000,
             extraOptions: "",
@@ -76,5 +75,9 @@ contract CrossChainSend is Script, L2Constants {
         } catch (bytes memory lowLevelData) {
             console.logBytes(lowLevelData);
         }
+    }
+
+    function _toBytes32(address addr) public pure returns (bytes32) {
+        return bytes32(uint256(uint160(addr)));
     }
 }

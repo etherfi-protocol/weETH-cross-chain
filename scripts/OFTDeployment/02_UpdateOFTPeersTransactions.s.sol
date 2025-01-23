@@ -43,12 +43,12 @@ contract UpdateOFTPeersTransactions is Script, L2Constants {
         enforcedOptions[0] = EnforcedOptionParam({
             eid: DEPLOYMENT_EID,
             msgType: 1,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(170_000, 0)
         });
         enforcedOptions[1] = EnforcedOptionParam({
             eid: DEPLOYMENT_EID,
             msgType: 2,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(170_000, 0)
         });
         bytes memory setEnforcedOptionsData = abi.encodeWithSignature("setEnforcedOptions((uint32,uint16,bytes)[])", enforcedOptions);
         setEnforcedOptionsString = iToHex(setEnforcedOptionsData);
