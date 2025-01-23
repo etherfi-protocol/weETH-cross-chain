@@ -23,7 +23,7 @@ struct OFTDeployment {
     EtherfiOFTUpgradeable tokenContract;
 }
 
-// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --evm-version "paris" --via-ir --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
+// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --broadcast --evm-version "paris" --via-ir --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
 contract DeployOFTScript is Script, L2Constants {
     using OptionsBuilder for bytes;
 
@@ -34,7 +34,7 @@ contract DeployOFTScript is Script, L2Constants {
 
     function run() public {
         scriptDeployer = DEPLOYER_ADDRESS;
-        vm.startBroadcast(DEPLOYER_ADDRESS);
+        vm.startBroadcast();
 
         deployOFT();
 
@@ -142,7 +142,7 @@ contract DeployOFTScript is Script, L2Constants {
         });
 
         params[0] = SetConfigParam(dstEid, 2, abi.encode(ulnConfig));
-        ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(oftDeployment.proxyAddress, DEPLOYMENT_SEND_LID_302, params);
+        ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(oftDeployment.proxyAddress, DEPLOYMENT_SEND_LIB_302, params);
         ILayerZeroEndpointV2(DEPLOYMENT_LZ_ENDPOINT).setConfig(oftDeployment.proxyAddress, DEPLOYMENT_RECEIVE_LIB_302, params);
     }
 
@@ -151,12 +151,12 @@ contract DeployOFTScript is Script, L2Constants {
         enforcedOptions.push(EnforcedOptionParam({
             eid: dstEid,
             msgType: 1,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(170_000, 0)
         }));
         enforcedOptions.push(EnforcedOptionParam({
             eid: dstEid,
             msgType: 2,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(170_000, 0)
         }));
     }
 }

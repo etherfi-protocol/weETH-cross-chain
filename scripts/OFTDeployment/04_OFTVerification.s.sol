@@ -22,7 +22,7 @@ contract verifyOFT is ContractCodeChecker, Script, L2Constants, Test {
         verifyContractByteCodeMatch(DEPLOYMENT_OFT_IMPL, address(tmpOFT));
 
         console2.log("#2. Verification of [OFT proxy] bytecode...");
-        address INITIAL_OWNER = 0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150;
+        address INITIAL_OWNER = DEPLOYER_ADDRESS;
         TransparentUpgradeableProxy tmpProxy = new TransparentUpgradeableProxy(
             DEPLOYMENT_OFT_IMPL, 
             INITIAL_OWNER,  
@@ -38,7 +38,7 @@ contract verifyOFT is ContractCodeChecker, Script, L2Constants, Test {
         EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
         LZEndpoint endpoint = LZEndpoint(DEPLOYMENT_LZ_ENDPOINT);
 
-        assertEq(ProxyAdmin(0xE917Fad11ca0d835d3C8d960906195a641320cd7).owner(), DEPLOYMENT_CONTRACT_CONTROLLER);
+        assertEq(ProxyAdmin(DEPLOYMENT_PROXY_ADMIN_CONTRACT).owner(), DEPLOYMENT_CONTRACT_CONTROLLER);
 
         assertEq(oft.owner(), DEPLOYMENT_CONTRACT_CONTROLLER);
         assertTrue(oft.hasRole(oft.PAUSER_ROLE(), PAUSER_EOA));

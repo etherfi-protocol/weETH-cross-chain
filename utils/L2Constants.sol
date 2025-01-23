@@ -58,7 +58,7 @@ contract L2Constants {
     
     // LayerZero addresses
     uint32 constant DEPLOYMENT_EID = 0;
-    address constant DEPLOYMENT_SEND_LID_302 = address(0);
+    address constant DEPLOYMENT_SEND_LIB_302 = address(0);
     address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
     address constant DEPLOYMENT_LZ_DVN = address(0);
     address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
@@ -79,11 +79,11 @@ contract L2Constants {
     string constant TOKEN_NAME = "Wrapped eETH";
     string constant TOKEN_SYMBOL = "weETH";
     
-    // weETH Bridge Rate Limits
+    // weETH Bridge Rate Limits for Native Minting
     uint256 constant BUCKET_SIZE = 3600000000000000000000;
     uint256 constant BUCKET_REFILL_PER_SECOND = 1000000000000000000;
 
-    // Global Production weETH Bridge Rate Limits
+    // Global Production for OFT weETH Bridge Rate Limits
     uint256 constant LIMIT = 2000 ether;
     uint256 constant WINDOW = 4 hours;
 
@@ -131,6 +131,7 @@ contract L2Constants {
         L2s.push(LINEA);
         L2s.push(ZKSYNC);
         L2s.push(SWELL);
+        L2s.push(MORPH);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -312,6 +313,41 @@ contract L2Constants {
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
 
+    ConfigPerL2 MORPH = ConfigPerL2({
+        NAME: "morph",
+        RPC_URL: "https://rpc.morphl2.io",
+        CHAIN_ID: "2818",
+
+        L2_EID: 30322,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7,
+        RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043,
+
+        LAYERZERO_DVN: 0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842,
+        NETHERMIND_DVN: 0xdf30C9f6A70cE65A152c5Bd09826525D7E97Ba49,
+        LZ_DVN: [0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842, 0xdf30C9f6A70cE65A152c5Bd09826525D7E97Ba49],
+
+        L2_OFT: 0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7,
+        L2_OFT_IMPL: 0xa49184769628e2f22317FbeB7012EeE6075A1B5B,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x770099bca35DE404C1843eaA36bA1C8986514a93,
+        L2_OFT_PROXY_ADMIN: 0x570456a8768F9EDe4E574706da4B59d8092382B4,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
     ConfigPerL2 OP = ConfigPerL2({
         NAME: "op",
         RPC_URL: "https://optimism-rpc.publicnode.com",
@@ -430,7 +466,7 @@ contract L2Constants {
 
         LAYERZERO_DVN: 0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842,
         NETHERMIND_DVN: 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B,
-        LZ_DVN: [0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842, address(0)],
+        LZ_DVN: [0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B, 0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842],
 
         L2_OFT: 0xA6cB988942610f6731e664379D15fFcfBf282b44,
         L2_OFT_IMPL: 0x04E5c62b27092234CeC69ec56Dfa0b2c97F72Eb3,
