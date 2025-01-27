@@ -156,7 +156,7 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
 
         IERC20(HYDRA_WETH).approve(address(stargate), amountIn);
         
-        (MessagingReceipt memory _msgReceipt, OFTReceipt memory oftReceipt,) = stargate.sendToken{ value: hydraFee.nativeFee }(sendParam, hydraFee, address(0x0));
+        (MessagingReceipt memory _msgReceipt, OFTReceipt memory oftReceipt,) = stargate.sendToken{ value: hydraFee.nativeFee }(sendParam, hydraFee, msg.sender);
         msgReceipt = _msgReceipt;
 
         // amount of ETH received on mainnet will be less then the amount of wETH sent due to stargate fee
