@@ -144,7 +144,7 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
         uint256 amountOut,
         bytes calldata extraOptions,
         MessagingFee calldata fee
-    ) internal virtual override returns (MessagingReceipt memory msgReceipt) {
+    ) internal virtual override returns (MessagingReceipt memory) {
         // wETH deposited on alt chain will be unwrapped for ETH on mainnet
         if (l1TokenIn != Constants.ETH_ADDRESS || l2TokenIn != HYDRA_WETH) {
             revert HydraSyncPoolETH__OnlyETH();
@@ -157,7 +157,6 @@ contract HydraSyncPoolETHUpgradeable is L2BaseSyncPoolUpgradeable, BaseMessenger
         IERC20(HYDRA_WETH).approve(address(stargate), amountIn);
         
         (MessagingReceipt memory _msgReceipt, OFTReceipt memory oftReceipt,) = stargate.sendToken{ value: hydraFee.nativeFee }(sendParam, hydraFee, address(0x0));
-        msgReceipt = _msgReceipt;
 
         // amount of ETH received on mainnet will be less then the amount of wETH sent due to stargate fee
         amountIn = oftReceipt.amountReceivedLD;
