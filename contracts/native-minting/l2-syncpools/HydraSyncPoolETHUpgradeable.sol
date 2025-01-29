@@ -6,9 +6,9 @@ import {
     MessagingReceipt
 } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
-import {BaseMessengerUpgradeable} from "../LayerZeroBaseContracts/BaseMessengerUpgradeable.sol";
-import {BaseReceiverUpgradeable} from "../LayerZeroBaseContracts/BaseReceiverUpgradeable.sol";
-import {L2BaseSyncPoolUpgradeable} from "../LayerZeroBaseContracts/L2BaseSyncPoolUpgradeable.sol";
+import {BaseMessengerUpgradeable} from "../layerzero-base/BaseMessengerUpgradeable.sol";
+import {BaseReceiverUpgradeable} from "../layerzero-base/BaseReceiverUpgradeable.sol";
+import {L2BaseSyncPoolUpgradeable} from "../layerzero-base/L2BaseSyncPoolUpgradeable.sol";
 import {IStargate} from "../../../interfaces/IStargate.sol";
 import { MessagingFee, OFTReceipt, SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {Constants} from "../../libraries/Constants.sol";

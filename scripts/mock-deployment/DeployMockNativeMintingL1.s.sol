@@ -5,10 +5,10 @@ import {ILayerZeroEndpointV2} from "@layerzerolabs/lz-evm-protocol-v2/contracts/
 import {Script} from "forge-std/Script.sol";
 import {LayerZeroHelpers} from "../../utils/LayerZeroHelpers.sol";
 import {MockL1SyncPool} from "../../test/mock/MockL1SyncPool.sol";
-import {L1HydraReceiverETHUpgradeable} from "../../contracts/NativeMinting/ReceiverContracts/L1HydraReceiverETHUpgradeable.sol";
+import {L1HydraReceiverETHUpgradeable} from "../../contracts/native-minting/receivers/L1HydraReceiverETHUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-// forge script scripts/MockDeployment/DeployMockNativeMintingL1.s.sol:DeployMockNativeMintingL1 --rpc-url https://eth-sepolia.public.blastapi.io --via-ir
+// forge script scripts/mock-deployment/DeployMockNativeMintingL1.s.sol:DeployMockNativeMintingL1 --rpc-url https://eth-sepolia.public.blastapi.io --via-ir
 contract DeployMockNativeMintingL1 is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");

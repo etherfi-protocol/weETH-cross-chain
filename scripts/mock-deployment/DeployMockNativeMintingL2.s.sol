@@ -5,7 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {MockMintableToken} from "../../test/mock/MockMintToken.sol";
 import {LayerZeroHelpers} from "../../utils/LayerZeroHelpers.sol";
 import {MockExchangeRateProvider} from "../../test/mock/MockExchangeRateProvider.sol";
-import {HydraSyncPoolETHUpgradeable} from "../../contracts/NativeMinting/L2SyncPoolContracts/HydraSyncPoolETHUpgradeable.sol";
+import {HydraSyncPoolETHUpgradeable} from "../../contracts/native-minting/L2SyncPoolContracts/HydraSyncPoolETHUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Constants} from "../../contracts/libraries/Constants.sol";

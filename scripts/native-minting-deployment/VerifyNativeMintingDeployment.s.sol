@@ -6,22 +6,22 @@ import {Script} from "forge-std/Script.sol";
 import "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
 import {console2} from "forge-std/console2.sol";
-import "../../contracts/NativeMinting/DummyTokenUpgradeable.sol";
-import "../../contracts/NativeMinting/EtherfiL2ExchangeRateProvider.sol";
-import "../../contracts/NativeMinting/BucketRateLimiter.sol";
-import "../../contracts/NativeMinting/ReceiverContracts/L1ScrollReceiverETHUpgradeable.sol";
+import "../../contracts/native-minting/DummyTokenUpgradeable.sol";
+import "../../contracts/native-minting/EtherfiL2ExchangeRateProvider.sol";
+import "../../contracts/native-minting/BucketRateLimiter.sol";
+import "../../contracts/native-minting/receivers/L1ScrollReceiverETHUpgradeable.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
-import "../../contracts/NativeMinting/L2SyncPoolContracts/L2ScrollSyncPoolETHUpgradeable.sol";
-import "../../contracts/NativeMinting/EtherfiL1SyncPoolETH.sol";
+import "../../contracts/native-minting/l2-syncpools/L2ScrollSyncPoolETHUpgradeable.sol";
+import "../../contracts/native-minting/EtherfiL1SyncPoolETH.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../../utils/L2Constants.sol";
 import "../ContractCodeChecker.sol";
 
-// forge script scripts/NativeMintingDeployment/VerifyNativeMintingDeployment.s.sol:verifyNativeMintingDeployment --via-ir
+// forge script scripts/native-minting-deployment/VerifyNativeMintingDeployment.s.sol:VerifyNativeMintingDeployment --via-ir
 // verifies the bytecode and upgrade role of the native minting contracts
-contract verifyNativeMintingDeployment is Script, L2Constants, ContractCodeChecker, Test {
+contract VerifyNativeMintingDeployment is Script, L2Constants, ContractCodeChecker, Test {
 
     bytes32 _ADMIN_SLOT = bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1);
     bytes32 MINTER_ROLE = keccak256("MINTER_ROLE");

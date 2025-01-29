@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "../scripts/NativeMintingDeployment/DeployConfigureL1.s.sol";
-import "../scripts/NativeMintingDeployment/DeployConfigureL2.s.sol";
-import "../contracts/NativeMinting/EtherfiL1SyncPoolETH.sol";
-import "../contracts/NativeMinting/L2SyncPoolContracts/L2ScrollSyncPoolETHUpgradeable.sol";
+import "../scripts/native-minting-deployment/DeployConfigureL1.s.sol";
+import "../scripts/native-minting-deployment/DeployConfigureL2.s.sol";
+import "../contracts/native-minting/EtherfiL1SyncPoolETH.sol";
+import "../contracts/native-minting/l2-syncpools/L2ScrollSyncPoolETHUpgradeable.sol";
 import {Origin} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-import "../contracts/NativeMinting/BucketRateLimiter.sol";
+import "../contracts/native-minting/BucketRateLimiter.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IScrollMessenger.sol";
 import "../utils/L2Constants.sol";
