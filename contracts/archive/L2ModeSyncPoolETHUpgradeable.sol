@@ -9,9 +9,9 @@ import {
     MessagingFee,
     MessagingReceipt
 } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-import {BaseMessengerUpgradeable} from "../NativeMinting/LayerZeroBaseContracts/BaseMessengerUpgradeable.sol";
-import {BaseReceiverUpgradeable} from "../NativeMinting/LayerZeroBaseContracts/BaseReceiverUpgradeable.sol";
-import {L2BaseSyncPoolUpgradeable} from "../NativeMinting/LayerZeroBaseContracts/L2BaseSyncPoolUpgradeable.sol";
+import {BaseMessengerUpgradeable} from "../native-minting/layerzero-base/BaseMessengerUpgradeable.sol";
+import {BaseReceiverUpgradeable} from "../native-minting/layerzero-base/BaseReceiverUpgradeable.sol";
+import {L2BaseSyncPoolUpgradeable} from "../native-minting/layerzero-base/L2BaseSyncPoolUpgradeable.sol";
 import {ICrossDomainMessenger} from "../../interfaces/ICrossDomainMessenger.sol";
 import {Constants} from "../libraries/Constants.sol";
 import {IL1Receiver} from "../../interfaces/IL1Receiver.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {L2ExchangeRateProviderUpgradeable} from "./LayerZeroBaseContracts/L2ExchangeRateProviderUpgradeable.sol";
+import {L2ExchangeRateProviderUpgradeable} from "./layerzero-base/L2ExchangeRateProviderUpgradeable.sol";
 import {IAggregatorV3} from "../../interfaces/IAggregatorV3.sol";
 
 contract EtherfiL2ExchangeRateProvider is L2ExchangeRateProviderUpgradeable {

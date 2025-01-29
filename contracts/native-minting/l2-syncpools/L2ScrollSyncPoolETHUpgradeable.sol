@@ -7,9 +7,9 @@ import {
     MessagingReceipt
 } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
-import {BaseMessengerUpgradeable} from "../LayerZeroBaseContracts/BaseMessengerUpgradeable.sol";
-import {BaseReceiverUpgradeable} from "../LayerZeroBaseContracts/BaseReceiverUpgradeable.sol";
-import {L2BaseSyncPoolUpgradeable} from "../LayerZeroBaseContracts/L2BaseSyncPoolUpgradeable.sol";
+import {BaseMessengerUpgradeable} from "../layerzero-base/BaseMessengerUpgradeable.sol";
+import {BaseReceiverUpgradeable} from "../layerzero-base/BaseReceiverUpgradeable.sol";
+import {L2BaseSyncPoolUpgradeable} from "../layerzero-base/L2BaseSyncPoolUpgradeable.sol";
 import {IL2ScrollMessenger} from "../../../interfaces/IL2ScrollMessenger.sol";
 import {Constants} from "../../libraries/Constants.sol";
 import {IL1Receiver} from "../../../interfaces/IL1Receiver.sol";

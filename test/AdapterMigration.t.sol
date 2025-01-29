@@ -10,8 +10,8 @@ import "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/Errors.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
-import "../scripts/AdapterMigration/01_DeployUpgradeableAdapter.s.sol" as DeployOFTAdapter;
-import "../scripts/AdapterMigration/02_DeployMigrationOFT.s.sol" as DeployMigrationOFT;
+import "../scripts/adapter-migration/01_DeployUpgradeableAdapter.s.sol" as DeployOFTAdapter;
+import "../scripts/adapter-migration/02_DeployMigrationOFT.s.sol" as DeployMigrationOFT;
 
 import "../utils/L2Constants.sol";
 import "../utils/LayerZeroHelpers.sol";

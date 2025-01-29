@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ILayerZeroComposer} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroComposer.sol";
 import {OFTComposeMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTComposeMsgCodec.sol";
-import {L1BaseReceiverUpgradeable} from "../LayerZeroBaseContracts/L1BaseReceiverUpgradeable.sol";
+import {L1BaseReceiverUpgradeable} from "../layerzero-base/L1BaseReceiverUpgradeable.sol";
 import {Constants} from "../../libraries/Constants.sol";
 
 /**

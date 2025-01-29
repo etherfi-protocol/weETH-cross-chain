@@ -10,9 +10,9 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
-import "../../contracts/NativeMinting/EtherfiL2ExchangeRateProvider.sol";
-import "../../contracts/NativeMinting/L2SyncPoolContracts/L2ScrollSyncPoolETHUpgradeable.sol";
-import "../../contracts/NativeMinting/BucketRateLimiter.sol";
+import "../../contracts/native-minting/EtherfiL2ExchangeRateProvider.sol";
+import "../../contracts/native-minting/l2-syncpools/L2ScrollSyncPoolETHUpgradeable.sol";
+import "../../contracts/native-minting/BucketRateLimiter.sol";
 
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";

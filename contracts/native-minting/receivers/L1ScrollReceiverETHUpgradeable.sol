@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {L1BaseReceiverUpgradeable} from "../LayerZeroBaseContracts/L1BaseReceiverUpgradeable.sol";
+import {L1BaseReceiverUpgradeable} from "../layerzero-base/L1BaseReceiverUpgradeable.sol";
 import {IL1ScrollMessenger} from "../../../interfaces/IL1ScrollMessenger.sol";
 import {Constants} from "../../libraries/Constants.sol";
 
