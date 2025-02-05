@@ -132,6 +132,7 @@ contract L2Constants {
         L2s.push(ZKSYNC);
         L2s.push(SWELL);
         L2s.push(MORPH);
+        L2s.push(BERA);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -483,6 +484,35 @@ contract L2Constants {
         L1_DUMMY_TOKEN: address(0),
         L1_RECEIVER: address(0),
 
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
+        ConfigPerL2 BERA = ConfigPerL2({
+        NAME: "bera",
+        RPC_URL: "",
+        CHAIN_ID: "80094",
+        L2_EID: 30362,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7,
+        RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043,
+        LAYERZERO_DVN: 0x282b3386571f7f794450d5789911a9804FA346b4,
+        NETHERMIND_DVN: 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B,
+        LZ_DVN: [0x282b3386571f7f794450d5789911a9804FA346b4, 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B],
+        L2_OFT: 0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7,
+        L2_OFT_IMPL: 0xa49184769628e2f22317FbeB7012EeE6075A1B5B,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x2F8B067150123f53Da77eF3c1414FcE866E8A2D1,
+        L2_OFT_PROXY_ADMIN: 0x570456a8768F9EDe4E574706da4B59d8092382B4,
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
         L2_SYNC_POOL_PROXY_ADMIN: address(0),
         L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
         L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
