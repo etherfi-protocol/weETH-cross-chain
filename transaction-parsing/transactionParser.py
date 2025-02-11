@@ -58,7 +58,7 @@ class LocalTxnParser:
 
     def parse_txn(self, target: str, data: str) -> Dict[str, Any]:
         target = Web3.to_checksum_address(target)
-        func_signature = data[:10]
+        func_signature = data[2:10]
         
         if func_signature not in self.function_signatures:
             return {
@@ -181,7 +181,7 @@ def main():
     # Initialize the parser
     web3 = Web3(Web3.HTTPProvider('https://eth.llamarpc.com', request_kwargs={'timeout': 120}))
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    abis_dir = os.path.join(current_dir, 'oftContractABIs')
+    abis_dir = os.path.join(current_dir, 'oft-abis')
     parent_dir = os.path.dirname(current_dir)
     transactions_dir = os.path.join(parent_dir, 'output')
    
