@@ -15,7 +15,7 @@ import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
-// forge script scripts/OFTDeployment/02_UpdateOFTPeersTransactions.s.sol:UpdateOFTPeersTransactions
+// forge script scripts/oft-deployment/02_UpdateOFTPeersTransactions.s.sol:UpdateOFTPeersTransactions
 contract UpdateOFTPeersTransactions is Script, L2Constants {
     using OptionsBuilder for bytes;
 
