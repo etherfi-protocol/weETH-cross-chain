@@ -33,29 +33,30 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {
     );
 
     //  Canonical bridge message expected values
-    address private SENDER = SCROLL.L2_SYNC_POOL;
-    address private TARGET = SCROLL.L1_RECEIVER;
+    address private SENDER = BERA.L2_SYNC_POOL;
+    address private TARGET = BERA.L1_RECEIVER;
     uint256 private MESSAGE_VALUE = 1 ether;
     bytes private BRIDGE_MESSAGE = hex"3a69197e000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000007606ebd50bcf19f47f644e6981a58d2287a3b8d6c0702ffa0a1cb9ecdd12c568a498000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000000de0b6b3a76400000000000000000000000000000000000000000000000000000d2ddfc66b17a973";
 
     /// @notice Test the upgrade to natvie minting functionalilty and deposit/sync on L2
     function testNativeMintingL2() public {
         // Setup L2 environment
-        vm.createSelectFork(SCROLL.RPC_URL);
+        vm.createSelectFork(BERA.RPC_URL);
         L2NativeMintingScript nativeMintingL2 = new L2NativeMintingScript();
         // contracts have already been deployed hence no need to simulate deployments
-        // nativeMintingL2.run();
+        nativeMintingL2.run();
+        vm.stopPrank();
  
-        executeGnosisTransactionBundle("./output/setScrollMinter.json", SCROLL.L2_CONTRACT_CONTROLLER_SAFE);
+        executeGnosisTransactionBundle("./output/setBeraMinter.json", BERA.L2_CONTRACT_CONTROLLER_SAFE);
         vm.warp(block.timestamp + 3600);
 
         // Test deposit functionality
-        L2ScrollSyncPoolETHUpgradeable syncPool = L2ScrollSyncPoolETHUpgradeable(SCROLL.L2_SYNC_POOL);
+        L2ScrollSyncPoolETHUpgradeable syncPool = L2ScrollSyncPoolETHUpgradeable(BERA.L2_SYNC_POOL);
         address user = vm.addr(2);
         startHoax(user);
         syncPool.deposit{value: 1 ether}(Constants.ETH_ADDRESS, MESSAGE_VALUE, 0.90 ether);
 
-        assertApproxEqAbs(IERC20(SCROLL.L2_OFT).balanceOf(user), 0.95 ether, 0.01 ether);
+        assertApproxEqAbs(IERC20(BERA.L2_OFT).balanceOf(user), 0.95 ether, 0.01 ether);
         assertEq(address(syncPool).balance, 1 ether);
 
         // Test sync functionality
@@ -82,7 +83,8 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {
         vm.createSelectFork(L1_RPC_URL);
         L1NativeMintingScript nativeMintingL1 = new L1NativeMintingScript();
         // contracts have already been deployed hence no need to simulate deployments
-        // nativeMintingL1.run();
+        nativeMintingL1.run();
+        vm.stopPrank();
 
         // Execute timelock transactions
         executeGnosisTransactionBundle("./output/L1NativeMintingScheduleTransactions.json", L1_TIMELOCK_GNOSIS);
@@ -98,23 +100,22 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {
         // used the data from this call:
         // https://layerzeroscan.com/tx/0x1107ae898ad34e942d2e007dbb358c26d24ec578d8e9628fafa9b6c1727ae92d
         Origin memory origin = Origin({
-            srcEid: SCROLL.L2_EID,
-            sender:LayerZeroHelpers._toBytes32(SCROLL.L2_SYNC_POOL),
+            srcEid: BERA.L2_EID,
+            sender:LayerZeroHelpers._toBytes32(BERA.L2_SYNC_POOL),
             nonce: 1
         });
         bytes32 guid = 0x1fb4f4c346dd3904d20a62a68ba66df159e012db8526b776cd5bb07b2f80f20e;
         address lzExecutor = 0x173272739Bd7Aa6e4e214714048a9fE699453059;
-        bytes memory messageL2Message = hex"000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000000000000000000000000000000121cc50fba271ca2860000000000000000000000000000000000000000000000113ae1410d24beb5a6";
+        bytes memory messageL2Message = hex"000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000000000000000000000000000000000000000b3391361c5231ab1400000000000000000000000000000000000000000000000a923986bbf6435c87";
         
         vm.prank(L1_ENDPOINT);
         L1syncPool.lzReceive(origin, guid, messageL2Message, lzExecutor, "");
 
         // Verify fast-sync results
-        IERC20 scrollDummyToken = IERC20(SCROLL.L1_DUMMY_TOKEN);
-        assertApproxEqAbs(scrollDummyToken.balanceOf(L1_VAMP), 334.114 ether, 0.01 ether);
+        IERC20 beraDummyToken = IERC20(BERA.L1_DUMMY_TOKEN);
+        assertApproxEqAbs(beraDummyToken.balanceOf(L1_VAMP), 206.63 ether, 0.01 ether);
         uint256 lockBoxBalanceAfter = IERC20(L1_WEETH).balanceOf(L1syncPool.getLockBox());
-        // As eETH continues to appreciate, the amount received from this fast-sync will decrease from the original 317 weETH
-        assertApproxEqAbs(lockBoxBalanceAfter, lockBoxBalanceBefore + 317 ether, 1 ether);
+        assertApproxEqAbs(lockBoxBalanceAfter, lockBoxBalanceBefore + 194 ether, 1 ether);
 
         // Test slow-sync scenario
         uint256 vampBalanceBefore = L1_VAMP.balance;
