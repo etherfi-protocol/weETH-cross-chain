@@ -53,22 +53,22 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://mainnet.unichain.org/";
-    string constant DEPLOYMENT_CHAIN_ID = "130";
+    string constant DEPLOYMENT_RPC_URL = "";
+    string constant DEPLOYMENT_CHAIN_ID = "";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 30320;
-    address constant DEPLOYMENT_SEND_LIB_302 = 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043;
-    address constant DEPLOYMENT_LZ_DVN = 0x282b3386571f7f794450d5789911a9804FA346b4;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0x25e0e650a78e6304A3983Fc4b7Ffc6544b1bEea6;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B;
+    uint32 constant DEPLOYMENT_EID = 0;
+    address constant DEPLOYMENT_SEND_LIB_302 = address(0x0);
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0x0);
+    address constant DEPLOYMENT_LZ_DVN = address(0x0);
+    address constant DEPLOYMENT_NETHERMIND_DVN = address(0x0);
+    address constant DEPLOYMENT_LZ_ENDPOINT = address(0x0);
 
     // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = 0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7;
-    address constant DEPLOYMENT_OFT_IMPL = 0xa49184769628e2f22317FbeB7012EeE6075A1B5B;
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0xe54449CB6162FfcA23721434F4bB9f62702dC602;
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0x570456a8768F9EDe4E574706da4B59d8092382B4;
+    address constant DEPLOYMENT_OFT = address(0x0);
+    address constant DEPLOYMENT_OFT_IMPL = address(0x0);
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0x0);
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0x0);
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
@@ -133,6 +133,7 @@ contract L2Constants {
         L2s.push(SWELL);
         L2s.push(MORPH);
         L2s.push(BERA);
+        L2s.push(UNICHAIN);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -490,7 +491,7 @@ contract L2Constants {
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
 
-        ConfigPerL2 BERA = ConfigPerL2({
+    ConfigPerL2 BERA = ConfigPerL2({
         NAME: "bera",
         RPC_URL: "https://rpc.berachain.com/",
         CHAIN_ID: "80094",
