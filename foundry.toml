@@ -14,3 +14,7 @@ solc_version = "0.8.20"
 bytecode_hash = 'none'
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+
+[etherscan]
+unknown_chain = { key = "VB8ENBIWWKF5CT2TVDD2K9KK389CRJZ214", chain = 130, url = "https://api.uniscan.xyz/api" }

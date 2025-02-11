@@ -58,17 +58,17 @@ contract L2Constants {
     
     // LayerZero addresses
     uint32 constant DEPLOYMENT_EID = 0;
-    address constant DEPLOYMENT_SEND_LIB_302 = address(0);
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
-    address constant DEPLOYMENT_LZ_DVN = address(0);
-    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
-    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
+    address constant DEPLOYMENT_SEND_LIB_302 = address(0x0);
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0x0);
+    address constant DEPLOYMENT_LZ_DVN = address(0x0);
+    address constant DEPLOYMENT_NETHERMIND_DVN = address(0x0);
+    address constant DEPLOYMENT_LZ_ENDPOINT = address(0x0);
 
     // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = address(0);
-    address constant DEPLOYMENT_OFT_IMPL = address(0);
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0);
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0);
+    address constant DEPLOYMENT_OFT = address(0x0);
+    address constant DEPLOYMENT_OFT_IMPL = address(0x0);
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0x0);
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0x0);
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
@@ -133,6 +133,7 @@ contract L2Constants {
         L2s.push(SWELL);
         L2s.push(MORPH);
         L2s.push(BERA);
+        L2s.push(UNICHAIN);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -490,9 +491,9 @@ contract L2Constants {
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
 
-        ConfigPerL2 BERA = ConfigPerL2({
+    ConfigPerL2 BERA = ConfigPerL2({
         NAME: "bera",
-        RPC_URL: "",
+        RPC_URL: "https://rpc.berachain.com/",
         CHAIN_ID: "80094",
         L2_EID: 30362,
         L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
@@ -518,4 +519,40 @@ contract L2Constants {
         L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
+
+    ConfigPerL2 UNICHAIN = ConfigPerL2({
+        NAME: "unichain",
+        RPC_URL: "https://mainnet.unichain.org/",
+        CHAIN_ID: "130",
+
+        L2_EID: 30320,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7,
+        RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043,
+
+        LAYERZERO_DVN: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        NETHERMIND_DVN: 0x25e0e650a78e6304A3983Fc4b7Ffc6544b1bEea6,
+        LZ_DVN: [0x6F475642a6e85809B1c36Fa62763669b1b48DD5B, 0x25e0e650a78e6304A3983Fc4b7Ffc6544b1bEea6],
+
+        L2_OFT: 0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7,
+        L2_OFT_IMPL: 0xa49184769628e2f22317FbeB7012EeE6075A1B5B,
+        L2_CONTRACT_CONTROLLER_SAFE: 0xe54449CB6162FfcA23721434F4bB9f62702dC602,
+        L2_OFT_PROXY_ADMIN: 0x570456a8768F9EDe4E574706da4B59d8092382B4,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
 }

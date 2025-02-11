@@ -23,7 +23,7 @@ struct OFTDeployment {
     EtherfiOFTUpgradeable tokenContract;
 }
 
-// forge script scripts/OFTDeployment/01_OFTConfigure.s.sol:DeployOFTScript --broadcast --evm-version "paris" --via-ir --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
+// forge script scripts/oft-deployment/01_OFTConfigure.s.sol:DeployOFTScript --evm-version "shanghai" --via-ir  --ledger --verify --rpc-url "deployment rpc" --etherscan-api-key "etherscan key" --broadcast
 contract DeployOFTScript is Script, L2Constants {
     using OptionsBuilder for bytes;
 
@@ -64,6 +64,7 @@ contract DeployOFTScript is Script, L2Constants {
         );
 
         oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
+        require(oftDeployment.proxyAddress == DEPLOYMENT_OFT, "OFT proxy address is not correct");
 
         console.log("OFT proxy", oftDeployment.proxyAddress);
         console.log("OFT implementation", oftDeployment.implementationAddress);
