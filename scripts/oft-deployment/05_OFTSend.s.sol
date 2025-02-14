@@ -19,7 +19,7 @@ import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "forge-std/Test.sol";
 import "../../utils/L2Constants.sol";
 
-// forge script scripts/OFTDeployment/05_OFTSend.s.sol:CrossChainSend --rpc-url "source chain"  --private-key "dev wallet"
+// forge script scripts/oft-deployment/05_OFTSend.s.sol:CrossChainSend --rpc-url "source chain" --private-key "dev wallet"
 contract CrossChainSend is Script, L2Constants {
 
     function run() public {

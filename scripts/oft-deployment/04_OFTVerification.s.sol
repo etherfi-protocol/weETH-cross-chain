@@ -11,7 +11,7 @@ import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 import "../ContractCodeChecker.s.sol";
 
-// forge script scripts/OFTDeployment/04_OFTVerification.s.sol:verifyOFT --evm-version "paris" --via-ir
+// forge script scripts/oft-deployment/04_OFTVerification.s.sol:verifyOFT --evm-version "shanghai" --via-ir
 contract verifyOFT is ContractCodeChecker, Script, L2Constants, Test {
 
     function run() public {

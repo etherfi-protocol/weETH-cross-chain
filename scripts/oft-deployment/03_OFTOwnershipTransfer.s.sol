@@ -18,7 +18,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 
-// forge script scripts/OFTDeployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --ledger --broadcast
+// forge script scripts/oft-deployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --ledger --broadcast
 contract OFTOwnershipTransfer is Script, L2Constants {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
@@ -33,8 +33,6 @@ contract OFTOwnershipTransfer is Script, L2Constants {
         EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
         ProxyAdmin oftProxyAdmin = ProxyAdmin(DEPLOYMENT_PROXY_ADMIN_CONTRACT);
 
-        address owner = oft.owner();
-        console.log("OFT owner: %s", owner);
 
         // setting the contract controller as the delegate
         oft.setDelegate(DEPLOYMENT_CONTRACT_CONTROLLER);
@@ -54,6 +52,9 @@ contract OFTOwnershipTransfer is Script, L2Constants {
 
         // transfer ownership of the proxy admin to the contract controller
         oftProxyAdmin.transferOwnership(DEPLOYMENT_CONTRACT_CONTROLLER);
+
+        console.log("OFT new owner: %s", oft.owner());
+        console.log("OFT proxy admin new owner: %s", oftProxyAdmin.owner());
 
         vm.stopBroadcast();
     }
