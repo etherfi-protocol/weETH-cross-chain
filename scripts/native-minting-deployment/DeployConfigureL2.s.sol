@@ -19,7 +19,7 @@ import "../../utils/LayerZeroHelpers.sol";
 import "../../utils/GnosisHelpers.sol";
 import "../../interfaces/ICreate3Deployer.sol";
 
-// forge script scripts/native-minting-deployment/DeployConfigureL2.s.sol:L2NativeMintingScript --evm-version "paris" --via-ir --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
+// forge script scripts/native-minting-deployment/DeployConfigureL2.s.sol:L2NativeMintingScript --evm-version "shanghai" --via-ir --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
 contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
     using OptionsBuilder for bytes;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -46,7 +46,7 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
         require(proxy == BERA.L2_EXCHANGE_RATE_PROVIDER, "Exchange Rate Provider address mismatch");
         
         EtherfiL2ExchangeRateProvider provider = EtherfiL2ExchangeRateProvider(proxy);
-        provider.setRateParameters(ETH_ADDRESS, BERA.L2_PRICE_ORACLE, 0, L2_PRICE_ORACLE_HEART_BEAT);
+        provider.setRateParameters(HYDRA_WETH, BERA.L2_PRICE_ORACLE, 0, L2_PRICE_ORACLE_HEART_BEAT);
         provider.transferOwnership(BERA.L2_CONTRACT_CONTROLLER_SAFE);
 
         return proxy;
@@ -73,9 +73,19 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
     }
 
     function getEnforcedOptions(uint32 _eid) public pure returns (EnforcedOptionParam[] memory) {
-        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](1);
-        // TODO: optimize gas and and remove unnecessary message types 
+        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](3);
         enforcedOptions[0] = EnforcedOptionParam({
+            eid: _eid,
+            msgType: 0,
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(200_000, 0)
+        });
+        
+        enforcedOptions[1] = EnforcedOptionParam({
+            eid: _eid,
+            msgType: 1,
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(200_000, 0)
+        });
+        enforcedOptions[2] = EnforcedOptionParam({
             eid: _eid,
             msgType: 2,
             options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(200_000, 0)
@@ -127,8 +137,7 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
     }
 
     function run() public {
-        // vm.startBroadcast(DEPLOYER_ADDRESS);
-        vm.startPrank(DEPLOYER_ADDRESS);
+        vm.startBroadcast(DEPLOYER_ADDRESS);
 
         console.log("Deploying contracts on L2...");
 

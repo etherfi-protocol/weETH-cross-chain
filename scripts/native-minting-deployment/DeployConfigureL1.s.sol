@@ -9,20 +9,18 @@ import "../../contracts/native-minting/DummyTokenUpgradeable.sol";
 import "../../utils/GnosisHelpers.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
-import {CREATE3} from "solmate/src/utils/CREATE3.sol";
 
-// forge script scripts/native-minting-deployment/DeployConfigureL1.s.sol:L1NativeMintingScript --evm-version "paris" --via-ir --rpc-url "https://mainnet.gateway.tenderly.co" --ledger --verify --etherscan-api-key "etherscan key"
+// forge script scripts/native-minting-deployment/DeployConfigureL1.s.sol:L1NativeMintingScript --evm-version "shanghai" --via-ir --rpc-url "https://mainnet.gateway.tenderly.co" --ledger --verify --etherscan-api-key "etherscan key"
 contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
-    // address constant 
+    // hydra deployment additional constant 
     address constant STARGATE_POOL_NATIVE = 0x77b2043768d28E9C9aB44E1aBfC95944bcE57931;
     
     function run() public {
         
-        // vm.startBroadcast(DEPLOYER_ADDRESS);
-        vm.startPrank(DEPLOYER_ADDRESS);
+        vm.startBroadcast(DEPLOYER_ADDRESS);
 
         console.log("Deploying contracts on L1...");
         
