@@ -54,7 +54,7 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {
         vm.createSelectFork(BERA.RPC_URL);
         L2NativeMintingScript nativeMintingL2 = new L2NativeMintingScript();
         // contracts have already been deployed hence no need to simulate deployments
-        nativeMintingL2.run();
+        // nativeMintingL2.run();
         vm.stopPrank();
  
         executeGnosisTransactionBundle("./output/setBeraMinter.json", BERA.L2_CONTRACT_CONTROLLER_SAFE);
@@ -83,7 +83,7 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {
         vm.createSelectFork(L1_RPC_URL);
         L1NativeMintingScript nativeMintingL1 = new L1NativeMintingScript();
         // contracts have already been deployed hence no need to simulate deployments
-        nativeMintingL1.run();
+        // nativeMintingL1.run();
         vm.stopPrank();
 
         // Execute timelock transactions

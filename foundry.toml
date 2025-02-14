@@ -18,3 +18,4 @@ bytecode_hash = 'none'
 
 [etherscan]
 unknown_chain = { key = "VB8ENBIWWKF5CT2TVDD2K9KK389CRJZ214", chain = 130, url = "https://api.uniscan.xyz/api" }
+berachain = { key = "GSM4EN5YE4634277ECCMTFFEA7ADGJ41XR", chain = 80094, url = "https://api.berascan.com/api" }

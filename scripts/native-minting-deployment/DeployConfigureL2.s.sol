@@ -19,7 +19,7 @@ import "../../utils/LayerZeroHelpers.sol";
 import "../../utils/GnosisHelpers.sol";
 import "../../interfaces/ICreate3Deployer.sol";
 
-// forge script scripts/native-minting-deployment/DeployConfigureL2.s.sol:L2NativeMintingScript --evm-version "shanghai" --via-ir --rpc-url "deployment rpc" --ledger --verify --etherscan-api-key "etherscan key"
+// forge script scripts/native-minting-deployment/DeployConfigureL2.s.sol:L2NativeMintingScript --evm-version "shanghai" --via-ir --ledger --verify --slow --rpc-url "l2 rpc" --etherscan-api-key "chain api key"
 contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
     using OptionsBuilder for bytes;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -106,7 +106,8 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
             abi.encode(impl, BERA.L2_CONTRACT_CONTROLLER_SAFE, 
             abi.encodeWithSelector(
                 HydraSyncPoolETHUpgradeable.initialize.selector, 
-                exchangeRateProvider, bucketRateLimiter, 
+                exchangeRateProvider, 
+                bucketRateLimiter, 
                 BERA.L2_OFT, 
                 L1_EID, 
                 BERA.L2_MESSENGER, 

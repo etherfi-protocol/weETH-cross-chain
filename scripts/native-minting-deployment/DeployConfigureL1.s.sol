@@ -10,12 +10,11 @@ import "../../utils/GnosisHelpers.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 
-// forge script scripts/native-minting-deployment/DeployConfigureL1.s.sol:L1NativeMintingScript --evm-version "shanghai" --via-ir --rpc-url "https://mainnet.gateway.tenderly.co" --ledger --verify --etherscan-api-key "etherscan key"
+// forge script scripts/native-minting-deployment/DeployConfigureL1.s.sol:L1NativeMintingScript --evm-version "shanghai" --via-ir --slow --ledger --verify --rpc-url $ETH_RPC --etherscan-api-key $ETHERSCAN_API_KEY
 contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
-    // hydra deployment additional constant 
     address constant STARGATE_POOL_NATIVE = 0x77b2043768d28E9C9aB44E1aBfC95944bcE57931;
     
     function run() public {
@@ -24,9 +23,9 @@ contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
 
         console.log("Deploying contracts on L1...");
         
-        address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("BeraTokenImpl")}(18));
+        address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("BerachainTokenImpl")}(18));
         address dummyTokenProxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("BeraDummyToken")}(
+            new TransparentUpgradeableProxy{salt: keccak256("BerachainDummyToken")}(
                 dummyTokenImpl, 
                 L1_TIMELOCK, 
                 abi.encodeWithSelector(
@@ -42,9 +41,9 @@ contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
         dummyToken.grantRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
         dummyToken.renounceRole(DEFAULT_ADMIN_ROLE, DEPLOYER_ADDRESS);
 
-        address beraReceiverImpl = address(new L1HydraReceiverETHUpgradeable{salt: keccak256("ReceiverImpl")}(STARGATE_POOL_NATIVE));
+        address beraReceiverImpl = address(new L1HydraReceiverETHUpgradeable{salt: keccak256("BerachainReceiverImpl")}(STARGATE_POOL_NATIVE));
         address beraReceiverProxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("Receiver")}(
+            new TransparentUpgradeableProxy{salt: keccak256("BerachainReceiver")}(
                 beraReceiverImpl, 
                 L1_TIMELOCK, 
                 abi.encodeWithSelector(
