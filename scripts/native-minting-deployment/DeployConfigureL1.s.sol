@@ -20,7 +20,6 @@ contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
     bool public skipDeployment;
 
     function setUp() public {
-        // Check if SKIP_DEPLOYMENT environment variable is set
         skipDeployment = vm.envBool("SKIP_DEPLOYMENT");
     }
 
