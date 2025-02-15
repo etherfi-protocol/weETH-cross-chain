@@ -17,42 +17,52 @@ contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
 
     address constant STARGATE_POOL_NATIVE = 0x77b2043768d28E9C9aB44E1aBfC95944bcE57931;
     
+    bool public skipDeployment;
+
+    function setUp() public {
+        // Check if SKIP_DEPLOYMENT environment variable is set
+        skipDeployment = vm.envBool("SKIP_DEPLOYMENT");
+    }
+
     function run() public {
-        
         vm.startBroadcast(DEPLOYER_ADDRESS);
 
-        console.log("Deploying contracts on L1...");
-        
-        address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("BerachainTokenImpl")}(18));
-        address dummyTokenProxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("BerachainDummyToken")}(
-                dummyTokenImpl, 
-                L1_TIMELOCK, 
-                abi.encodeWithSelector(
-                    DummyTokenUpgradeable.initialize.selector, "Bera Dummy ETH", "beraETH", DEPLOYER_ADDRESS
+        if (!skipDeployment) {
+            console.log("Deploying contracts on L1...");
+            
+            address dummyTokenImpl = address(new DummyTokenUpgradeable{salt: keccak256("BerachainTokenImpl")}(18));
+            address dummyTokenProxy = address(
+                new TransparentUpgradeableProxy{salt: keccak256("BerachainDummyToken")}(
+                    dummyTokenImpl, 
+                    L1_TIMELOCK, 
+                    abi.encodeWithSelector(
+                        DummyTokenUpgradeable.initialize.selector, "Bera Dummy ETH", "beraETH", DEPLOYER_ADDRESS
+                    )
                 )
-            )
-        );
-        console.log("DummyToken deployed at: ", dummyTokenProxy);
-        require(dummyTokenProxy == BERA.L1_DUMMY_TOKEN, "Dummy Token address mismatch");
+            );
+            console.log("DummyToken deployed at: ", dummyTokenProxy);
+            require(dummyTokenProxy == BERA.L1_DUMMY_TOKEN, "Dummy Token address mismatch");
 
-        DummyTokenUpgradeable dummyToken = DummyTokenUpgradeable(dummyTokenProxy);
-        dummyToken.grantRole(MINTER_ROLE, L1_SYNC_POOL);
-        dummyToken.grantRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
-        dummyToken.renounceRole(DEFAULT_ADMIN_ROLE, DEPLOYER_ADDRESS);
+            DummyTokenUpgradeable dummyToken = DummyTokenUpgradeable(dummyTokenProxy);
+            dummyToken.grantRole(MINTER_ROLE, L1_SYNC_POOL);
+            dummyToken.grantRole(DEFAULT_ADMIN_ROLE, L1_CONTRACT_CONTROLLER);
+            dummyToken.renounceRole(DEFAULT_ADMIN_ROLE, DEPLOYER_ADDRESS);
 
-        address beraReceiverImpl = address(new L1HydraReceiverETHUpgradeable{salt: keccak256("BerachainReceiverImpl")}(STARGATE_POOL_NATIVE));
-        address beraReceiverProxy = address(
-            new TransparentUpgradeableProxy{salt: keccak256("BerachainReceiver")}(
-                beraReceiverImpl, 
-                L1_TIMELOCK, 
-                abi.encodeWithSelector(
-                    L1HydraReceiverETHUpgradeable.initialize.selector, L1_SYNC_POOL, BERA.L1_MESSENGER, L1_CONTRACT_CONTROLLER
+            address beraReceiverImpl = address(new L1HydraReceiverETHUpgradeable{salt: keccak256("BerachainReceiverImpl")}(STARGATE_POOL_NATIVE));
+            address beraReceiverProxy = address(
+                new TransparentUpgradeableProxy{salt: keccak256("BerachainReceiver")}(
+                    beraReceiverImpl, 
+                    L1_TIMELOCK, 
+                    abi.encodeWithSelector(
+                        L1HydraReceiverETHUpgradeable.initialize.selector, L1_SYNC_POOL, BERA.L1_MESSENGER, L1_CONTRACT_CONTROLLER
+                    )
                 )
-            )
-        );
-        console.log("BeraReceiver deployed at: ", beraReceiverProxy);
-        require(beraReceiverProxy == BERA.L1_RECEIVER, "BeraReceiver address mismatch");
+            );
+            console.log("BeraReceiver deployed at: ", beraReceiverProxy);
+            require(beraReceiverProxy == BERA.L1_RECEIVER, "BeraReceiver address mismatch");
+        } else {
+            console.log("Skipping deployment, generating transactions only...");
+        }
         
         console.log("Generating L1 transactions for native minting...");
 

@@ -34,6 +34,12 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
     // StargateOFTETH deployed on bera
     address constant STARGATE_OFT_ETH = 0x45f1A95A4D3f3836523F5c83673c797f4d4d263B;
 
+    bool public skipDeployment;
+
+    function setUp() public {
+        skipDeployment = vm.envBool("SKIP_DEPLOYMENT");
+    }
+
     function deployConfigureExchangeRateProvider(address scriptDeployer) private returns (address) {
         address impl = CREATE3.deployCreate3(keccak256("ExchangeRateProviderImpl"), type(EtherfiL2ExchangeRateProvider).creationCode);
 
@@ -140,12 +146,16 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
     function run() public {
         vm.startBroadcast(DEPLOYER_ADDRESS);
 
-        console.log("Deploying contracts on L2...");
+        if (!skipDeployment) {
+            console.log("Deploying contracts on L2...");
 
-        // deploy and configure the native minting related contracts
-        address exchangeRateProvider = deployConfigureExchangeRateProvider(DEPLOYER_ADDRESS);
-        address rateLimiter = deployConfigureBucketRateLimiter(DEPLOYER_ADDRESS);
-        deployConfigureSyncPool(DEPLOYER_ADDRESS, exchangeRateProvider, rateLimiter);
+            // deploy and configure the native minting related contracts
+            address exchangeRateProvider = deployConfigureExchangeRateProvider(DEPLOYER_ADDRESS);
+            address rateLimiter = deployConfigureBucketRateLimiter(DEPLOYER_ADDRESS);
+            deployConfigureSyncPool(DEPLOYER_ADDRESS, exchangeRateProvider, rateLimiter);
+        } else {
+            console.log("Skipping deployment, generating transactions only...");
+        }
 
         // generate the transactions required by the L2 contract controller
 
@@ -157,7 +167,7 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
 
         // transaction to set the min sync 
         string memory minSyncTransaction = _getGnosisHeader(BERA.CHAIN_ID);
-        bytes memory setMinSyncData = abi.encodeWithSignature("setMinSyncAmount(address,uint256)", Constants.ETH_ADDRESS, 10 ether);
+        bytes memory setMinSyncData = abi.encodeWithSignature("setMinSyncAmount(address,uint256)", HYDRA_WETH, 10 ether);
         minSyncTransaction = string.concat(minSyncTransaction, _getGnosisTransaction(iToHex(abi.encodePacked(BERA.L2_SYNC_POOL)), iToHex(setMinSyncData), true));
         vm.writeJson(minSyncTransaction, "./output/setMinSyncAmount.json");
     }
