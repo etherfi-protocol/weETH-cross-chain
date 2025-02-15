@@ -87,7 +87,7 @@ contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
         string memory l1_contract_controller_transaction = _getGnosisHeader("1");
 
         // set DVN receive config for the L1 sync to receive messages from the L2 sync pool
-        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_SYNC_POOL, L1_RECEIVE_302, LayerZeroHelpers.getDVNConfig(BERA.L2_EID, L1_DVN)));
+        string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_SYNC_POOL, L1_RECEIVE_302, LayerZeroHelpers.getDVNConfigWithBlockConfirmations(BERA.L2_EID, L1_DVN, 10)));
         l1_contract_controller_transaction = string.concat(l1_contract_controller_transaction, _getGnosisTransaction(iToHex(abi.encodePacked(L1_ENDPOINT)), setLZConfigReceive, true));
 
         vm.writeJson(l1_contract_controller_transaction, "./output/L1NativeMintingSetConfig.json");
