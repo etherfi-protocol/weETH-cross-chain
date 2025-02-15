@@ -51,4 +51,3 @@ solidity-bytes-utils@^0.8.2:
   dependencies:
     ds-test "github:dapphub/ds-test"
     forge-std "^1.1.2"
-    
