@@ -51,8 +51,3 @@ solidity-bytes-utils@^0.8.2:
   dependencies:
     ds-test "github:dapphub/ds-test"
     forge-std "^1.1.2"
-
-solmate@^6.8.0:
-  version "6.8.0"
-  resolved "https://registry.yarnpkg.com/solmate/-/solmate-6.8.0.tgz#acb665d88783745899e2f6345e3ac66d5b7df2ab"
-  integrity sha512-/oI8kgEvSxGG1mrFv3FmCEZd0F8Z9VzRmoYMIhzmmzt6mjtPwfdCm3oh8yOL7bMHJBSfXJuMpnMPrM0uyaKsKg==
