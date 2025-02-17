@@ -56,6 +56,28 @@ class LocalTxnParser:
                             except Exception as e:
                                 print(f"Warning: Could not process function {func['name']}: {e}")
 
+    def _decode_uln_config(self, encoded_data: str) -> Dict[str, Any]:
+        try:
+            decoded = self.web3.codec.decode(
+                ['(uint64,uint8,uint8,uint8,address[],address[])'],
+                bytes.fromhex(encoded_data)
+            )[0]
+            
+            return {
+                "confirmations": decoded[0],
+                "requiredDVNCount": decoded[1],
+                "optionalDVNCount": decoded[2],
+                "optionalDVNThreshold": decoded[3],
+                "requiredDVNs": decoded[4],
+                "optionalDVNs": decoded[5]
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Error decoding ULN config: {str(e)}",
+                "raw_data": encoded_data
+            }
+
     def parse_txn(self, target: str, data: str) -> Dict[str, Any]:
         target = Web3.to_checksum_address(target)
         func_signature = data[2:10]
@@ -112,7 +134,19 @@ class LocalTxnParser:
                         "parameters": parameters
                     }
 
-            print(contract_name)
+                # Add special handling for setConfig transactions
+                if func_abi['name'] == 'setConfig':
+                    decoded_configs = []
+                    
+                    for param in parameters.get('_params', []):
+                        if isinstance(param, tuple):
+                            config = {
+                                "eid": param[0],
+                                "configType": param[1],
+                                "config": self._decode_uln_config(param[2].hex())
+                            }
+                            parameters['_params'] = config
+
             return {
                 "contract": contract_name,
                 "function": func_abi['name'],
