@@ -3,19 +3,19 @@
 
 
 "@layerzerolabs/lz-evm-messagelib-v2@^2.1.27":
-  version "2.1.27"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.1.27.tgz#b5517288de73f55c3717b2cb433af08bbcd138ca"
-  integrity sha512-7om/nPsxfgfRNsdgsj01foEOXg10crMWRu7B7/LnqjZ9LB5Q0TrF/Hw+r7OL/TtcPqLGpiadN97HSlcuAFU4Bg==
+  version "2.3.44"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.3.44.tgz#3684bf9de5cf19e417626970ca09528496d70fc1"
+  integrity sha512-2HZMjV0KZH0e3W2KL/H8HvE3I7QMJw1no46IQ5LpGSvxIm5Ri45tnQAynbmEbRyKXrRSP3Brkvkc2U7VrfZ/Cg==
 
 "@layerzerolabs/lz-evm-oapp-v2@^2.1.18":
-  version "2.1.27"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.1.27.tgz#23002e7aed920972bb6506b75716fe2459b961ab"
-  integrity sha512-euZO+oEqmKFf7ESNBCcR5ofOLaoLroxnFChjaHY0cBLc3rNq5WRY1zhMhqVqxpqhsjfpt3nsnea+DbBAgCjKxw==
+  version "2.3.44"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.3.44.tgz#e6a2e9fc60e7f21009138405cc21e3bcfe48177d"
+  integrity sha512-FNm9+OFKOl+/5JvpV6rMUoHZSePOcLtNJ+GHJuf38xPmEe0ehxFVQBw3iIfaH2dsWzRn/T7ZizV5ouId35FLdg==
 
 "@layerzerolabs/lz-evm-protocol-v2@^2.1.27":
-  version "2.1.27"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.1.27.tgz#7f2ec78af67fe66cd75a7eb90aa37329417e2605"
-  integrity sha512-kJlPYILW/VLxeeWagFYJpP/4EFeCw7Yuqp+qpv/+lnGDSXflvanGVnCApBJtEmirMva4E0nEkTFd0x9rfu/1Dg==
+  version "2.3.44"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.3.44.tgz#63c967dcb6aeaa4275fa51c6976b27133f9c16ff"
+  integrity sha512-oNtwl4HGCogFVOr45T3FfrkB0/CRW2eGAEScBw/FY/6mlncnS4dqlvrCJ3SFlK17cu1w9q0ztD3NzS9sUrb7vw==
 
 "@openzeppelin/contracts-upgradeable@^5.0.2":
   version "5.0.2"
@@ -40,7 +40,7 @@ forge-std@^1.1.2:
   version "1.7.6"
   resolved "https://codeload.github.com/foundry-rs/forge-std/tar.gz/bb4ceea94d6f10eeb5b41dc2391c6c8bf8e734ef"
 
-"layerzero-v2@github:JorgeAtPaladin/LayerZero-v2#lz-upgrade":
+"layerzero-v2@github:JorgeAtPaladin/LayerZero-v2#21ad027cf323c323619566d2c9d1f2fa404f021f":
   version "2.0.2"
   resolved "https://codeload.github.com/JorgeAtPaladin/LayerZero-v2/tar.gz/21ad027cf323c323619566d2c9d1f2fa404f021f"
 
@@ -51,4 +51,3 @@ solidity-bytes-utils@^0.8.2:
   dependencies:
     ds-test "github:dapphub/ds-test"
     forge-std "^1.1.2"
-    
