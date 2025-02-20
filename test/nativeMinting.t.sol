@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 import "../scripts/native-minting-deployment/DeployConfigureL1.s.sol";
-import "../scripts/native-minting-deployment/DeployConfigureL2.s.sol";
+import "../scripts/native-minting-deployment/DeployConfigureAltChain.s.sol";
 import "../contracts/native-minting/EtherfiL1SyncPoolETH.sol";
-import "../contracts/native-minting/l2-syncpools/HydraSyncPoolETHUpgradeable.sol";
+import "../contracts/native-minting/sync-pools/HydraSyncPoolETHUpgradeable.sol";
 import {Origin} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import "../contracts/native-minting/BucketRateLimiter.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -21,7 +21,7 @@ import "forge-std/console.sol";
  * @title Native Minting Unit Tests
  * @notice Test suite for verifying native minting functionality across L1 and L2
  */
-contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {
+contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {   
     // Events for verifying bridge messages
     event SentMessage(
         address indexed sender,
@@ -48,13 +48,13 @@ contract NativeMintingUnitTests is Test, L2Constants, GnosisHelpers {
     // StargatePoolNative deployed on mainnet
     address constant STARGATE_POOL_NATIVE = 0x77b2043768d28E9C9aB44E1aBfC95944bcE57931;
 
-    /// @notice Test native minting functionality and deposit/sync on L2
-    function testNativeMintingL2() public {
-        // Setup L2 environment
+    /// @notice Test native minting functionality and deposit/sync on alt chain
+    function testNativeMintingAltChain() public {
+        // Setup alt chain environment
         vm.createSelectFork(BERA.RPC_URL);
-        L2NativeMintingScript nativeMintingL2 = new L2NativeMintingScript();
+        AltChainNativeMintingScript nativeMintingAltChain = new AltChainNativeMintingScript();
         // contracts have already been deployed hence no need to simulate deployments
-        // nativeMintingL2.run();
+        // nativeMintingAltChain.run();
         vm.stopPrank();
  
         executeGnosisTransactionBundle("./output/setBeraMinter.json", BERA.L2_CONTRACT_CONTROLLER_SAFE);

@@ -12,7 +12,7 @@ import "../../contracts/native-minting/BucketRateLimiter.sol";
 import "../../contracts/native-minting/receivers/L1HydraReceiverETHUpgradeable.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../contracts/native-minting/EtherfiL1SyncPoolETH.sol";
-import "../../contracts/native-minting/l2-syncpools/HydraSyncPoolETHUpgradeable.sol";
+import "../../contracts/native-minting/sync-pools/HydraSyncPoolETHUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 

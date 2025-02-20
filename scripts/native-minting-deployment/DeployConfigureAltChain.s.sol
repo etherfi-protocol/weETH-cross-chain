@@ -11,7 +11,7 @@ import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/lib
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 import "../../contracts/native-minting/EtherfiL2ExchangeRateProvider.sol";
-import "../../contracts/native-minting/l2-syncpools/HydraSyncPoolETHUpgradeable.sol";
+import "../../contracts/native-minting/sync-pools/HydraSyncPoolETHUpgradeable.sol";
 import "../../contracts/native-minting/BucketRateLimiter.sol";
 
 import "../../utils/L2Constants.sol";
@@ -19,15 +19,15 @@ import "../../utils/LayerZeroHelpers.sol";
 import "../../utils/GnosisHelpers.sol";
 import "../../interfaces/ICreate3Deployer.sol";
 
-// forge script scripts/native-minting-deployment/DeployConfigureL2.s.sol:L2NativeMintingScript --evm-version "shanghai" --via-ir --ledger --verify --slow --rpc-url "l2 rpc" --etherscan-api-key "chain api key"
-contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
+// forge script scripts/native-minting-deployment/DeployConfigureAltChain.s.sol:AltChainNativeMintingScript --evm-version "shanghai" --via-ir --ledger --verify --slow --rpc-url "l2 rpc" --etherscan-api-key "chain api key"
+contract AltChainNativeMintingScript is Script, L2Constants, GnosisHelpers {
     using OptionsBuilder for bytes;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     ICreate3Deployer private CREATE3 = ICreate3Deployer(L2_CREATE3_DEPLOYER);
 
 
-    // addition constants for hydra deployment
+    // additional constants for hydra deployment
     // hydra deployed wETH on bera
     address constant HYDRA_WETH = 0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590;
 
