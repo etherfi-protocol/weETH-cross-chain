@@ -95,4 +95,29 @@ library LayerZeroHelpers {
         return params;
     }
 
+    function getDVNConfigWithBlockConfirmations(uint32 eid, address[2] memory lzDvn, uint64 numConfirmations) internal pure returns (SetConfigParam[] memory) {
+        SetConfigParam[] memory params = new SetConfigParam[](1);
+        address[] memory requiredDVNs = new address[](2);
+        if (lzDvn[0] > lzDvn[1]) {
+            requiredDVNs[0] = lzDvn[1];
+            requiredDVNs[1] = lzDvn[0];
+        } else {
+            requiredDVNs[0] = lzDvn[0];
+            requiredDVNs[1] = lzDvn[1];
+        }
+
+        UlnConfig memory ulnConfig = UlnConfig({
+            confirmations: numConfirmations,
+            requiredDVNCount: 2,
+            optionalDVNCount: 0,
+            optionalDVNThreshold: 0,
+            requiredDVNs: requiredDVNs,
+            optionalDVNs: new address[](0)
+        });
+
+        params[0] = SetConfigParam(eid, 2, abi.encode(ulnConfig));
+
+        return params;
+    }
+
 }
