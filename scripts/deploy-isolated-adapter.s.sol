@@ -12,32 +12,33 @@ import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManage
 import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 
-import "../../contracts/EtherFiOFTAdapterUpgradeable.sol";
-import "../../utils/L2Constants.sol";
+import {OFTAdapterUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTAdapterUpgradeable.sol";
+import "../utils/L2Constants.sol";
+import "../utils/LayerZeroHelpers.sol";
 
-
-import "../../utils/LayerZeroHelpers.sol";
-
-contract DeployUpgradeableOFTAdapter is Script, L2Constants {
+// forge script scripts/deploy-isolated-adapter.s.sol:DeployIsolatedAdapter --evm-version "shanghai" --via-ir --verify --rpc-url https://eth-mainnet.g.alchemy.com/v2/s1uQt1DH72oGOULqUztzXwh77EPmHKNO
+contract DeployIsolatedAdapter is Script, L2Constants {
     using OptionsBuilder for bytes;
     
     EnforcedOptionParam[] public enforcedOptions;
     address public adapterProxy;
 
+    uint32 public constant ISOLATED_EID = 30325;
+
     function run() public returns (address) {
         
-        // TODO: replace with the deployer's private key for actual deployment
-        // uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        address scriptDeployer = vm.addr(1);
-        vm.startBroadcast(scriptDeployer);
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        address scriptDeployer = vm.addr(privateKey);
+        console.log("Deployer: ", scriptDeployer);
+        vm.startBroadcast();
 
-        address adapterImpl = address(new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
-        EtherfiOFTAdapterUpgradeable adapter = EtherfiOFTAdapterUpgradeable(address(
+        address adapterImpl = address(new OFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
+        OFTAdapterUpgradeable adapter = OFTAdapterUpgradeable(address(
             new TransparentUpgradeableProxy(
                 address(adapterImpl),
                 L1_TIMELOCK,
                 abi.encodeWithSelector( // delegate and owner stay with the deployer for now
-                    EtherfiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
+                    OFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
                 )
             ))
         );
@@ -48,26 +49,14 @@ contract DeployUpgradeableOFTAdapter is Script, L2Constants {
         address proxyAdminAddress = address(uint160(uint256(vm.load(address(adapter), 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
         ProxyAdmin proxyAdmin = ProxyAdmin(proxyAdminAddress);
         console.log("Proxy Admin Owner: ", proxyAdmin.owner());
-        
-        console.log("Setting L2s as peers...");
-        for (uint256 i = 0; i < L2s.length; i++) {
-            adapter.setPeer(L2s[i].L2_EID, LayerZeroHelpers._toBytes32(L2s[i].L2_OFT));
-        }
 
-        console.log("Setting DVN config for each L2...");
-        for (uint256 i = 0; i < L2s.length; i++) {
-            _setMainnetDVN(L2s[i].L2_EID);
-        }
+        console.log("Setting DVN config for isolated chain");
+        _setMainnetDVN(ISOLATED_EID);
 
-        console.log("Configuring enforced options...");
-        for (uint256 i = 0; i < L2s.length; i++) {
-            _appendEnforcedOptions(L2s[i].L2_EID);
-        }
+        console.log("Configuring enforced options for isolated chain...");
+        _appendEnforcedOptions(ISOLATED_EID);
+
         IOAppOptionsType3(adapterProxy).setEnforcedOptions(enforcedOptions);
-
-        console.log("Transfering ownership to the gnosis...");
-        adapter.setDelegate(L1_CONTRACT_CONTROLLER);
-        adapter.transferOwnership(L1_CONTRACT_CONTROLLER);
 
         vm.stopBroadcast();
         return adapterProxy;
@@ -104,12 +93,12 @@ contract DeployUpgradeableOFTAdapter is Script, L2Constants {
         enforcedOptions.push(EnforcedOptionParam({
             eid: dstEid,
             msgType: 1,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(170_000, 0)
         }));
         enforcedOptions.push(EnforcedOptionParam({
             eid: dstEid,
             msgType: 2,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(170_000, 0)
         }));
     }
 }
