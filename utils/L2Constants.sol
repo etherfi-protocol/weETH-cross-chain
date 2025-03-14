@@ -75,6 +75,7 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     address constant DEPLOYER_ADDRESS = 0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150;
+    address constant CA_DEPLOYER_ADDRESS = 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550;
 
     address constant L2_CREATE3_DEPLOYER = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
     

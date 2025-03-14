@@ -12,11 +12,11 @@ import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManage
 import "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/interfaces/IOAppOptionsType3.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 
-import {OFTAdapterUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTAdapterUpgradeable.sol";
+import {EtherfiOFTAdapterUpgradeable} from "../contracts/EtherfiOFTAdapterUpgradeable.sol";
 import "../utils/L2Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
 
-// forge script scripts/deploy-isolated-adapter.s.sol:DeployIsolatedAdapter --evm-version "shanghai" --via-ir --verify --rpc-url https://eth-mainnet.g.alchemy.com/v2/s1uQt1DH72oGOULqUztzXwh77EPmHKNO
+// forge script scripts/deploy-isolated-adapter.s.sol:DeployIsolatedAdapter --evm-version "shanghai" --via-ir --verify --slow --rpc-url $ETH_RPC --ledger
 contract DeployIsolatedAdapter is Script, L2Constants {
     using OptionsBuilder for bytes;
     
@@ -26,19 +26,17 @@ contract DeployIsolatedAdapter is Script, L2Constants {
     uint32 public constant ISOLATED_EID = 30325;
 
     function run() public returns (address) {
-        
-        uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        address scriptDeployer = vm.addr(privateKey);
+        address scriptDeployer = CA_DEPLOYER_ADDRESS;
         console.log("Deployer: ", scriptDeployer);
         vm.startBroadcast();
 
-        address adapterImpl = address(new OFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
-        OFTAdapterUpgradeable adapter = OFTAdapterUpgradeable(address(
+        address adapterImpl = address(new EtherfiOFTAdapterUpgradeable(L1_WEETH, L1_ENDPOINT));
+        EtherfiOFTAdapterUpgradeable adapter = EtherfiOFTAdapterUpgradeable(address(
             new TransparentUpgradeableProxy(
                 address(adapterImpl),
                 L1_TIMELOCK,
                 abi.encodeWithSelector( // delegate and owner stay with the deployer for now
-                    OFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
+                    EtherfiOFTAdapterUpgradeable.initialize.selector, scriptDeployer, scriptDeployer
                 )
             ))
         );
