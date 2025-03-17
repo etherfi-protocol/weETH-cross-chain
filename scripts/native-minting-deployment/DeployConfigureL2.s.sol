@@ -83,18 +83,18 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
         enforcedOptions[0] = EnforcedOptionParam({
             eid: _eid,
             msgType: 0,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(200_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(400_000, 0)
         });
         
         enforcedOptions[1] = EnforcedOptionParam({
             eid: _eid,
             msgType: 1,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(200_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(400_000, 0)
         });
         enforcedOptions[2] = EnforcedOptionParam({
             eid: _eid,
             msgType: 2,
-            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(200_000, 0)
+            options: OptionsBuilder.newOptions().addExecutorLzReceiveOption(400_000, 0)
         });
 
         return enforcedOptions; 
