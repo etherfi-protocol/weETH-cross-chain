@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {TransparentProxyVennFirewallConsumer} from "@ironblocks/contracts/consumers/presets/proxy/TransparentProxyVennFirewallConsumer.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
@@ -9,11 +11,12 @@ import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeabl
 import {IMintableERC20} from "../interfaces/IMintableERC20.sol";
 import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
+
 /**
  * @title Etherfi mintable upgradeable OFT token
  * @dev Extends MintableOFTUpgradeable with pausing and rate limiting functionality
  */
-contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
+contract EtherfiOFTUpgradeable is TransparentProxyVennFirewallConsumer, OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
@@ -55,6 +58,10 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, Paus
     ) internal virtual override whenNotPaused() returns (uint256 amountReceivedLD) {
         _checkAndUpdateInboundRateLimit(_srcEid, _amountLD);
         return super._credit(_to, _amountLD, 0);
+    }
+
+    function approve(address spender, uint256 amount) public override(ERC20Upgradeable, IERC20) firewallProtected returns (bool) {
+        return super.approve(spender, amount);
     }
 
     /**
@@ -110,4 +117,5 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, Paus
             $.slot := ERC20StorageLocation
         }
     }
+    
 }
