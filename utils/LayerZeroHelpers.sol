@@ -41,7 +41,7 @@ library LayerZeroHelpers {
         }
 
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
@@ -59,7 +59,7 @@ library LayerZeroHelpers {
         
 
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 1,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
@@ -82,7 +82,7 @@ library LayerZeroHelpers {
         }
 
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,

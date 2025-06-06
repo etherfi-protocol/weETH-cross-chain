@@ -134,7 +134,7 @@ contract DeployOFTScript is Script, L2Constants {
             requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
         }
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,

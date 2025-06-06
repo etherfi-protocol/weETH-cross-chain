@@ -141,7 +141,7 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
         requiredDVNs[0] = 0x000000000000000000000000000000000000dEaD;
 
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 1,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
@@ -166,7 +166,7 @@ contract GenerationMigrationTransactions is Script, Constants, LayerZeroHelpers 
         }
 
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,

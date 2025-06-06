@@ -54,22 +54,22 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "";
-    string constant DEPLOYMENT_CHAIN_ID = "";
+    string constant DEPLOYMENT_RPC_URL = "https://avalanche-c-chain-rpc.publicnode.com";
+    string constant DEPLOYMENT_CHAIN_ID = "43114";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 0;
-    address constant DEPLOYMENT_SEND_LIB_302 = address(0x0);
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0x0);
-    address constant DEPLOYMENT_LZ_DVN = address(0x0);
-    address constant DEPLOYMENT_NETHERMIND_DVN = address(0x0);
-    address constant DEPLOYMENT_LZ_ENDPOINT = address(0x0);
+    uint32 constant DEPLOYMENT_EID = 30106;
+    address constant DEPLOYMENT_SEND_LIB_302 = 0x197D1333DEA5Fe0D6600E9b396c7f1B1cFCc558a;
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xbf3521d309642FA9B1c91A08609505BA09752c61;
+    address constant DEPLOYMENT_LZ_DVN = 0x962F502A63F5FBeB44DC9ab932122648E8352959;
+    address constant DEPLOYMENT_NETHERMIND_DVN = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
+    address constant DEPLOYMENT_LZ_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
 
     // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = address(0x0);
-    address constant DEPLOYMENT_OFT_IMPL = address(0x0);
+    address constant DEPLOYMENT_OFT = 0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7;
+    address constant DEPLOYMENT_OFT_IMPL = 0xa49184769628e2f22317FbeB7012EeE6075A1B5B;
     address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0x0);
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0x0);
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0x570456a8768F9EDe4E574706da4B59d8092382B4;
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
@@ -125,18 +125,18 @@ contract L2Constants {
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
     constructor () {
-        L2s.push(BLAST);
-        L2s.push(MODE);
-        L2s.push(BNB);
+        // L2s.push(BLAST);
+        // L2s.push(MODE);
+        // L2s.push(BNB);
         L2s.push(BASE);
-        L2s.push(OP);
-        L2s.push(SCROLL);
-        L2s.push(LINEA);
-        L2s.push(ZKSYNC);
-        L2s.push(SWELL);
-        L2s.push(MORPH);
-        L2s.push(BERA);
-        L2s.push(UNICHAIN);
+        // L2s.push(OP);
+        // L2s.push(SCROLL);
+        // L2s.push(LINEA);
+        // L2s.push(ZKSYNC);
+        // L2s.push(SWELL);
+        // L2s.push(MORPH);
+        // L2s.push(BERA);
+        // L2s.push(UNICHAIN);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({

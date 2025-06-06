@@ -127,7 +127,7 @@ contract UpdateOFTPeersTransactions is Script, L2Constants {
         }
 
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
