@@ -68,7 +68,7 @@ contract L2Constants {
     // OFT deployment addresses
     address constant DEPLOYMENT_OFT = 0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7;
     address constant DEPLOYMENT_OFT_IMPL = 0xa49184769628e2f22317FbeB7012EeE6075A1B5B;
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0x0);
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x7a00657a45420044bc526B90Ad667aFfaee0A868;
     address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0x570456a8768F9EDe4E574706da4B59d8092382B4;
     /*//////////////////////////////////////////////////////////////
                     
