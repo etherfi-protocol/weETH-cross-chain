@@ -23,7 +23,7 @@ workspace.code-workspace
 .DS_Store
 
 # Ignore contents of output directory but keep the directory
-# output/* display transactions for now
+# output/*
 !output/.gitkeep
 
 transactionParsing/venv
