@@ -62,7 +62,7 @@ contract DeployMigrationOFT is Script, L2Constants {
             requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
         }
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
@@ -77,7 +77,7 @@ contract DeployMigrationOFT is Script, L2Constants {
         address[] memory deadDVN = new address[](1);
         deadDVN[0] = DEAD_DVN;
         ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 1,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,

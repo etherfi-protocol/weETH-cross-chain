@@ -15,6 +15,7 @@ import "../../contracts/PairwiseRateLimiter.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
+import "../../interfaces/ICreate3Deployer.sol";
 
 struct OFTDeployment {
     address adminAddress;
@@ -23,9 +24,11 @@ struct OFTDeployment {
     EtherfiOFTUpgradeable tokenContract;
 }
 
-// forge script scripts/oft-deployment/01_OFTConfigure.s.sol:DeployOFTScript --evm-version "shanghai" --via-ir  --ledger --verify --rpc-url "deployment rpc" --etherscan-api-key "etherscan key" --broadcast
+// forge script scripts/oft-deployment/01_OFTConfigure.s.sol:DeployOFTScript --via-ir  --ledger --verify --rpc-url "deployment rpc" --etherscan-api-key "etherscan key" --broadcast
 contract DeployOFTScript is Script, L2Constants {
     using OptionsBuilder for bytes;
+
+    ICreate3Deployer private CREATE3 = ICreate3Deployer(L2_CREATE3_DEPLOYER);
 
     address scriptDeployer;
     OFTDeployment oftDeployment;
@@ -49,22 +52,20 @@ contract DeployOFTScript is Script, L2Constants {
     function deployOFT() internal {
         console.log("Deploying OFT contract...");
 
-        // Create salt for deployment
-        bytes32 SALT = keccak256(abi.encodePacked(TOKEN_NAME));
+        bytes memory implCreationCode = abi.encodePacked(type(EtherfiOFTUpgradeable).creationCode, abi.encode(DEPLOYMENT_LZ_ENDPOINT));
 
-        oftDeployment.implementationAddress = address(new EtherfiOFTUpgradeable{salt: SALT}(DEPLOYMENT_LZ_ENDPOINT));
-        oftDeployment.proxyAddress = address(
-            new TransparentUpgradeableProxy{salt: SALT}(
-                oftDeployment.implementationAddress,
-                scriptDeployer,
-                abi.encodeWithSelector(
-                    EtherfiOFTUpgradeable.initialize.selector, TOKEN_NAME, TOKEN_SYMBOL, scriptDeployer
-                )
-            )
+        oftDeployment.implementationAddress = CREATE3.deployCreate3(keccak256("EtherfiOFTUpgradeable-impl"), implCreationCode);
+
+        bytes memory proxyCreationCode = abi.encodePacked(
+            type(TransparentUpgradeableProxy).creationCode, 
+            abi.encode(oftDeployment.implementationAddress, scriptDeployer, abi.encodeWithSelector(EtherfiOFTUpgradeable.initialize.selector, TOKEN_NAME, TOKEN_SYMBOL, scriptDeployer))
         );
+
+        oftDeployment.proxyAddress = CREATE3.deployCreate3(keccak256("EtherfiOFTUpgradeable-proxy"), proxyCreationCode);
 
         oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
         require(oftDeployment.proxyAddress == DEPLOYMENT_OFT, "OFT proxy address is not correct");
+        require(oftDeployment.implementationAddress == DEPLOYMENT_OFT_IMPL, "OFT implementation address is not correct");
 
         console.log("OFT proxy", oftDeployment.proxyAddress);
         console.log("OFT implementation", oftDeployment.implementationAddress);
@@ -134,7 +135,7 @@ contract DeployOFTScript is Script, L2Constants {
             requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
         }
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 64,
+            confirmations: 15,
             requiredDVNCount: 2,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,

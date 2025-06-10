@@ -54,28 +54,28 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "";
-    string constant DEPLOYMENT_CHAIN_ID = "";
+    string constant DEPLOYMENT_RPC_URL = "https://avalanche-c-chain-rpc.publicnode.com";
+    string constant DEPLOYMENT_CHAIN_ID = "43114";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 0;
-    address constant DEPLOYMENT_SEND_LIB_302 = address(0x0);
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0x0);
-    address constant DEPLOYMENT_LZ_DVN = address(0x0);
-    address constant DEPLOYMENT_NETHERMIND_DVN = address(0x0);
-    address constant DEPLOYMENT_LZ_ENDPOINT = address(0x0);
+    uint32 constant DEPLOYMENT_EID = 30106;
+    address constant DEPLOYMENT_SEND_LIB_302 = 0x197D1333DEA5Fe0D6600E9b396c7f1B1cFCc558a;
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xbf3521d309642FA9B1c91A08609505BA09752c61;
+    address constant DEPLOYMENT_LZ_DVN = 0x962F502A63F5FBeB44DC9ab932122648E8352959;
+    address constant DEPLOYMENT_NETHERMIND_DVN = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
+    address constant DEPLOYMENT_LZ_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
 
-    // OFT deployment addresses
-    address constant DEPLOYMENT_OFT = address(0x0);
-    address constant DEPLOYMENT_OFT_IMPL = address(0x0);
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0x0);
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = address(0x0);
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x7a00657a45420044bc526B90Ad667aFfaee0A868;
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
 
-    address constant DEPLOYER_ADDRESS = 0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150;
+    // OFT deployment addresses (should be consistent across all chains due to the create3 deployment)
+    address constant DEPLOYMENT_OFT = 0xA3D68b74bF0528fdD07263c60d6488749044914b;
+    address constant DEPLOYMENT_OFT_IMPL = 0x22901E04467D982E42b0E7b884C6C098590da749;
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0x373ea3AEC25eB652ACa38504254eCD5459da6d19;
 
+    address constant DEPLOYER_ADDRESS = 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550;
     address constant L2_CREATE3_DEPLOYER = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
     
     // OFT Token Constants
@@ -87,7 +87,7 @@ contract L2Constants {
     uint256 constant BUCKET_REFILL_PER_SECOND = 1000000000000000000;
 
     // Global Production for OFT weETH Bridge Rate Limits
-    uint256 constant LIMIT = 2000 ether;
+    uint256 constant LIMIT = 5000 ether;
     uint256 constant WINDOW = 4 hours;
 
     // Standard Native Minting Rates
@@ -125,18 +125,18 @@ contract L2Constants {
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
     constructor () {
-        L2s.push(BLAST);
-        L2s.push(MODE);
-        L2s.push(BNB);
+        // L2s.push(BLAST);
+        // L2s.push(MODE);
+        // L2s.push(BNB);
         L2s.push(BASE);
-        L2s.push(OP);
-        L2s.push(SCROLL);
-        L2s.push(LINEA);
-        L2s.push(ZKSYNC);
-        L2s.push(SWELL);
-        L2s.push(MORPH);
-        L2s.push(BERA);
-        L2s.push(UNICHAIN);
+        // L2s.push(OP);
+        // L2s.push(SCROLL);
+        // L2s.push(LINEA);
+        // L2s.push(ZKSYNC);
+        // L2s.push(SWELL);
+        // L2s.push(MORPH);
+        // L2s.push(BERA);
+        // L2s.push(UNICHAIN);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
