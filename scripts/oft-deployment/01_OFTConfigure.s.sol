@@ -24,7 +24,7 @@ struct OFTDeployment {
     EtherfiOFTUpgradeable tokenContract;
 }
 
-// forge script scripts/oft-deployment/01_OFTConfigure.s.sol:DeployOFTScript --via-ir --ledger --rpc-url "deployment rpc"
+// forge script scripts/oft-deployment/01_OFTConfigure.s.sol:DeployOFTScript --via-ir  --ledger --sender 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550 --rpc-url "deployment rpc"  --verify --etherscan-api-key "etherscan key"
 contract DeployOFTScript is Script, L2Constants {
     using OptionsBuilder for bytes;
 
