@@ -54,25 +54,25 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://avalanche-c-chain-rpc.publicnode.com";
-    string constant DEPLOYMENT_CHAIN_ID = "43114";
+    string constant DEPLOYMENT_RPC_URL = "https://rpc.hyperliquid.xyz/evm";
+    string constant DEPLOYMENT_CHAIN_ID = "999";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 30106;
-    address constant DEPLOYMENT_SEND_LIB_302 = 0x197D1333DEA5Fe0D6600E9b396c7f1B1cFCc558a;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xbf3521d309642FA9B1c91A08609505BA09752c61;
-    address constant DEPLOYMENT_LZ_DVN = 0x962F502A63F5FBeB44DC9ab932122648E8352959;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
+    uint32 constant DEPLOYMENT_EID = 30367;
+    address constant DEPLOYMENT_SEND_LIB_302 = 0xfd76d9CB0Bac839725aB79127E7411fe71b1e3CA;
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x7cacBe439EaD55fa1c22790330b12835c6884a91;
+    address constant DEPLOYMENT_LZ_DVN = 0xc097ab8CD7b053326DFe9fB3E3a31a0CCe3B526f;
+    address constant DEPLOYMENT_NETHERMIND_DVN = 0x8E49eF1DfAe17e547CA0E7526FfDA81FbaCA810A;
+    address constant DEPLOYMENT_LZ_ENDPOINT = 0x3A73033C0b1407574C76BdBAc67f126f6b4a9AA9;
 
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x7a00657a45420044bc526B90Ad667aFfaee0A868;
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0xf27128a5b064e8d97EDaa60D24bFa2FD1eeC26eB;
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
 
     // OFT deployment addresses (should be consistent across all chains due to the create3 deployment)
     address constant DEPLOYMENT_OFT = 0xA3D68b74bF0528fdD07263c60d6488749044914b;
-    address constant DEPLOYMENT_OFT_IMPL = 0x22901E04467D982E42b0E7b884C6C098590da749;
+    address constant DEPLOYMENT_OFT_IMPL = 0x08DB0DB9b5F2dcbBFDc26FF411FB2026e81DA748;
     address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0x373ea3AEC25eB652ACa38504254eCD5459da6d19;
 
     address constant DEPLOYER_ADDRESS = 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550;
@@ -130,13 +130,14 @@ contract L2Constants {
         // L2s.push(BNB);
         L2s.push(BASE);
         // L2s.push(OP);
-        // L2s.push(SCROLL);
+        L2s.push(SCROLL);
         // L2s.push(LINEA);
         // L2s.push(ZKSYNC);
         // L2s.push(SWELL);
         // L2s.push(MORPH);
-        // L2s.push(BERA);
-        // L2s.push(UNICHAIN);
+        L2s.push(BERA);
+        L2s.push(UNICHAIN);
+        // L2s.push(AVAX);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -550,14 +551,50 @@ contract L2Constants {
         SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7,
         RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043,
 
-        LAYERZERO_DVN: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        LAYERZERO_DVN: 0x282b3386571f7f794450d5789911a9804FA346b4,
         NETHERMIND_DVN: 0x25e0e650a78e6304A3983Fc4b7Ffc6544b1bEea6,
-        LZ_DVN: [0x6F475642a6e85809B1c36Fa62763669b1b48DD5B, 0x25e0e650a78e6304A3983Fc4b7Ffc6544b1bEea6],
+        LZ_DVN: [0x282b3386571f7f794450d5789911a9804FA346b4, 0x25e0e650a78e6304A3983Fc4b7Ffc6544b1bEea6],
 
         L2_OFT: 0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7,
         L2_OFT_IMPL: 0xa49184769628e2f22317FbeB7012EeE6075A1B5B,
         L2_CONTRACT_CONTROLLER_SAFE: 0xe54449CB6162FfcA23721434F4bB9f62702dC602,
         L2_OFT_PROXY_ADMIN: 0x570456a8768F9EDe4E574706da4B59d8092382B4,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
+    ConfigPerL2 AVAX = ConfigPerL2({
+        NAME: "avax",
+        RPC_URL: "https://avalanche-c-chain-rpc.publicnode.com",
+        CHAIN_ID: "43114",
+
+        L2_EID: 30106,
+        L2_ENDPOINT: 0x1a44076050125825900e736c501f859c50fE728c,
+        SEND_302: 0x197D1333DEA5Fe0D6600E9b396c7f1B1cFCc558a,
+        RECEIVE_302: 0xbf3521d309642FA9B1c91A08609505BA09752c61,
+
+        LAYERZERO_DVN: 0x962F502A63F5FBeB44DC9ab932122648E8352959,
+        NETHERMIND_DVN: 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5,
+        LZ_DVN: [0x962F502A63F5FBeB44DC9ab932122648E8352959, 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5],
+
+        L2_OFT: DEPLOYMENT_OFT,
+        L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x7a00657a45420044bc526B90Ad667aFfaee0A868,
+        L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
 
         L2_SYNC_POOL: address(0),
         L2_SYNC_POOL_RATE_LIMITER: address(0),

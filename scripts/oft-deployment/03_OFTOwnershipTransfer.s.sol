@@ -18,7 +18,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 
-// forge script scripts/oft-deployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --ledger --broadcast
+// forge script scripts/oft-deployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "https://rpc.hyperliquid.xyz/evm" --ledger --broadcast
 contract OFTOwnershipTransfer is Script, L2Constants {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
