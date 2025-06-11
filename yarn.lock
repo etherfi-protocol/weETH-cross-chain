@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@ironblocks/firewall-consumer-v2@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@ironblocks/firewall-consumer-v2/-/firewall-consumer-v2-2.0.0.tgz#614844d9dceed864f29224fb252e169c6427d27d"
+  integrity sha512-oUQ9sY35LA6z3PVy+8mwmmj1bf5dwWe4aD4bMwe6FwbCuUAxK2JtY4axCJl/iPli07d0E7sH1zpsgrVrv+Ueqw==
+
 "@layerzerolabs/lz-evm-messagelib-v2@^2.1.27":
   version "2.3.44"
   resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.3.44.tgz#3684bf9de5cf19e417626970ca09528496d70fc1"
