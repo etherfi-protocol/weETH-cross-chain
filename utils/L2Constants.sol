@@ -54,18 +54,18 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://rpc.hyperliquid.xyz/evm";
-    string constant DEPLOYMENT_CHAIN_ID = "999";
+    string constant DEPLOYMENT_RPC_URL = "https://rpc.soniclabs.com";
+    string constant DEPLOYMENT_CHAIN_ID = "146";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 30367;
-    address constant DEPLOYMENT_SEND_LIB_302 = 0xfd76d9CB0Bac839725aB79127E7411fe71b1e3CA;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x7cacBe439EaD55fa1c22790330b12835c6884a91;
-    address constant DEPLOYMENT_LZ_DVN = 0xc097ab8CD7b053326DFe9fB3E3a31a0CCe3B526f;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0x8E49eF1DfAe17e547CA0E7526FfDA81FbaCA810A;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0x3A73033C0b1407574C76BdBAc67f126f6b4a9AA9;
+    uint32 constant DEPLOYMENT_EID = 30332;
+    address constant DEPLOYMENT_SEND_LIB_302 = 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7;
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043;
+    address constant DEPLOYMENT_LZ_DVN = 0x282b3386571f7f794450d5789911a9804FA346b4;
+    address constant DEPLOYMENT_NETHERMIND_DVN = 0x05AaEfDf9dB6E0f7d27FA3b6EE099EDB33dA029E;
+    address constant DEPLOYMENT_LZ_ENDPOINT = 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B;
 
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0xf27128a5b064e8d97EDaa60D24bFa2FD1eeC26eB;
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x7a00657a45420044bc526B90Ad667aFfaee0A868;
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
@@ -130,13 +130,13 @@ contract L2Constants {
         // L2s.push(BNB);
         L2s.push(BASE);
         // L2s.push(OP);
-        L2s.push(SCROLL);
+        // L2s.push(SCROLL);
         // L2s.push(LINEA);
         // L2s.push(ZKSYNC);
         // L2s.push(SWELL);
         // L2s.push(MORPH);
-        L2s.push(BERA);
-        L2s.push(UNICHAIN);
+        // L2s.push(BERA);
+        // L2s.push(UNICHAIN);
         // L2s.push(AVAX);
     }
 
