@@ -11,23 +11,17 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType
 
 contract generateCanaryTransactions is Script, L2Constants, GnosisHelpers {
 
-    mapping(uint32 => address) public canaryDvns;
 
     function run() public {
-        // ethereum canary dvn
-        canaryDvns[1] = 0xa4fE5A5B9A846458a70Cd0748228aED3bF65c2cd;
-        // optimism canary dvn
-        canaryDvns[10] = 0x5b6735c66d97479cCD18294fc96B3084EcB2fa3f;
-        // bsc canary dvn
-        canaryDvns[56] = 0xfA9bA83C102283958B997Adc8B44ED3A3CdB5dDa;
 
         address[] memory existingDvns = new address[](2);
         existingDvns[0] = L1_DVN[0];
         existingDvns[1] = L1_DVN[1];
         uint32[] memory targetEids = new uint32[](2);
-        targetEids[0] = OP.L2_EID;
-        targetEids[1] = BNB.L2_EID;
+        targetEids[0] = BASE.L2_EID;
+        targetEids[1] = SCROLL.L2_EID;
 
+        // generate ethereum canary transaction
         _generate_canary_transaction(
             L1_ENDPOINT,
             "1",
@@ -35,39 +29,41 @@ contract generateCanaryTransactions is Script, L2Constants, GnosisHelpers {
             L1_SEND_302,
             L1_RECEIVE_302,
             existingDvns,
-            canaryDvns[1],
+            0xa4fE5A5B9A846458a70Cd0748228aED3bF65c2cd, // ethereum canary dvn
             targetEids
         );
 
-        existingDvns[0] = OP.LZ_DVN[0];
-        existingDvns[1] = OP.LZ_DVN[1];
+        existingDvns[0] = BASE.LZ_DVN[0];
+        existingDvns[1] = BASE.LZ_DVN[1];
         targetEids[0] = L1_EID;
-        targetEids[1] = BNB.L2_EID;
+        targetEids[1] = SCROLL.L2_EID;
 
+        // generate base canary transaction
         _generate_canary_transaction(
-            OP.L2_ENDPOINT,
-            OP.CHAIN_ID,
-            OP.L2_OFT,
-            OP.SEND_302,
-            OP.RECEIVE_302,
+            BASE.L2_ENDPOINT,
+            BASE.CHAIN_ID,
+            BASE.L2_OFT,
+            BASE.SEND_302,
+            BASE.RECEIVE_302,
             existingDvns,
-            canaryDvns[10],
+            0x554833698Ae0FB22ECC90B01222903fD62CA4B47, // base canary dvn
             targetEids
         );
 
-        existingDvns[0] = BNB.LZ_DVN[0];
-        existingDvns[1] = BNB.LZ_DVN[1];
+        existingDvns[0] = SCROLL.LZ_DVN[0];
+        existingDvns[1] = SCROLL.LZ_DVN[1];
         targetEids[0] = L1_EID;
-        targetEids[1] = OP.L2_EID;
+        targetEids[1] = BASE.L2_EID;
 
+        // generate scroll canary transaction
         _generate_canary_transaction(
-            BNB.L2_ENDPOINT,
-            BNB.CHAIN_ID,
-            BNB.L2_OFT,
-            BNB.SEND_302,
-            BNB.RECEIVE_302,
+            SCROLL.L2_ENDPOINT,
+            SCROLL.CHAIN_ID,
+            SCROLL.L2_OFT,
+            SCROLL.SEND_302,
+            SCROLL.RECEIVE_302,
             existingDvns,
-            canaryDvns[56],
+            0xDF44a1594d3D516f7CDFb4DC275a79a5F6e3Db1d, // scroll canary dvn
             targetEids
         );
     }
