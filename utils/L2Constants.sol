@@ -77,6 +77,10 @@ contract L2Constants {
 
     address constant DEPLOYER_ADDRESS = 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550;
     address constant L2_CREATE3_DEPLOYER = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
+
+    bytes32 constant ADMIN_STORAGE_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
+
+    bytes32 constant IMPLEMENTATION_STORAGE_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
     
     // OFT Token Constants
     string constant TOKEN_NAME = "Wrapped eETH";
@@ -362,7 +366,7 @@ contract L2Constants {
 
     ConfigPerL2 OP = ConfigPerL2({
         NAME: "op",
-        RPC_URL: "https://optimism-rpc.publicnode.com",
+        RPC_URL: "https://mainnet.optimism.io",
         CHAIN_ID: "10",
 
         L2_EID: 30111,
@@ -471,7 +475,7 @@ contract L2Constants {
 
     ConfigPerL2 SWELL = ConfigPerL2({
         NAME: "swell",
-        RPC_URL: "https://swell-mainnet.alt.technology",
+        RPC_URL: "https://rpc.ankr.com/swell",
         CHAIN_ID: "1923",
 
         L2_EID: 30335,

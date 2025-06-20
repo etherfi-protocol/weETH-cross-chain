@@ -13,6 +13,7 @@ import { MessagingFee } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interf
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import { SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
+import "../interfaces/IWeEth.sol";
 import "../contracts/EtherfiOFTUpgradeable.sol";
 import "../contracts/EtherfiOFTAdapterUpgradeable.sol";
 import "../utils/L2Constants.sol";
@@ -61,6 +62,48 @@ contract OFTDeploymentTest is Test, L2Constants {
         assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), LayerZeroHelpers._getExpectedUln(L1_DVN[0], L1_DVN[1]));
 
         _sendCrossChain(DEPLOYMENT_EID, L1_OFT_ADAPTER, 1 ether, false);
+    }
+
+    function testL2Upgrades() public {
+        console.log("Testing L2 upgrades");
+        for (uint i = 0; i < L2s.length; i++) {
+
+            if (L2s[i].L2_EID == 30165) {
+                // zksync has a different execution environment and we can't simulate against it here
+                continue;
+            }
+
+            address l2OFT = L2s[i].L2_OFT;
+
+            console.log("Testing L2 upgrade transactions for %s", L2s[i].NAME);
+            vm.createSelectFork(L2s[i].RPC_URL);
+            EtherfiOFTUpgradeable newEtherfiOFTImplementation = new EtherfiOFTUpgradeable(L2s[i].L2_ENDPOINT);
+            EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(l2OFT);
+            address currentSetL2Endpoint = address(oft.endpoint());
+            assertEq(currentSetL2Endpoint, L2s[i].L2_ENDPOINT);
+
+            bytes32 adminStorageValue = vm.load(l2OFT, ADMIN_STORAGE_SLOT);
+            address proxyAdmin = address(uint160(uint256(adminStorageValue)));
+            address proxyAdminOwner = IWeEth(l2OFT).owner();
+            vm.startPrank(proxyAdminOwner);
+
+            (bool success,) = proxyAdmin.call(abi.encodeWithSignature("upgradeAndCall(address,address,bytes)", oft, address(newEtherfiOFTImplementation), hex""));
+            require(success, "Upgrade failed");
+            bytes32 implementationStorageValue = vm.load(l2OFT, IMPLEMENTATION_STORAGE_SLOT);
+            address implementation = address(uint160(uint256(implementationStorageValue)));
+            assertEq(implementation, address(newEtherfiOFTImplementation));
+
+            address newSetL2Endpoint = address(oft.endpoint());
+            assertEq(newSetL2Endpoint, L2s[i].L2_ENDPOINT);
+
+            address firewallAdmin = oft.firewallAdmin();
+            if (firewallAdmin == address(0)) {
+                oft.initializeFirewallAdmin(proxyAdminOwner);
+                oft.acceptFirewallAdmin();
+            }
+            // test that basic approve doesn't revert
+            oft.approve(address(1), 1 ether);
+        }
     }
 
     function testGnosisL2() public {
