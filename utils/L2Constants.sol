@@ -122,21 +122,26 @@ contract L2Constants {
     // Cross chain pauser EOA
     address constant PAUSER_EOA = 0x9AF1298993DC1f397973C62A5D47a284CF76844D;
 
+    address constant L2_TIMELOCK = 0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6;
+
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
     constructor () {
+        // only include our timelock L2s rn for testing 
+        // TODO: add timelocks to all L2s
+        L2s.push(BERA);
+        L2s.push(BASE);
+        L2s.push(OP);
+        L2s.push(SCROLL);
+        L2s.push(UNICHAIN);
+        L2s.push(LINEA);
+
         // L2s.push(BLAST);
+        // L2s.push(ZKSYNC);
         // L2s.push(MODE);
         // L2s.push(BNB);
-        L2s.push(BASE);
-        // L2s.push(OP);
-        L2s.push(SCROLL);
-        // L2s.push(LINEA);
-        // L2s.push(ZKSYNC);
         // L2s.push(SWELL);
         // L2s.push(MORPH);
-        L2s.push(BERA);
-        L2s.push(UNICHAIN);
         // L2s.push(AVAX);
     }
 

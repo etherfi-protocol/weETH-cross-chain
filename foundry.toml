@@ -17,5 +17,9 @@ bytecode_hash = 'none'
 
 
 [etherscan]
-unknown_chain = { key = "${UNICHAIN_ETHERSCAN_KEY}", chain = 130, url = "https://api.uniscan.xyz/api" }
-berachain = { key = "${BERACHAIN_ETHERSCAN_KEY}", chain = 80094, url = "https://api.berascan.com/api" }
+base = { key = "${MAINNET_ETHERSCAN_KEY}" }
+linea = { key = "${MAINNET_ETHERSCAN_KEY}", chain = 59144 }
+scroll = { key = "${MAINNET_ETHERSCAN_KEY}", chain = 534352 }
+unichain = { key = "${MAINNET_ETHERSCAN_KEY}", chain = 130 }
+berachain = { key = "${MAINNET_ETHERSCAN_KEY}", chain = 80094 }
+op = { key = "${MAINNET_ETHERSCAN_KEY}", chain = 10 }
