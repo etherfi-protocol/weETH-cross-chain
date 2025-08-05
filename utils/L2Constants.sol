@@ -129,11 +129,11 @@ contract L2Constants {
     constructor () {
         // only include our timelock L2s rn for testing 
         // TODO: add timelocks to all L2s
-        L2s.push(BERA);
-        L2s.push(BASE);
-        L2s.push(OP);
-        L2s.push(SCROLL);
-        L2s.push(UNICHAIN);
+        // L2s.push(BERA);
+        // L2s.push(BASE);
+        // L2s.push(OP);
+        // L2s.push(SCROLL);
+        // L2s.push(UNICHAIN);
         L2s.push(LINEA);
 
         // L2s.push(BLAST);
