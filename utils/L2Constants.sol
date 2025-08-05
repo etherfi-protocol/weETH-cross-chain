@@ -126,6 +126,22 @@ contract L2Constants {
 
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
+    // constructor () {
+    //     L2s.push(BERA);
+    //     L2s.push(BASE);
+    //     L2s.push(OP);
+    //     L2s.push(ZKSYNC);
+    //     L2s.push(SCROLL);
+    //     L2s.push(BLAST);
+    //     L2s.push(MODE);
+    //     L2s.push(UNICHAIN);
+    //     L2s.push(BNB);
+    //     L2s.push(LINEA);
+    //     L2s.push(SWELL);
+    //     L2s.push(MORPH);
+    //     L2s.push(AVAX);
+    // }
+
     constructor () {
         // only include our timelock L2s rn for testing 
         // TODO: add timelocks to all L2s
@@ -136,15 +152,7 @@ contract L2Constants {
         L2s.push(UNICHAIN);
         L2s.push(LINEA);
 
-        // L2s.push(BLAST);
-        // L2s.push(ZKSYNC);
-        // L2s.push(MODE);
-        // L2s.push(BNB);
-        // L2s.push(SWELL);
-        // L2s.push(MORPH);
-        // L2s.push(AVAX);
     }
-
     ConfigPerL2 BLAST = ConfigPerL2({
         NAME: "blast",
         RPC_URL: "https://rpc.blast.io",
