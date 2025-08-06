@@ -151,8 +151,11 @@ contract L2Constants {
         L2s.push(SCROLL);
         L2s.push(UNICHAIN);
         L2s.push(LINEA);
-
+        L2s.push(BNB);
+        L2s.push(SWELL);
+        L2s.push(AVAX);
     }
+
     ConfigPerL2 BLAST = ConfigPerL2({
         NAME: "blast",
         RPC_URL: "https://rpc.blast.io",
