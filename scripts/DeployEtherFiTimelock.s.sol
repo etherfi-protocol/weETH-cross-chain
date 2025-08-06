@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 
-// forge script scripts/deployEtherFiTimelock.s.sol:DeployEtherFiTimelock --via-ir --ledger --sender 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550 --rpc-url "deployment rpc"
+// forge script scripts/deployEtherFiTimelock.s.sol:DeployEtherFiTimelock --ledger --sender 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550 --rpc-url "deployment rpc"
 contract DeployEtherFiTimelock is Script, L2Constants {
 
     ICreate3Deployer private CREATE3 = ICreate3Deployer(L2_CREATE3_DEPLOYER);
@@ -18,8 +18,8 @@ contract DeployEtherFiTimelock is Script, L2Constants {
         vm.startBroadcast();
 
         address[] memory controller = new address[](1);
-        controller[0] = AVAX.L2_CONTRACT_CONTROLLER_SAFE;
-        ProxyAdmin proxyAdmin = ProxyAdmin(AVAX.L2_OFT_PROXY_ADMIN);
+        controller[0] = MODE.L2_CONTRACT_CONTROLLER_SAFE;
+        ProxyAdmin proxyAdmin = ProxyAdmin(MODE.L2_OFT_PROXY_ADMIN);
 
         require(proxyAdmin.owner() == controller[0], "Proxy admin owner mismatch");
 
