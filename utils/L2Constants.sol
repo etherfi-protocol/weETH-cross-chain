@@ -150,10 +150,10 @@ contract L2Constants {
         L2s.push(OP);
         L2s.push(SCROLL);
         L2s.push(UNICHAIN);
-        L2s.push(LINEA);
-        L2s.push(BNB);
-        L2s.push(SWELL);
-        L2s.push(AVAX);
+        // L2s.push(AVAX);
+
+        L2s.push(HYPEREVM);
+        L2s.push(SONIC);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -629,4 +629,77 @@ contract L2Constants {
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
 
+    ConfigPerL2 SONIC = ConfigPerL2({
+        NAME: "sonic",
+        RPC_URL: "https://rpc.soniclabs.com",
+        CHAIN_ID: "146",
+
+        L2_EID: 30332,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7,
+        RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043,
+
+        LAYERZERO_DVN: 0x282b3386571f7f794450d5789911a9804FA346b4,
+        NETHERMIND_DVN: 0x05AaEfDf9dB6E0f7d27FA3b6EE099EDB33dA029E,
+        LZ_DVN: [0x282b3386571f7f794450d5789911a9804FA346b4, 0x05AaEfDf9dB6E0f7d27FA3b6EE099EDB33dA029E],
+
+        L2_OFT: DEPLOYMENT_OFT,
+        L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x7a00657a45420044bc526B90Ad667aFfaee0A868,
+        L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
+
+
+    ConfigPerL2 HYPEREVM = ConfigPerL2({
+        NAME: "hyperEVM",
+        RPC_URL: "https://rpc.hyperliquid.xyz",
+        CHAIN_ID: "999",
+
+        L2_EID: 30367,
+        L2_ENDPOINT: 0x3A73033C0b1407574C76BdBAc67f126f6b4a9AA9,
+        SEND_302: 0xfd76d9CB0Bac839725aB79127E7411fe71b1e3CA,
+        RECEIVE_302: 0x7cacBe439EaD55fa1c22790330b12835c6884a91,
+
+        LAYERZERO_DVN: 0xc097ab8CD7b053326DFe9fB3E3a31a0CCe3B526f,
+        NETHERMIND_DVN: 0x8E49eF1DfAe17e547CA0E7526FfDA81FbaCA810A,
+        LZ_DVN: [0xc097ab8CD7b053326DFe9fB3E3a31a0CCe3B526f, 0x8E49eF1DfAe17e547CA0E7526FfDA81FbaCA810A],
+
+        L2_OFT: DEPLOYMENT_OFT,
+        L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
+        L2_CONTRACT_CONTROLLER_SAFE: 0xf27128a5b064e8d97EDaa60D24bFa2FD1eeC26eB,
+        L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
 }
