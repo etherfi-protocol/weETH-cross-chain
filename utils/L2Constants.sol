@@ -124,6 +124,8 @@ contract L2Constants {
 
     address constant L2_TIMELOCK = 0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6;
 
+    // address constant ZKSYNC_TIMELOCK 
+
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
     constructor () {

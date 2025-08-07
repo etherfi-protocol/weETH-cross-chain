@@ -15,11 +15,11 @@ contract DeployEtherFiTimelock is Script, L2Constants {
     ICreate3Deployer private CREATE3 = ICreate3Deployer(L2_CREATE3_DEPLOYER);
 
     function run() public {
-        vm.startBroadcast();
+        vm.startBroadcast(0xd8F3803d8412e61e04F53e1C9394e13eC8b32550);
 
         address[] memory controller = new address[](1);
-        controller[0] = MODE.L2_CONTRACT_CONTROLLER_SAFE;
-        ProxyAdmin proxyAdmin = ProxyAdmin(MODE.L2_OFT_PROXY_ADMIN);
+        controller[0] = ZKSYNC.L2_CONTRACT_CONTROLLER_SAFE;
+        ProxyAdmin proxyAdmin = ProxyAdmin(ZKSYNC.L2_OFT_PROXY_ADMIN);
 
         require(proxyAdmin.owner() == controller[0], "Proxy admin owner mismatch");
 

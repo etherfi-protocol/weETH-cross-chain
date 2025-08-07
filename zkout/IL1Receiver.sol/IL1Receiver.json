@@ -1,0 +1,1 @@
+{"abi":[{"type":"function","name":"onMessageReceived","inputs":[{"name":"message","type":"bytes","internalType":"bytes"}],"outputs":[],"stateMutability":"payable"}],"storageLayout":{"storage":[],"types":{}},"userdoc":{},"devdoc":{},"factoryDependencies":{},"factoryDependenciesUnlinked":[],"id":29}
