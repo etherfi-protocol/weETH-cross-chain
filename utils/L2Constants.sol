@@ -127,14 +127,14 @@ contract L2Constants {
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
     constructor () {
-        L2s.push(BLAST);
+        // L2s.push(BLAST); blast to be configured and signed separately due to lack of gnosis safe support
         L2s.push(MODE);
         L2s.push(BNB);
         L2s.push(BASE);
         L2s.push(OP);
         L2s.push(SCROLL);
         L2s.push(LINEA);
-        // L2s.push(ZKSYNC); zksync to be deployed and verified separately  
+        // L2s.push(ZKSYNC); zksync to be deployed and configured separately due to different deployment process
         L2s.push(SWELL);
         L2s.push(MORPH);
         L2s.push(BERA);
