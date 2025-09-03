@@ -160,13 +160,13 @@ contract L2NativeMintingScript is Script, L2Constants, GnosisHelpers {
         // generate the transactions required by the L2 contract controller
 
         // give the L2 sync pool permission to mint the dummy token
-        string memory minterTransaction = _getGnosisHeader(BERA.CHAIN_ID);
+        string memory minterTransaction = _getGnosisHeader(BERA.CHAIN_ID, BERA.L2_CONTRACT_CONTROLLER_SAFE);
         bytes memory setMinterData = abi.encodeWithSignature("grantRole(bytes32,address)", MINTER_ROLE, BERA.L2_SYNC_POOL);
         minterTransaction = string.concat(minterTransaction, _getGnosisTransaction(iToHex(abi.encodePacked(BERA.L2_OFT)), iToHex(setMinterData), true));
         vm.writeJson(minterTransaction, "./output/setBeraMinter.json");
 
         // transaction to set the min sync 
-        string memory minSyncTransaction = _getGnosisHeader(BERA.CHAIN_ID);
+        string memory minSyncTransaction = _getGnosisHeader(BERA.CHAIN_ID, BERA.L2_CONTRACT_CONTROLLER_SAFE);
         bytes memory setMinSyncData = abi.encodeWithSignature("setMinSyncAmount(address,uint256)", HYDRA_WETH, 10 ether);
         minSyncTransaction = string.concat(minSyncTransaction, _getGnosisTransaction(iToHex(abi.encodePacked(BERA.L2_SYNC_POOL)), iToHex(setMinSyncData), true));
         vm.writeJson(minSyncTransaction, "./output/setMinSyncAmount.json");

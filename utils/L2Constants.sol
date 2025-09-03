@@ -122,23 +122,24 @@ contract L2Constants {
     // Cross chain pauser EOA
     address constant PAUSER_EOA = 0x9AF1298993DC1f397973C62A5D47a284CF76844D;
 
+    address constant L2_TIMELOCK = 0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6;
+
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
     constructor () {
-        // L2s.push(BLAST);
-        // L2s.push(MODE);
-        // L2s.push(BNB);
+        // L2s.push(BLAST); blast to be configured and signed separately due to lack of gnosis safe support
+        L2s.push(MODE);
+        L2s.push(BNB);
         L2s.push(BASE);
-        // L2s.push(OP);
+        L2s.push(OP);
         L2s.push(SCROLL);
-        // L2s.push(LINEA);
-        // L2s.push(ZKSYNC);
-        // L2s.push(SWELL);
-        // L2s.push(MORPH);
+        L2s.push(LINEA);
+        // L2s.push(ZKSYNC); zksync to be deployed and configured separately due to different deployment process
+        L2s.push(SWELL);
+        L2s.push(MORPH);
         L2s.push(BERA);
         L2s.push(UNICHAIN);
-        // L2s.push(AVAX);
-
+        L2s.push(AVAX);
         L2s.push(HYPEREVM);
         L2s.push(SONIC);
     }
@@ -217,7 +218,7 @@ contract L2Constants {
 
     ConfigPerL2 LINEA = ConfigPerL2({
         NAME: "linea",
-        RPC_URL: "https://linea-mainnet.public.blastapi.io",
+        RPC_URL: "https://rpc.linea.build",
         CHAIN_ID: "59144",
 
         L2_EID: 30183,
@@ -254,7 +255,7 @@ contract L2Constants {
 
     ConfigPerL2 BASE = ConfigPerL2({
         NAME: "base",
-        RPC_URL: "https://base-mainnet.public.blastapi.io",
+        RPC_URL: "https://mainnet.base.org",
         CHAIN_ID: "8453",
 
         L2_EID: 30184,
@@ -546,7 +547,7 @@ contract L2Constants {
 
     ConfigPerL2 UNICHAIN = ConfigPerL2({
         NAME: "unichain",
-        RPC_URL: "https://mainnet.unichain.org/",
+        RPC_URL: "https://mainnet.unichain.org",
         CHAIN_ID: "130",
 
         L2_EID: 30320,
@@ -656,7 +657,7 @@ contract L2Constants {
 
     ConfigPerL2 HYPEREVM = ConfigPerL2({
         NAME: "hyperEVM",
-        RPC_URL: "https://rpc.hyperliquid.xyz",
+        RPC_URL: "https://rpc.hyperliquid.xyz/evm",
         CHAIN_ID: "999",
 
         L2_EID: 30367,

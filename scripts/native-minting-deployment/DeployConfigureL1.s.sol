@@ -68,8 +68,8 @@ contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
         // the require transactions to integrate native minting on the L1 side are spilt between the timelock and the L1 contract controller
         
         // 1. generate the schedule and execute transactions for the L1 sync pool
-        string memory timelock_schedule_transactions = _getGnosisHeader("1");
-        string memory timelock_execute_transactions = _getGnosisHeader("1");
+        string memory timelock_schedule_transactions = _getGnosisHeader("1", L1_CONTRACT_CONTROLLER);
+        string memory timelock_execute_transactions = _getGnosisHeader("1", L1_CONTRACT_CONTROLLER);
         
         // registers the new dummy token as an acceptable token for the vamp contract
         bytes memory setTokenData = abi.encodeWithSignature("registerToken(address,address,bool,uint16,uint32,uint32,bool)", BERA.L1_DUMMY_TOKEN, address(0), true, 0, 20_000, 200_000, true); 
@@ -93,7 +93,7 @@ contract L1NativeMintingScript is Script, L2Constants, GnosisHelpers {
         vm.writeJson(timelock_execute_transactions, "./output/L1NativeMintingExecuteTransactions.json");
 
         // 2. generate transactions required by the L1 contract controller
-        string memory l1_contract_controller_transaction = _getGnosisHeader("1");
+        string memory l1_contract_controller_transaction = _getGnosisHeader("1", L1_CONTRACT_CONTROLLER);
 
         // set DVN receive config for the L1 sync to receive messages from the L2 sync pool
         string memory setLZConfigReceive = iToHex(abi.encodeWithSignature("setConfig(address,address,(uint32,uint32,bytes)[])", L1_SYNC_POOL, L1_RECEIVE_302, LayerZeroHelpers.getDVNConfigWithBlockConfirmations(BERA.L2_EID, L1_DVN, 10)));

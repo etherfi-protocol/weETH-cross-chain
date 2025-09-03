@@ -27,8 +27,8 @@ contract GnosisHelpers is Test {
     }
 
     // Get the gnosis transaction header
-    function _getGnosisHeader(string memory chainId) internal pure returns (string memory) {
-        return string.concat('{"chainId":"', chainId, '","meta": { "txBuilderVersion": "1.16.5" }, "transactions": [');
+     function _getGnosisHeader(string memory chainId, address safeAddress) internal pure returns (string memory) {
+        return string.concat('{"chainId":"', chainId, '","safeAddress":"', addressToHex(safeAddress), '","meta": { "txBuilderVersion": "1.16.5" }, "transactions": [');
     }
 
     // Create a gnosis transaction
