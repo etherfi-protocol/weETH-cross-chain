@@ -49,10 +49,10 @@ contract OFTDeploymentTest is Test, L2Constants {
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 1), hex"00030100110100000000000000000000000000029810");
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 2), hex"00030100110100000000000000000000000000029810");
         (,,uint256 limit, uint256 window) = adapter.inboundRateLimits(DEPLOYMENT_EID);
-            assertEq(limit, 10000 ether);
+            assertEq(limit, 5000 ether);
             assertEq(window, 4 hours);
         (,,limit, window) = adapter.outboundRateLimits(DEPLOYMENT_EID);
-            assertEq(limit, 10000 ether);
+            assertEq(limit, 5000 ether);
             assertEq(window, 4 hours);
 
         console.log("Confirming that the layerzero endpoint for mainnet is properly configured");
@@ -97,10 +97,10 @@ contract OFTDeploymentTest is Test, L2Constants {
             EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(L2s[i].L2_OFT);
             assertTrue(oft.isPeer(DEPLOYMENT_EID,LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT)));
             (,,uint256 limit, uint256 window) = oft.inboundRateLimits(DEPLOYMENT_EID);
-            assertEq(limit, 10000 ether);
+            assertEq(limit, 5000 ether);
             assertEq(window, 4 hours);
             (,,limit, window) = oft.outboundRateLimits(DEPLOYMENT_EID);
-            assertEq(limit, 10000 ether);
+            assertEq(limit, 5000 ether);
             assertEq(window, 4 hours);
 
             assertEq(oft.enforcedOptions(DEPLOYMENT_EID, 1), hex"00030100110100000000000000000000000000029810");
@@ -124,10 +124,10 @@ contract OFTDeploymentTest is Test, L2Constants {
         console.log("confirming that L2 -> L1 configuration is correct");
         assertTrue(oft.isPeer(L1_EID,LayerZeroHelpers._toBytes32(L1_OFT_ADAPTER)));
         (,,uint256 limit, uint256 window) = oft.inboundRateLimits(L1_EID);
-        assertEq(limit, 10000 ether);
+        assertEq(limit, 5000 ether);
         assertEq(window, 4 hours);
         (,,limit, window) = oft.outboundRateLimits(L1_EID);
-        assertEq(limit, 10000 ether);
+        assertEq(limit, 5000 ether);
         assertEq(window, 4 hours);
         assertEq(oft.enforcedOptions(L1_EID, 1), hex"00030100110100000000000000000000000000029810");
         assertEq(oft.enforcedOptions(L1_EID, 2), hex"00030100110100000000000000000000000000029810");
@@ -140,10 +140,10 @@ contract OFTDeploymentTest is Test, L2Constants {
             console.log("confirming that deployment -> %s configuration is correct", L2s[i].NAME);
             assertTrue(oft.isPeer(L2s[i].L2_EID,LayerZeroHelpers._toBytes32(L2s[i].L2_OFT)));
             (,,limit, window) = oft.inboundRateLimits(L2s[i].L2_EID);
-            assertEq(limit, 10000 ether); 
+            assertEq(limit, 5000 ether); 
             assertEq(window, 4 hours);
             (,,limit, window) = oft.outboundRateLimits(L2s[i].L2_EID);
-            assertEq(limit, 10000 ether);
+            assertEq(limit, 5000 ether);
             assertEq(window, 4 hours);
             assertEq(oft.enforcedOptions(L2s[i].L2_EID, 1), hex"00030100110100000000000000000000000000029810"); 
             assertEq(oft.enforcedOptions(L2s[i].L2_EID, 2), hex"00030100110100000000000000000000000000029810");

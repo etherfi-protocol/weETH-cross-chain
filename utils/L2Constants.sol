@@ -54,18 +54,18 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://rpc.plasma.to/";
-    string constant DEPLOYMENT_CHAIN_ID =  "9745";
+    string constant DEPLOYMENT_RPC_URL = "";
+    string constant DEPLOYMENT_CHAIN_ID =  "";
     
-    // LayerZero addresses`
-    uint32 constant DEPLOYMENT_EID = 30383;
-    address constant DEPLOYMENT_SEND_LIB_302 = 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043;
-    address constant DEPLOYMENT_LZ_DVN = 0x282b3386571f7f794450d5789911a9804FA346b4;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0xa51cE237FaFA3052D5d3308Df38A024724Bb1274;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B;
+    // LayerZero addresses
+    uint32 constant DEPLOYMENT_EID = 0;
+    address constant DEPLOYMENT_SEND_LIB_302 = address(0);
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
+    address constant DEPLOYMENT_LZ_DVN = address(0);
+    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
+    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
 
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x8faD84C95282503b198e27A0aAe378a04bc3d60f;
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0);
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
@@ -87,7 +87,7 @@ contract L2Constants {
     uint256 constant BUCKET_REFILL_PER_SECOND = 1000000000000000000;
 
     // Global Production for OFT weETH Bridge Rate Limits
-    uint256 constant LIMIT = 10000 ether;
+    uint256 constant LIMIT = 5000 ether;
     uint256 constant WINDOW = 4 hours;
 
     // Standard Native Minting Rates
@@ -693,39 +693,39 @@ contract L2Constants {
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
 
-    // ConfigPerL2 PLASMA = ConfigPerL2({
-    //     NAME: "plasma",
-    //     RPC_URL: "https://rpc.plasma.com",
-    //     CHAIN_ID: "9745",
+    ConfigPerL2 PLASMA = ConfigPerL2({
+        NAME: "plasma",
+        RPC_URL: "https://rpc.plasma.to/",
+        CHAIN_ID: "9745",
 
-    //     L2_EID: 30383,
-    //     L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
-    //     SEND_302:0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7 ,
-    //     RECEIVE_302:0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043 ,
+        L2_EID: 30383,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7 ,
+        RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043 ,
 
-    //     LAYERZERO_DVN: 0x282b3386571f7f794450d5789911a9804FA346b4,
-    //     NETHERMIND_DVN: 0xa51cE237FaFA3052D5d3308Df38A024724Bb1274,
-    //     LZ_DVN: [0x282b3386571f7f794450d5789911a9804FA346b4, 0xa51cE237FaFA3052D5d3308Df38A024724Bb1274],
+        LAYERZERO_DVN: 0x282b3386571f7f794450d5789911a9804FA346b4,
+        NETHERMIND_DVN: 0xa51cE237FaFA3052D5d3308Df38A024724Bb1274,
+        LZ_DVN: [0x282b3386571f7f794450d5789911a9804FA346b4, 0xa51cE237FaFA3052D5d3308Df38A024724Bb1274],
 
-    //     L2_OFT: DEPLOYMENT_OFT,
-    //     L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
-    //     L2_CONTRACT_CONTROLLER_SAFE: address(0),
-    //     L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
+        L2_OFT: DEPLOYMENT_OFT,
+        L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
+        L2_CONTRACT_CONTROLLER_SAFE: address(0),
+        L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
 
-    //     L2_SYNC_POOL: address(0),
-    //     L2_SYNC_POOL_RATE_LIMITER: address(0),
-    //     L2_EXCHANGE_RATE_PROVIDER: address(0),
-    //     L2_PRICE_ORACLE: address(0),
-    //     L2_MESSENGER: address(0),
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
 
-    //     L1_MESSENGER: address(0),
-    //     L1_DUMMY_TOKEN: address(0),
-    //     L1_RECEIVER: address(0),
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
 
-    //     L2_SYNC_POOL_PROXY_ADMIN: address(0),
-    //     L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
-    //     L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
-    //     L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
-    //     L1_RECEIVER_PROXY_ADMIN: address(0)
-    // });
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
 }

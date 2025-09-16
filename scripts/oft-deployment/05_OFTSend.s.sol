@@ -34,11 +34,11 @@ contract CrossChainSend is Script, L2Constants {
         //////////////////////////////////////////////////////////////*/
         
         // Initializing the sending OFT (only set if sending from L2)
-        IOFT SENDING_OFT = IOFT(0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7);
+        IOFT SENDING_OFT = IOFT(0xA3D68b74bF0528fdD07263c60d6488749044914b);
         IERC20 SENDING_ERC20 = IERC20(address(SENDING_OFT));
 
         // Desintation EID
-        uint32 DST_EID = 30101;
+        uint32 DST_EID = 30184;
 
         /*//////////////////////////////////////////////////////////////
                     
