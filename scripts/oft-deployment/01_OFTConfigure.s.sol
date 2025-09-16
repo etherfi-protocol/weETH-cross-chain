@@ -13,6 +13,7 @@ import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/lib
 import "../../contracts/PairwiseRateLimiter.sol";
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
+import "../../contracts/EtherFiTimelock.sol";
 import "../../utils/L2Constants.sol";
 import "../../utils/LayerZeroHelpers.sol";
 import "../../interfaces/ICreate3Deployer.sol";
@@ -66,6 +67,23 @@ contract DeployOFTScript is Script, L2Constants {
         oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
         require(oftDeployment.proxyAddress == DEPLOYMENT_OFT, "OFT proxy address is not correct");
         require(oftDeployment.implementationAddress == DEPLOYMENT_OFT_IMPL, "OFT implementation address is not correct");
+
+        oftDeployment.proxyAddress = DEPLOYMENT_OFT;
+        oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
+
+        address[] memory controller = new address[](1);
+        controller[0] = DEPLOYMENT_CONTRACT_CONTROLLER;
+        if(DEPLOYMENT_CONTRACT_CONTROLLER == address(0)) {
+            revert("DEPLOYMENT_CONTRACT_CONTROLLER is not set");
+        }
+
+        bytes memory timelockCreationCode = abi.encodePacked(
+            type(EtherFiTimelock).creationCode, 
+            abi.encode(3 days, controller, controller, address(0))
+        );
+        address timelockAddress = CREATE3.deployCreate3(keccak256("EtherFiTimelock"), timelockCreationCode);
+        require(timelockAddress == L2_TIMELOCK, "Timelock address is not correct");
+
 
         console.log("OFT proxy", oftDeployment.proxyAddress);
         console.log("OFT implementation", oftDeployment.implementationAddress);

@@ -54,18 +54,18 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://rpc.hyperliquid.xyz/evm";
-    string constant DEPLOYMENT_CHAIN_ID = "999";
+    string constant DEPLOYMENT_RPC_URL = "";
+    string constant DEPLOYMENT_CHAIN_ID =  "";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 30367;
-    address constant DEPLOYMENT_SEND_LIB_302 = 0xfd76d9CB0Bac839725aB79127E7411fe71b1e3CA;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x7cacBe439EaD55fa1c22790330b12835c6884a91;
-    address constant DEPLOYMENT_LZ_DVN = 0xc097ab8CD7b053326DFe9fB3E3a31a0CCe3B526f;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0x8E49eF1DfAe17e547CA0E7526FfDA81FbaCA810A;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0x3A73033C0b1407574C76BdBAc67f126f6b4a9AA9;
+    uint32 constant DEPLOYMENT_EID = 0;
+    address constant DEPLOYMENT_SEND_LIB_302 = address(0);
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
+    address constant DEPLOYMENT_LZ_DVN = address(0);
+    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
+    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
 
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0xf27128a5b064e8d97EDaa60D24bFa2FD1eeC26eB;
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0);
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
@@ -126,22 +126,24 @@ contract L2Constants {
 
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
+
+    // Only connecting to base and mainnet
     constructor () {
-        // L2s.push(BLAST); blast to be configured and signed separately due to lack of gnosis safe support
-        L2s.push(MODE);
-        L2s.push(BNB);
+        // L2s.push(BLAST);
+        // L2s.push(MODE);
+        // L2s.push(BNB);
         L2s.push(BASE);
-        L2s.push(OP);
-        L2s.push(SCROLL);
-        L2s.push(LINEA);
-        // L2s.push(ZKSYNC); zksync to be deployed and configured separately due to different deployment process
-        L2s.push(SWELL);
-        L2s.push(MORPH);
-        L2s.push(BERA);
-        L2s.push(UNICHAIN);
-        L2s.push(AVAX);
-        L2s.push(HYPEREVM);
-        L2s.push(SONIC);
+        // L2s.push(OP);
+        // L2s.push(SCROLL);
+        // L2s.push(LINEA);
+        // L2s.push(ZKSYNC);
+        // L2s.push(SWELL);
+        // L2s.push(MORPH);
+        // L2s.push(BERA);
+        // L2s.push(UNICHAIN);
+        // L2s.push(AVAX);
+        // L2s.push(HYPEREVM);
+        // L2s.push(SONIC);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -672,6 +674,42 @@ contract L2Constants {
         L2_OFT: DEPLOYMENT_OFT,
         L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
         L2_CONTRACT_CONTROLLER_SAFE: 0xf27128a5b064e8d97EDaa60D24bFa2FD1eeC26eB,
+        L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
+    ConfigPerL2 PLASMA = ConfigPerL2({
+        NAME: "plasma",
+        RPC_URL: "https://rpc.plasma.to/",
+        CHAIN_ID: "9745",
+
+        L2_EID: 30383,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7 ,
+        RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043 ,
+
+        LAYERZERO_DVN: 0x282b3386571f7f794450d5789911a9804FA346b4,
+        NETHERMIND_DVN: 0xa51cE237FaFA3052D5d3308Df38A024724Bb1274,
+        LZ_DVN: [0x282b3386571f7f794450d5789911a9804FA346b4, 0xa51cE237FaFA3052D5d3308Df38A024724Bb1274],
+
+        L2_OFT: DEPLOYMENT_OFT,
+        L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
+        L2_CONTRACT_CONTROLLER_SAFE: address(0),
         L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
 
         L2_SYNC_POOL: address(0),

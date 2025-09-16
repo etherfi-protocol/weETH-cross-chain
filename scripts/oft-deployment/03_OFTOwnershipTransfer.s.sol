@@ -42,16 +42,16 @@ contract OFTOwnershipTransfer is Script, L2Constants {
         oft.grantRole(UNPAUSER_ROLE, DEPLOYMENT_CONTRACT_CONTROLLER);
 
         // set the contract controller as the default admin
-        oft.grantRole(bytes32(0x0000000000000000000000000000000000000000000000000000000000000000), DEPLOYMENT_CONTRACT_CONTROLLER);
+        oft.grantRole(bytes32(0x0000000000000000000000000000000000000000000000000000000000000000), L2_TIMELOCK);
 
         // revoke the script deployer's admin role
         oft.renounceRole(bytes32(0x0000000000000000000000000000000000000000000000000000000000000000), scriptDeployer);
         
         // transfer ownership to the contract controller
-        oft.transferOwnership(DEPLOYMENT_CONTRACT_CONTROLLER);
+        oft.transferOwnership(L2_TIMELOCK);
 
         // transfer ownership of the proxy admin to the contract controller
-        oftProxyAdmin.transferOwnership(DEPLOYMENT_CONTRACT_CONTROLLER);
+        oftProxyAdmin.transferOwnership(L2_TIMELOCK);
 
         console.log("OFT new owner: %s", oft.owner());
         console.log("OFT proxy admin new owner: %s", oftProxyAdmin.owner());
