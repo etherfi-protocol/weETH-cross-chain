@@ -159,9 +159,9 @@ contract OFTDeploymentTest is Test, L2Constants {
         }
 
         console.log("Testing failed sends do to rate limit exceeded");
-        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 10001 ether, true);
+        _sendCrossChain(L1_EID, DEPLOYMENT_OFT, 5001 ether, true);
         for (i = 0; i < L2s.length; i++) {
-            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 10001 ether, true);
+            _sendCrossChain(L2s[i].L2_EID, DEPLOYMENT_OFT, 5001 ether, true);
         }
     }
 
