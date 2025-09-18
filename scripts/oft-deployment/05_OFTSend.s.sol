@@ -9,11 +9,11 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
+import "@layerzerolabs/oapp-evm/contracts/oapp/utils/RateLimiter.sol";
 import { MessagingFee } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
-import { SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import { SendParam } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+import "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "forge-std/Test.sol";

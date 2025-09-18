@@ -5,7 +5,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
-import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
+import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFTUpgradeable.sol";
 import {IMintableERC20} from "../interfaces/IMintableERC20.sol";
 import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
@@ -40,12 +40,13 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, Paus
     }
 
     function _debit(
+        address _from,
         uint256 _amountLD,
         uint256 _minAmountLD,
         uint32 _dstEid
     ) internal virtual override whenNotPaused() returns (uint256 amountSentLD, uint256 amountReceivedLD) {
         _checkAndUpdateOutboundRateLimit(_dstEid, _amountLD);
-        return super._debit(_amountLD, _minAmountLD, _dstEid);
+        return super._debit(_from, _amountLD, _minAmountLD, _dstEid);
     }
 
     function _credit(
@@ -54,7 +55,7 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, Paus
         uint32 _srcEid
     ) internal virtual override whenNotPaused() returns (uint256 amountReceivedLD) {
         _checkAndUpdateInboundRateLimit(_srcEid, _amountLD);
-        return super._credit(_to, _amountLD, 0);
+        return super._credit(_to, _amountLD, _srcEid);
     }
 
     /**

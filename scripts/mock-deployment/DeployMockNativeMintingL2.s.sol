@@ -9,9 +9,9 @@ import {HydraSyncPoolETHUpgradeable} from "../../contracts/native-minting/L2Sync
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Constants} from "../../contracts/libraries/Constants.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType3.sol";
-import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
-import { MessagingFee } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppOptionsType3.sol";
+import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
+import { MessagingFee } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 
 // forge script scripts/MockDeployment/DeployMockNativeMintingL2.s.sol:DeployMockNativeMintingL2 --rpc-url https://rockbeard-eth-cartio.berachain.com  --via-ir
 contract DeployMockNativeMintingL2 is Script {

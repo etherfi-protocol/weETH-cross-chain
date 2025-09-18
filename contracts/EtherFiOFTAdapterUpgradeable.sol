@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {OFTAdapterUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTAdapterUpgradeable.sol";
+import {OFTAdapterUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFTAdapterUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
@@ -32,12 +32,13 @@ contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
     }
 
     function _debit(
+        address _from,
         uint256 _amountLD,
         uint256 _minAmountLD,
         uint32 _dstEid
     ) internal virtual override whenNotPaused() returns (uint256 amountSentLD, uint256 amountReceivedLD) {
         _checkAndUpdateOutboundRateLimit(_dstEid, _amountLD);
-        return super._debit(_amountLD, _minAmountLD, _dstEid);
+        return super._debit(_from, _amountLD, _minAmountLD, _dstEid);
     }
 
     function _credit(
@@ -46,7 +47,7 @@ contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
         uint32 _srcEid
     ) internal virtual override whenNotPaused() returns (uint256 amountReceivedLD) {
         _checkAndUpdateInboundRateLimit(_srcEid, _amountLD);
-        return super._credit(_to, _amountLD, 0);
+        return super._credit(_to, _amountLD, _srcEid);
     }
 
     function setOutboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {

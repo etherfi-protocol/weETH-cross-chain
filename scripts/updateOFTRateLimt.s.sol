@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Script.sol";
 
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
+import "@layerzerolabs/oapp-evm/contracts/oapp/utils/RateLimiter.sol";
+import "@layerzerolabs/oapp-evm/contracts/oapp/utils/RateLimiter.sol";
 
 import "../utils/L2Constants.sol";
 import "../utils/LayerZeroHelpers.sol";
