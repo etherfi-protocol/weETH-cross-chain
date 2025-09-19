@@ -7,9 +7,9 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {
     OAppSenderUpgradeable,
     OAppCoreUpgradeable
-} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/OAppSenderUpgradeable.sol";
+} from "@layerzerolabs/oapp-evm-upgradeable/contracts/oapp/OAppSenderUpgradeable.sol";
 import {OAppOptionsType3Upgradeable} from
-    "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/libs/OAppOptionsType3Upgradeable.sol";
+    "@layerzerolabs/oapp-evm-upgradeable/contracts/oapp/libs/OAppOptionsType3Upgradeable.sol";
 import {
     MessagingFee,
     MessagingReceipt

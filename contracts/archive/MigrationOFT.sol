@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {MessagingFee} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
+import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+import {OFT} from "@layerzerolabs/oft-evm/contracts/OFT.sol";
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 /**

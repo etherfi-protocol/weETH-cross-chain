@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
-import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
+import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 
 import "../contracts/PairwiseRateLimiter.sol";

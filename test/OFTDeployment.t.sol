@@ -7,11 +7,11 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 import "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
-import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import "@layerzerolabs/oapp-evm/contracts/oapp/utils/RateLimiter.sol";
+import "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import { MessagingFee } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
-import { SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
+import { SendParam } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 
 import "../contracts/EtherfiOFTUpgradeable.sol";
 import "../contracts/EtherfiOFTAdapterUpgradeable.sol";

@@ -5,12 +5,12 @@ import {
     MessagingFee,
     MessagingReceipt
 } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
+import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {BaseMessengerUpgradeable} from "../layerzero-base/BaseMessengerUpgradeable.sol";
 import {BaseReceiverUpgradeable} from "../layerzero-base/BaseReceiverUpgradeable.sol";
 import {L2BaseSyncPoolUpgradeable} from "../layerzero-base/L2BaseSyncPoolUpgradeable.sol";
 import {IStargate} from "../../../interfaces/IStargate.sol";
-import { MessagingFee, OFTReceipt, SendParam } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import { MessagingFee, OFTReceipt, SendParam } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {Constants} from "../../libraries/Constants.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 

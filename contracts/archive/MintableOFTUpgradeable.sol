@@ -2,11 +2,11 @@
 pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
+import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFTUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 import {IMintableERC20} from "../../interfaces/IMintableERC20.sol";
-import { RateLimiter } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/utils/RateLimiter.sol";
+import { RateLimiter } from "@layerzerolabs/oapp-evm/contracts/oapp/utils/RateLimiter.sol";
 
 /**
  * @title Mintable OFT
@@ -37,12 +37,13 @@ contract MintableOFTUpgradeable is RateLimiter, OFTUpgradeable, AccessControlUpg
     }
 
     function _debit(
+        address _from,
         uint256 _amountLD,
         uint256 _minAmountLD,
         uint32 _dstEid
     ) internal virtual override returns (uint256 amountSentLD, uint256 amountReceivedLD) {
-        _checkAndUpdateRateLimit(_dstEid, _amountLD);
-        return super._debit(_amountLD, _minAmountLD, _dstEid);
+        _outflow(_dstEid, _amountLD);
+        return super._debit(_from, _amountLD, _minAmountLD, _dstEid);
     }
 
     /**
