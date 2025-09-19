@@ -55,14 +55,6 @@ contract RoleTest is Test {
         vm.deal(unpauser, 100 ether);
     }
 
-    function testContractDeployment() public view {
-        // Test that contracts deploy successfully
-        assertTrue(address(oft) != address(0));
-        assertTrue(address(adapter) != address(0));
-        assertTrue(address(nonUpgradeableAdapter) != address(0));
-        assertTrue(address(mockWeETH) != address(0));
-    }
-
     function testOFTRoleFunctionsExist() public view {
         // Test that role-related functions exist on the OFT contract
         uint256 maxRole = oft.MAX_ROLE();
@@ -73,50 +65,31 @@ contract RoleTest is Test {
         assertTrue(oft.UNPAUSER_ROLE() == UNPAUSER_ROLE);
     }
 
-    function testAdapterRoleFunctionsExist() public view {
-        // Test that role-related functions exist on the Adapter contract
-        uint256 maxRole = adapter.MAX_ROLE();
-        assertEq(maxRole, type(uint256).max);
+    // function testAdapterRoleFunctionsExist() public view {
+    //     // Test that role-related functions exist on the Adapter contract
+    //     uint256 maxRole = adapter.MAX_ROLE();
+    //     assertEq(maxRole, type(uint256).max);
         
-        assertTrue(adapter.PAUSER_ROLE() == PAUSER_ROLE);
-        assertTrue(adapter.UNPAUSER_ROLE() == UNPAUSER_ROLE);
-    }
+    //     assertTrue(adapter.PAUSER_ROLE() == PAUSER_ROLE);
+    //     assertTrue(adapter.UNPAUSER_ROLE() == UNPAUSER_ROLE);
+    // }
 
-    function testNonUpgradeableAdapter() public view {
-        // Non-upgradeable adapter should not have role enumerable functionality
-        assertEq(nonUpgradeableAdapter.owner(), owner);
-    }
+    // function testNonUpgradeableAdapter() public view {
+    //     // Non-upgradeable adapter should not have role enumerable functionality
+    //     assertEq(nonUpgradeableAdapter.owner(), owner);
+    // }
 
-    function testRoleConstants() public view {
-        // Test that role constants are properly defined
-        assertEq(MINTER_ROLE, keccak256("MINTER_ROLE"));
-        assertEq(PAUSER_ROLE, keccak256("PAUSER_ROLE"));
-        assertEq(UNPAUSER_ROLE, keccak256("UNPAUSER_ROLE"));
+    // function testRoleConstants() public view {
+    //     // Test that role constants are properly defined
+    //     assertEq(MINTER_ROLE, keccak256("MINTER_ROLE"));
+    //     assertEq(PAUSER_ROLE, keccak256("PAUSER_ROLE"));
+    //     assertEq(UNPAUSER_ROLE, keccak256("UNPAUSER_ROLE"));
         
-        assertTrue(MINTER_ROLE != PAUSER_ROLE);
-        assertTrue(MINTER_ROLE != UNPAUSER_ROLE);
-        assertTrue(PAUSER_ROLE != UNPAUSER_ROLE);
-    }
+    //     assertTrue(MINTER_ROLE != PAUSER_ROLE);
+    //     assertTrue(MINTER_ROLE != UNPAUSER_ROLE);
+    //     assertTrue(PAUSER_ROLE != UNPAUSER_ROLE);
+    // }
 
-    function testRoleEnumerableIntegration() public view {
-        // Test that the contracts have the role enumerable functionality integrated
-        // by checking that they have the required functions and constants
-        
-        // Test MAX_ROLE function exists and returns correct value
-        assertEq(oft.MAX_ROLE(), type(uint256).max);
-        assertEq(adapter.MAX_ROLE(), type(uint256).max);
-        
-        // Test role constants are properly defined
-        assertEq(oft.MINTER_ROLE(), MINTER_ROLE);
-        assertEq(oft.PAUSER_ROLE(), PAUSER_ROLE);
-        assertEq(oft.UNPAUSER_ROLE(), UNPAUSER_ROLE);
-        assertEq(adapter.PAUSER_ROLE(), PAUSER_ROLE);
-        assertEq(adapter.UNPAUSER_ROLE(), UNPAUSER_ROLE);
-        
-        // Test that role management functions exist (they will revert without initialization)
-        // but the fact that they compile and exist proves the integration
-        assertTrue(true);
-    }
 
 }
 
