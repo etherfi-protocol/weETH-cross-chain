@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {EnumerableRoles} from "lib/solady/src/auth/EnumerableRoles.sol";
+import {EnumerableRoles} from "solady/src/auth/EnumerableRoles.sol";
 
 import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
 import {IMintableERC20} from "../interfaces/IMintableERC20.sol";

@@ -7,13 +7,13 @@ import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {EtherfiOFTUpgradeable} from "../contracts/EtherfiOFTUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {EnumerableRoles} from "lib/solady/src/auth/EnumerableRoles.sol";
-import {EndpointV2Mock} from "lib/devtools/packages/test-devtools-evm-foundry/contracts/mocks/EndpointV2Mock.sol";
+import {EnumerableRoles} from "solady/src/auth/EnumerableRoles.sol";
+import {SimpleEndpointMock} from "./mock/SimpleEndpointMock.sol";
 
 contract EtherfiOFTUpgradeableRolesTest is Test {
 
     EtherfiOFTUpgradeable public etherfiOFT;
-    EndpointV2Mock public lzEndpoint;
+    SimpleEndpointMock public lzEndpoint;
 
     address public owner = makeAddr("owner");
     address public minter = makeAddr("minter");
@@ -23,7 +23,7 @@ contract EtherfiOFTUpgradeableRolesTest is Test {
     address public user2 = makeAddr("user2");
 
     function setUp() public {
-        lzEndpoint = new EndpointV2Mock(1, address(this));
+        lzEndpoint = new SimpleEndpointMock(1);
 
         EtherfiOFTUpgradeable etherfiOFTImpl = new EtherfiOFTUpgradeable(address(lzEndpoint));
         etherfiOFT = EtherfiOFTUpgradeable(address(new ERC1967Proxy(
