@@ -12,41 +12,54 @@ import "../utils/GnosisHelpers.sol";
 contract ReduceRateLimits is Script, Constants, GnosisHelpers {
     using LayerZeroHelpers for *;
     
-    // Target chains for rate limit reduction
     string[] public targetChains = ["blast", "mode", "morph", "sonic", "zksync"];
     
-    // New rate limit: 50 weETH per 12 hours
     uint256 constant NEW_LIMIT = 50 ether;
     uint256 constant NEW_WINDOW = 12 hours;
 
     function run() public {
-        // Process ALL chains - each chain needs to be updated with new rate limits for deprecated chains
         for (uint256 i = 0; i < L2s.length; i++) {
             console.log("Processing rate limit updates for:", L2s[i].NAME);
             
-            // Create rate limit transaction to update rate limits for all peers
-            PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfig = new PairwiseRateLimiter.RateLimitConfig[](L2s.length);
+            // Create outbound rate limit config
+            PairwiseRateLimiter.RateLimitConfig[] memory outboundConfig = new PairwiseRateLimiter.RateLimitConfig[](L2s.length);
+            // Create inbound rate limit config  
+            PairwiseRateLimiter.RateLimitConfig[] memory inboundConfig = new PairwiseRateLimiter.RateLimitConfig[](L2s.length);
+            
             for (uint256 j = 0; j < L2s.length; j++) {
                 if (i == j) {
-                    // Currently on the L2 we are updating rate limits for, set mainnet config here instead
-                    rateLimitConfig[j] = LayerZeroHelpers._getRateLimitConfig(L1_EID, LIMIT, WINDOW);
+                    // Mainnet peer - use normal limits for both inbound and outbound
+                    outboundConfig[j] = LayerZeroHelpers._getRateLimitConfig(L1_EID, LIMIT, WINDOW);
+                    inboundConfig[j] = LayerZeroHelpers._getRateLimitConfig(L1_EID, LIMIT, WINDOW);
                 } else {
-                    // Check if the peer chain is one of our deprecated chains
-                    if (_isTargetChain(L2s[j].NAME)) {
-                        // Use reduced rate limit for deprecated chains
-                        rateLimitConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, NEW_LIMIT, NEW_WINDOW);
+                    // Check if current chain is deprecated
+                    if (_isTargetChain(L2s[i].NAME)) {
+                        // Deprecated chain: all inbound and outbound should be restricted
+                        outboundConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, NEW_LIMIT, NEW_WINDOW);
+                        inboundConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, NEW_LIMIT, NEW_WINDOW);
                     } else {
-                        // Use normal rate limit for non-deprecated chains
-                        rateLimitConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, LIMIT, WINDOW);
+                        // Non-deprecated chain: only restrict to deprecated chains
+                        if (_isTargetChain(L2s[j].NAME)) {
+                            // Target deprecated chains with restricted limits
+                            outboundConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, NEW_LIMIT, NEW_WINDOW);
+                            inboundConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, NEW_LIMIT, NEW_WINDOW);
+                        } else {
+                            // Non-deprecated chains use normal limits
+                            outboundConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, LIMIT, WINDOW);
+                            inboundConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, LIMIT, WINDOW);
+                        }
                     }
                 }
             }
             
-            string memory setRateLimitDataString = iToHex(abi.encodeWithSignature("setRateLimits((uint32,uint256,uint256)[])", rateLimitConfig));
+            // Create transaction data for both outbound and inbound
+            string memory setOutboundDataString = iToHex(abi.encodeWithSignature("setOutboundRateLimits((uint32,uint256,uint256)[])", outboundConfig));
+            string memory setInboundDataString = iToHex(abi.encodeWithSignature("setInboundRateLimits((uint32,uint256,uint256)[])", inboundConfig));
 
-            // Create gnosis transaction with rate limit data
+            // Create gnosis transaction with both outbound and inbound rate limit data
             string memory reduceRateLimitJson = _getGnosisHeader(L2s[i].CHAIN_ID, L2s[i].L2_CONTRACT_CONTROLLER_SAFE);
-            reduceRateLimitJson = string(abi.encodePacked(reduceRateLimitJson, _getGnosisTransaction(addressToHex(L2s[i].L2_OFT), setRateLimitDataString, true)));
+            reduceRateLimitJson = string(abi.encodePacked(reduceRateLimitJson, _getGnosisTransaction(addressToHex(L2s[i].L2_OFT), setOutboundDataString, false)));
+            reduceRateLimitJson = string(abi.encodePacked(reduceRateLimitJson, _getGnosisTransaction(addressToHex(L2s[i].L2_OFT), setInboundDataString, true)));
             vm.writeJson(reduceRateLimitJson, string.concat("./output/", L2s[i].NAME, "-RateLimitReduction.json"));
             
             console.log("Generated rate limit reduction transaction for:", L2s[i].NAME);
