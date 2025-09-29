@@ -20,31 +20,36 @@ contract ReduceRateLimits is Script, Constants, GnosisHelpers {
     uint256 constant NEW_WINDOW = 12 hours;
 
     function run() public {
+        // Process ALL chains - each chain needs to be updated with new rate limits for deprecated chains
         for (uint256 i = 0; i < L2s.length; i++) {
-            // Check if this L2 is in our target list
-            if (_isTargetChain(L2s[i].NAME)) {
-                console.log("Processing rate limit reduction for:", L2s[i].NAME);
-                
-                // Create rate limit transaction to update rate limits for all peers
-                PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfig = new PairwiseRateLimiter.RateLimitConfig[](L2s.length);
-                for (uint256 j = 0; j < L2s.length; j++) {
-                    if (i == j) {
-                        // Currently on the L2 we are updating rate limits for, set mainnet config here instead
-                        rateLimitConfig[j] = LayerZeroHelpers._getRateLimitConfig(L1_EID, NEW_LIMIT, NEW_WINDOW);
-                    } else {
+            console.log("Processing rate limit updates for:", L2s[i].NAME);
+            
+            // Create rate limit transaction to update rate limits for all peers
+            PairwiseRateLimiter.RateLimitConfig[] memory rateLimitConfig = new PairwiseRateLimiter.RateLimitConfig[](L2s.length);
+            for (uint256 j = 0; j < L2s.length; j++) {
+                if (i == j) {
+                    // Currently on the L2 we are updating rate limits for, set mainnet config here instead
+                    rateLimitConfig[j] = LayerZeroHelpers._getRateLimitConfig(L1_EID, LIMIT, WINDOW);
+                } else {
+                    // Check if the peer chain is one of our deprecated chains
+                    if (_isTargetChain(L2s[j].NAME)) {
+                        // Use reduced rate limit for deprecated chains
                         rateLimitConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, NEW_LIMIT, NEW_WINDOW);
+                    } else {
+                        // Use normal rate limit for non-deprecated chains
+                        rateLimitConfig[j] = LayerZeroHelpers._getRateLimitConfig(L2s[j].L2_EID, LIMIT, WINDOW);
                     }
                 }
-                
-                string memory setRateLimitDataString = iToHex(abi.encodeWithSignature("setRateLimits((uint32,uint256,uint256)[])", rateLimitConfig));
-
-                // Create gnosis transaction with rate limit data
-                string memory reduceRateLimitJson = _getGnosisHeader(L2s[i].CHAIN_ID, L2s[i].L2_CONTRACT_CONTROLLER_SAFE);
-                reduceRateLimitJson = string(abi.encodePacked(reduceRateLimitJson, _getGnosisTransaction(addressToHex(L2s[i].L2_OFT), setRateLimitDataString, true)));
-                vm.writeJson(reduceRateLimitJson, string.concat("./output/", L2s[i].NAME, "-RateLimitReduction.json"));
-                
-                console.log("Generated rate limit reduction transaction for:", L2s[i].NAME);
             }
+            
+            string memory setRateLimitDataString = iToHex(abi.encodeWithSignature("setRateLimits((uint32,uint256,uint256)[])", rateLimitConfig));
+
+            // Create gnosis transaction with rate limit data
+            string memory reduceRateLimitJson = _getGnosisHeader(L2s[i].CHAIN_ID, L2s[i].L2_CONTRACT_CONTROLLER_SAFE);
+            reduceRateLimitJson = string(abi.encodePacked(reduceRateLimitJson, _getGnosisTransaction(addressToHex(L2s[i].L2_OFT), setRateLimitDataString, true)));
+            vm.writeJson(reduceRateLimitJson, string.concat("./output/", L2s[i].NAME, "-RateLimitReduction.json"));
+            
+            console.log("Generated rate limit reduction transaction for:", L2s[i].NAME);
         }
     }
     
