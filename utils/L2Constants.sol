@@ -144,6 +144,7 @@ contract L2Constants {
         L2s.push(AVAX);
         L2s.push(HYPEREVM);
         L2s.push(SONIC);
+        L2s.push(PLASMA);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -730,5 +731,3 @@ contract L2Constants {
     });
 }
 
-// Alias for easier usage in scripts
-contract Constants is L2Constants {}
