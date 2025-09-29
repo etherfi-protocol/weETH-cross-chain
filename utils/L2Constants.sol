@@ -129,21 +129,21 @@ contract L2Constants {
 
     // Only connecting to base and mainnet
     constructor () {
-        // L2s.push(BLAST);
-        // L2s.push(MODE);
-        // L2s.push(BNB);
+        L2s.push(BLAST);
+        L2s.push(MODE);
+        L2s.push(BNB);
         L2s.push(BASE);
-        // L2s.push(OP);
-        // L2s.push(SCROLL);
-        // L2s.push(LINEA);
-        // L2s.push(ZKSYNC);
-        // L2s.push(SWELL);
-        // L2s.push(MORPH);
-        // L2s.push(BERA);
-        // L2s.push(UNICHAIN);
-        // L2s.push(AVAX);
-        // L2s.push(HYPEREVM);
-        // L2s.push(SONIC);
+        L2s.push(OP);
+        L2s.push(SCROLL);
+        L2s.push(LINEA);
+        L2s.push(ZKSYNC);
+        L2s.push(SWELL);
+        L2s.push(MORPH);
+        L2s.push(BERA);
+        L2s.push(UNICHAIN);
+        L2s.push(AVAX);
+        L2s.push(HYPEREVM);
+        L2s.push(SONIC);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -729,3 +729,6 @@ contract L2Constants {
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
 }
+
+// Alias for easier usage in scripts
+contract Constants is L2Constants {}
