@@ -72,7 +72,7 @@ contract EtherfiOFTUpgradeableRolesTest is Test {
 
     function test_RoleManagement_OnlyOwner() public {
         // Test that non-owner cannot set roles
-        vm.expectRevert(abi.encodeWithSelector(EnumerableRoles.EnumerableRolesUnauthorized.selector));
+        vm.expectRevert(EnumerableRoles.EnumerableRolesUnauthorized.selector);
         vm.prank(user);
         etherfiOFT.setRole(minter, 1, true);
 
@@ -89,7 +89,7 @@ contract EtherfiOFTUpgradeableRolesTest is Test {
     }
 
     function test_Mint_WithoutRole() public {
-        vm.expectRevert(abi.encodeWithSelector(EnumerableRoles.EnumerableRolesUnauthorized.selector));
+        vm.expectRevert(EnumerableRoles.EnumerableRolesUnauthorized.selector);
         etherfiOFT.mint(user, 1000 ether);
     }
 
@@ -109,7 +109,7 @@ contract EtherfiOFTUpgradeableRolesTest is Test {
     function test_PauseBridge_WithoutRole() public {
         assertFalse(etherfiOFT.paused());
 
-        vm.expectRevert(abi.encodeWithSelector(EnumerableRoles.EnumerableRolesUnauthorized.selector));
+        vm.expectRevert(EnumerableRoles.EnumerableRolesUnauthorized.selector);
         etherfiOFT.pauseBridge();
 
         assertFalse(etherfiOFT.paused());
@@ -137,7 +137,7 @@ contract EtherfiOFTUpgradeableRolesTest is Test {
         etherfiOFT.pauseBridge();
         assertTrue(etherfiOFT.paused());
 
-        vm.expectRevert(abi.encodeWithSelector(EnumerableRoles.EnumerableRolesUnauthorized.selector));
+        vm.expectRevert(EnumerableRoles.EnumerableRolesUnauthorized.selector);
         etherfiOFT.unpauseBridge();
 
         assertTrue(etherfiOFT.paused());
@@ -247,13 +247,13 @@ contract EtherfiOFTUpgradeableRolesTest is Test {
         assertTrue(firstMinter != secondMinter);
 
         // Test out of bounds
-        vm.expectRevert(abi.encodeWithSelector(EnumerableRoles.RoleHoldersIndexOutOfBounds.selector));
+        vm.expectRevert(EnumerableRoles.RoleHoldersIndexOutOfBounds.selector);
         etherfiOFT.roleHolderAt(1, 2);
     }
 
     function test_ZeroAddressRoleHolder() public {
         vm.startPrank(owner);
-        vm.expectRevert(abi.encodeWithSelector(EnumerableRoles.RoleHolderIsZeroAddress.selector));
+        vm.expectRevert(EnumerableRoles.RoleHolderIsZeroAddress.selector);
         etherfiOFT.setRole(address(0), 1, true);
         vm.stopPrank();
     }
