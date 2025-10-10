@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {EnumerableRoles} from "solady/src/auth/EnumerableRoles.sol";
 
 import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
 import {IMintableERC20} from "../interfaces/IMintableERC20.sol";
@@ -13,10 +13,10 @@ import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
  * @title Etherfi mintable upgradeable OFT token
  * @dev Extends MintableOFTUpgradeable with pausing and rate limiting functionality
  */
-contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
+contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
+    uint256 public constant MINTER_ROLE = 1;
+    uint256 public constant PAUSER_ROLE = 2;
+    uint256 public constant UNPAUSER_ROLE = 3;
 
     /**
      * @dev Constructor for MintableOFT
@@ -35,8 +35,6 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, Paus
     function initialize(string memory name, string memory symbol, address owner) external virtual initializer {
         __OFT_init(name, symbol, owner);
         __Ownable_init(owner);
-
-        _grantRole(DEFAULT_ADMIN_ROLE, owner);
     }
 
     function _debit(
@@ -85,17 +83,12 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, AccessControlUpgradeable, Paus
     }
 
     /**
-     * @dev Overrides the role admin logic from AccessControlUpgradeable to restrict granting roles to the owner
+     * @dev Sets the status of `role` of `holder` to `active`.
+     * Only the owner can set roles.
      */
-    function grantRole(bytes32 role, address account) public override onlyOwner() {
-        _grantRole(role, account);
-    }
-
-    /**
-     * @dev Overrides the role admin logic from AccessControlUpgradeable to restrict revoking roles to the owner
-     */
-    function revokeRole(bytes32 role, address account) public override onlyOwner() {
-        _revokeRole(role, account);
+    function setRole(address holder, uint256 role, bool active) public payable override {
+        if (msg.sender != owner()) revert EnumerableRolesUnauthorized();
+        super._setRole(holder, role, active);
     }
 
     function updateTokenSymbol(string memory name_, string memory symbol_) external onlyOwner() {

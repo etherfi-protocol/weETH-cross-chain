@@ -44,6 +44,10 @@ forge-std@^1.1.2:
   version "2.0.2"
   resolved "https://codeload.github.com/JorgeAtPaladin/LayerZero-v2/tar.gz/21ad027cf323c323619566d2c9d1f2fa404f021f"
 
+"solady@github:Vectorized/solady":
+  version "0.1.26"
+  resolved "https://codeload.github.com/Vectorized/solady/tar.gz/208e4f31cfae26e4983eb95c3488a14fdc497ad7"
+
 solidity-bytes-utils@^0.8.2:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/solidity-bytes-utils/-/solidity-bytes-utils-0.8.2.tgz#763d6a02fd093e93b3a97b742e97d540e66c29bd"

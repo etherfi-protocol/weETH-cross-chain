@@ -11,6 +11,7 @@
       "@layerzerolabs/lz-evm-oapp-v2": "^2.1.18",
       "@layerzerolabs/lz-evm-protocol-v2": "^2.1.27",
       "solidity-bytes-utils": "^0.8.2",
+      "solady": "github:Vectorized/solady",
       "layerzero-v2": "github:JorgeAtPaladin/LayerZero-v2#21ad027cf323c323619566d2c9d1f2fa404f021f"
     },
     "resolutions": {
