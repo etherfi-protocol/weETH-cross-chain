@@ -54,18 +54,18 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "";
-    string constant DEPLOYMENT_CHAIN_ID =  "";
+    string constant DEPLOYMENT_RPC_URL = "https://rpc-qnd.inkonchain.com";
+    string constant DEPLOYMENT_CHAIN_ID =  "57073";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 0;
-    address constant DEPLOYMENT_SEND_LIB_302 = address(0);
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = address(0);
-    address constant DEPLOYMENT_LZ_DVN = address(0);
-    address constant DEPLOYMENT_NETHERMIND_DVN = address(0);
-    address constant DEPLOYMENT_LZ_ENDPOINT = address(0);
+    uint32 constant DEPLOYMENT_EID = 30339;
+    address constant DEPLOYMENT_SEND_LIB_302 = 0x76111DE813F83AAAdBD62773Bf41247634e2319a;
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x473132bb594caEF281c68718F4541f73FE14Dc89;
+    address constant DEPLOYMENT_LZ_DVN = 0x174F2bA26f8ADeAfA82663bcf908288d5DbCa649;
+    address constant DEPLOYMENT_NETHERMIND_DVN = 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B;
+    address constant DEPLOYMENT_LZ_ENDPOINT = 0xca29f3A6f966Cb2fc0dE625F8f325c0C46dbE958;
 
-    address constant DEPLOYMENT_CONTRACT_CONTROLLER = address(0);
+    address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x7a00657a45420044bc526B90Ad667aFfaee0A868;
     /*//////////////////////////////////////////////////////////////
                     
     //////////////////////////////////////////////////////////////*/
@@ -129,22 +129,22 @@ contract L2Constants {
 
     // Only connecting to base and mainnet
     constructor () {
-        L2s.push(BLAST);
-        L2s.push(MODE);
-        L2s.push(BNB);
+        // L2s.push(BLAST);
+        // L2s.push(MODE);
+        // L2s.push(BNB);
         L2s.push(BASE);
-        L2s.push(OP);
-        L2s.push(SCROLL);
-        L2s.push(LINEA);
-        L2s.push(ZKSYNC);
-        L2s.push(SWELL);
-        L2s.push(MORPH);
-        L2s.push(BERA);
-        L2s.push(UNICHAIN);
-        L2s.push(AVAX);
-        L2s.push(HYPEREVM);
-        L2s.push(SONIC);
-        L2s.push(PLASMA);
+        // L2s.push(OP);
+        // L2s.push(SCROLL);
+        // L2s.push(LINEA);
+        // L2s.push(ZKSYNC);
+        // L2s.push(SWELL);
+        // L2s.push(MORPH);
+        // L2s.push(BERA);
+        // L2s.push(UNICHAIN);
+        // L2s.push(AVAX);
+        // L2s.push(HYPEREVM);
+        // L2s.push(SONIC);
+        // L2s.push(PLASMA);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
