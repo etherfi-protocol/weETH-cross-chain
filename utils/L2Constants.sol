@@ -729,5 +729,41 @@ contract L2Constants {
         L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
+
+    ConfigPerL2 INK = ConfigPerL2({
+        NAME: "ink",
+        RPC_URL: "https://rpc-qnd.inkonchain.com",
+        CHAIN_ID: "57073",
+
+        L2_EID: 30339,
+        L2_ENDPOINT: 0xca29f3A6f966Cb2fc0dE625F8f325c0C46dbE958,
+        SEND_302: 0x76111DE813F83AAAdBD62773Bf41247634e2319a,
+        RECEIVE_302: 0x473132bb594caEF281c68718F4541f73FE14Dc89,
+
+        LAYERZERO_DVN: 0x174F2bA26f8ADeAfA82663bcf908288d5DbCa649,
+        NETHERMIND_DVN: 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B,
+        LZ_DVN: [0x174F2bA26f8ADeAfA82663bcf908288d5DbCa649, 0xDd7B5E1dB4AaFd5C8EC3b764eFB8ed265Aa5445B],
+
+        L2_OFT: DEPLOYMENT_OFT,
+        L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x7a00657a45420044bc526B90Ad667aFfaee0A868,
+        L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
 }
 
