@@ -41,10 +41,17 @@ contract verifyOFT is ContractCodeChecker, Script, L2Constants, Test {
         assertEq(ProxyAdmin(DEPLOYMENT_PROXY_ADMIN_CONTRACT).owner(), L2_TIMELOCK);
 
         assertEq(oft.owner(), L2_TIMELOCK);
-        assertTrue(oft.hasRole(oft.PAUSER_ROLE(), PAUSER_EOA));
-        assertTrue(oft.hasRole(oft.UNPAUSER_ROLE(), DEPLOYMENT_CONTRACT_CONTROLLER));
-        assertTrue(oft.hasRole(oft.DEFAULT_ADMIN_ROLE(), L2_TIMELOCK));
-        assertFalse(oft.hasRole(oft.DEFAULT_ADMIN_ROLE(), DEPLOYER_ADDRESS));
+
+        address[] memory pauserHolders = new address[](1);
+        pauserHolders[0] = PAUSER_EOA;
+        assertEq(oft.roleHolders(oft.PAUSER_ROLE()).length, 1);
+        assertEq(oft.roleHolders(oft.PAUSER_ROLE())[0], PAUSER_EOA);
+
+        address[] memory unpauserHolders = new address[](1);
+        unpauserHolders[0] = DEPLOYMENT_CONTRACT_CONTROLLER;
+        assertEq(oft.roleHolders(oft.UNPAUSER_ROLE()).length, 1);
+        assertEq(oft.roleHolders(oft.UNPAUSER_ROLE())[0], DEPLOYMENT_CONTRACT_CONTROLLER);
+
 
         assertEq(endpoint.delegates(DEPLOYMENT_OFT), DEPLOYMENT_CONTRACT_CONTROLLER);
 

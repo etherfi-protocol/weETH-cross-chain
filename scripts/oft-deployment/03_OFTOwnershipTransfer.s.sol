@@ -38,14 +38,8 @@ contract OFTOwnershipTransfer is Script, L2Constants {
         oft.setDelegate(DEPLOYMENT_CONTRACT_CONTROLLER);
 
         // granting pauser roles
-        oft.grantRole(PAUSER_ROLE, PAUSER_EOA);
-        oft.grantRole(UNPAUSER_ROLE, DEPLOYMENT_CONTRACT_CONTROLLER);
-
-        // set the contract controller as the default admin
-        oft.grantRole(bytes32(0x0000000000000000000000000000000000000000000000000000000000000000), L2_TIMELOCK);
-
-        // revoke the script deployer's admin role
-        oft.renounceRole(bytes32(0x0000000000000000000000000000000000000000000000000000000000000000), scriptDeployer);
+        oft.setRole(PAUSER_EOA, oft.PAUSER_ROLE(), true);
+        oft.setRole(DEPLOYMENT_CONTRACT_CONTROLLER, oft.UNPAUSER_ROLE(), true);
         
         // transfer ownership to the contract controller
         oft.transferOwnership(L2_TIMELOCK);
