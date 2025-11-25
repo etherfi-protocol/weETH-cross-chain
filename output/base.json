@@ -1,7 +1,8 @@
 {
   "chainId": "8453",
   "meta": {
-    "txBuilderVersion": "1.16.5"
+    "txBuilderVersion": "1.16.5",
+    "safeAddress": "0x7a00657a45420044bc526B90Ad667aFfaee0A868"
   },
   "transactions": [
     {
