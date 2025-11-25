@@ -38,6 +38,10 @@ contract verifyOFT is ContractCodeChecker, Script, L2Constants, Test {
         EtherfiOFTUpgradeable oft = EtherfiOFTUpgradeable(DEPLOYMENT_OFT);
         LZEndpoint endpoint = LZEndpoint(DEPLOYMENT_LZ_ENDPOINT);
 
+        // verify the proxy admin is the correct address:
+        address proxyAdminAddress = address(uint160(uint256(vm.load(DEPLOYMENT_OFT, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
+        assertEq(proxyAdminAddress, DEPLOYMENT_PROXY_ADMIN_CONTRACT);
+
         assertEq(ProxyAdmin(DEPLOYMENT_PROXY_ADMIN_CONTRACT).owner(), L2_TIMELOCK);
 
         assertEq(oft.owner(), L2_TIMELOCK);
