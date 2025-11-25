@@ -51,5 +51,6 @@ contract OFTOwnershipTransfer is Script, L2Constants {
         console.log("OFT proxy admin new owner: %s", oftProxyAdmin.owner());
 
         vm.stopBroadcast();
+        // gpg test
     }
 }
