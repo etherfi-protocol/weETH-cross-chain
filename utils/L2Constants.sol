@@ -54,15 +54,15 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://rpc1.monad.xyz";
-    string constant DEPLOYMENT_CHAIN_ID =  "143";
+    string constant DEPLOYMENT_RPC_URL = "https://stable-mainnet.g.alchemy.com/v2/QiwPc7luyMCQq58_FRjVY";
+    string constant DEPLOYMENT_CHAIN_ID = "988";
     
     // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 30390;
-    address constant DEPLOYMENT_SEND_LIB_302 = 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043;
-    address constant DEPLOYMENT_LZ_DVN = 0x282b3386571f7f794450d5789911a9804FA346b4;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0xaCDe1f22EEAb249d3ca6Ba8805C8fEe9f52a16e7;
+    uint32 constant DEPLOYMENT_EID = 30396;
+    address constant DEPLOYMENT_SEND_LIB_302 = 0x37aaaf95887624a363effB7762D489E3C05c2a02;
+    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0x15e51701F245F6D5bd0FEE87bCAf55B0841451B3;
+    address constant DEPLOYMENT_LZ_DVN = 0x9C061c9A4782294eeF65ef28Cb88233A987F4bdD;
+    address constant DEPLOYMENT_NETHERMIND_DVN = 0x9bCd17A654bffAa6f8fEa38D19661a7210e22196;
     address constant DEPLOYMENT_LZ_ENDPOINT = 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B;
 
     address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x7a00657a45420044bc526B90Ad667aFfaee0A868;
@@ -71,9 +71,9 @@ contract L2Constants {
     //////////////////////////////////////////////////////////////*/
 
     // OFT deployment addresses (should be consistent across all chains due to the create3 deployment)
-    address constant DEPLOYMENT_OFT = 0xA3D68b74bF0528fdD07263c60d6488749044914b;
-    address constant DEPLOYMENT_OFT_IMPL = 0x08DB0DB9b5F2dcbBFDc26FF411FB2026e81DA748;
-    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0x373ea3AEC25eB652ACa38504254eCD5459da6d19;
+    address constant DEPLOYMENT_OFT = 0x60a08269e5f3406d8fd7892567d53188C7F75009;
+    address constant DEPLOYMENT_OFT_IMPL = 0x6FFcE32713417569237786cbeFBe355090642bF9;
+    address constant DEPLOYMENT_PROXY_ADMIN_CONTRACT = 0xd10036AE0736DBe4cc11a56C9dc651F40d37B7E6;
 
     address constant DEPLOYER_ADDRESS = 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550;
     address constant L2_CREATE3_DEPLOYER = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
@@ -122,7 +122,7 @@ contract L2Constants {
     // Cross chain pauser EOA
     address constant PAUSER_EOA = 0x9AF1298993DC1f397973C62A5D47a284CF76844D;
 
-    address constant L2_TIMELOCK = 0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6;
+    address constant L2_TIMELOCK = 0xd2D4171A1e81dc266e14B9694250C11C516C860b;
 
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
