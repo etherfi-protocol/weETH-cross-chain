@@ -145,6 +145,8 @@ contract L2Constants {
         // L2s.push(HYPEREVM);
         // L2s.push(SONIC);
         // L2s.push(PLASMA);
+        // L2s.push(MONAD);
+        // L2s.push(STABLE);
     }
 
     ConfigPerL2 BLAST = ConfigPerL2({
@@ -748,6 +750,78 @@ contract L2Constants {
         L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
         L2_CONTRACT_CONTROLLER_SAFE: 0x7a00657a45420044bc526B90Ad667aFfaee0A868,
         L2_OFT_PROXY_ADMIN: DEPLOYMENT_PROXY_ADMIN_CONTRACT,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
+    ConfigPerL2 MONAD = ConfigPerL2({
+        NAME: "monad",
+        RPC_URL: "https://rpc1.monad.xyz",
+        CHAIN_ID: "143",
+
+        L2_EID: 30390,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7,
+        RECEIVE_302: 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043,
+
+        LAYERZERO_DVN: 0x282b3386571f7f794450d5789911a9804FA346b4,
+        NETHERMIND_DVN: 0xaCDe1f22EEAb249d3ca6Ba8805C8fEe9f52a16e7,
+        LZ_DVN: [0x282b3386571f7f794450d5789911a9804FA346b4, 0xaCDe1f22EEAb249d3ca6Ba8805C8fEe9f52a16e7],
+
+        L2_OFT: DEPLOYMENT_OFT,
+        L2_OFT_IMPL: DEPLOYMENT_OFT_IMPL,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x7a00657a45420044bc526B90Ad667aFfaee0A868,
+        L2_OFT_PROXY_ADMIN: 0x373ea3AEC25eB652ACa38504254eCD5459da6d19,
+
+        L2_SYNC_POOL: address(0),
+        L2_SYNC_POOL_RATE_LIMITER: address(0),
+        L2_EXCHANGE_RATE_PROVIDER: address(0),
+        L2_PRICE_ORACLE: address(0),
+        L2_MESSENGER: address(0),
+
+        L1_MESSENGER: address(0),
+        L1_DUMMY_TOKEN: address(0),
+        L1_RECEIVER: address(0),
+
+        L2_SYNC_POOL_PROXY_ADMIN: address(0),
+        L2_EXCHANGE_RATE_PROVIDER_PROXY_ADMIN: address(0),
+        L2_SYNC_POOL_RATE_LIMITER_PROXY_ADMIN: address(0),
+        L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
+        L1_RECEIVER_PROXY_ADMIN: address(0)
+    });
+
+    ConfigPerL2 STABLE = ConfigPerL2({
+        NAME: "stable",
+        RPC_URL: "https://rpc.stable.xyz",
+        CHAIN_ID: "988",
+
+        L2_EID: 30396,
+        L2_ENDPOINT: 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B,
+        SEND_302: 0x37aaaf95887624a363effB7762D489E3C05c2a02,
+        RECEIVE_302: 0x15e51701F245F6D5bd0FEE87bCAf55B0841451B3,
+
+        LAYERZERO_DVN: 0x9C061c9A4782294eeF65ef28Cb88233A987F4bdD,
+        NETHERMIND_DVN: 0x9bCd17A654bffAa6f8fEa38D19661a7210e22196,
+        LZ_DVN: [0x9C061c9A4782294eeF65ef28Cb88233A987F4bdD, 0x9bCd17A654bffAa6f8fEa38D19661a7210e22196],
+
+        L2_OFT: 0x60a08269e5f3406d8fd7892567d53188C7F75009,
+        L2_OFT_IMPL: 0x6FFcE32713417569237786cbeFBe355090642bF9,
+        L2_CONTRACT_CONTROLLER_SAFE: 0x7a00657a45420044bc526B90Ad667aFfaee0A868,
+        L2_OFT_PROXY_ADMIN: 0xd10036AE0736DBe4cc11a56C9dc651F40d37B7E6,
 
         L2_SYNC_POOL: address(0),
         L2_SYNC_POOL_RATE_LIMITER: address(0),
