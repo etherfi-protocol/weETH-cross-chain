@@ -114,7 +114,7 @@ contract OFTMigrationUnitTests is Test, L2Constants {
         assertTrue(adapter.isPeer(DEPLOYMENT_EID, LayerZeroHelpers._toBytes32(DEPLOYMENT_OFT)));
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 1), hex"000301001101000000000000000000000000000f4240");
         assertEq(adapter.enforcedOptions(DEPLOYMENT_EID, 2), hex"000301001101000000000000000000000000000f4240");
-
+`
         // Assert that the endpoint is properly configured to __receive__ messages from the migration peer
         assertEq(endpoint.getConfig(L1_OFT_ADAPTER, L1_RECEIVE_302, DEPLOYMENT_EID, 2), LayerZeroHelpers._getExpectedUln(L1_DVN[0], L1_DVN[1]));
 
