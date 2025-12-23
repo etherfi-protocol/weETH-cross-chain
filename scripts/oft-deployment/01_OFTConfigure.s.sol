@@ -53,67 +53,23 @@ contract DeployOFTScript is Script, L2Constants {
     function deployOFT() internal {
         console.log("Deploying OFT contract...");
 
-        // bytes memory implCreationCode = abi.encodePacked(type(EtherfiOFTUpgradeable).creationCode, abi.encode(DEPLOYMENT_LZ_ENDPOINT));
+        bytes memory implCreationCode = abi.encodePacked(type(EtherfiOFTUpgradeable).creationCode, abi.encode(DEPLOYMENT_LZ_ENDPOINT));
 
-        // oftDeployment.implementationAddress = CREATE3.deployCreate3(keccak256("EtherfiOFTUpgradeable-impl"), implCreationCode);
+        oftDeployment.implementationAddress = CREATE3.deployCreate3(keccak256("EtherfiOFTUpgradeable-impl"), implCreationCode);
 
-        // bytes memory proxyCreationCode = abi.encodePacked(
-        //     type(TransparentUpgradeableProxy).creationCode, 
-        //     abi.encode(oftDeployment.implementationAddress, scriptDeployer, abi.encodeWithSelector(EtherfiOFTUpgradeable.initialize.selector, TOKEN_NAME, TOKEN_SYMBOL, scriptDeployer))
-        // );
-
-        // oftDeployment.proxyAddress = CREATE3.deployCreate3(keccak256("EtherfiOFTUpgradeable-proxy"), proxyCreationCode);
-
-        // oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
-        // require(oftDeployment.proxyAddress == DEPLOYMENT_OFT, "OFT proxy address is not correct");
-        // require(oftDeployment.implementationAddress == DEPLOYMENT_OFT_IMPL, "OFT implementation address is not correct");
-
-        // oftDeployment.proxyAddress = DEPLOYMENT_OFT;
-        // oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
-
-        // address[] memory controller = new address[](1);
-        // controller[0] = DEPLOYMENT_CONTRACT_CONTROLLER;
-        // if(DEPLOYMENT_CONTRACT_CONTROLLER == address(0)) {
-        //     revert("DEPLOYMENT_CONTRACT_CONTROLLER is not set");
-        // }
-
-        // bytes memory timelockCreationCode = abi.encodePacked(
-        //     type(EtherFiTimelock).creationCode, 
-        //     abi.encode(3 days, controller, controller, address(0))
-        // );
-        // address timelockAddress = CREATE3.deployCreate3(keccak256("EtherFiTimelock"), timelockCreationCode);
-        // require(timelockAddress == L2_TIMELOCK, "Timelock address is not correct");
-
-
-        // console.log("OFT proxy", oftDeployment.proxyAddress);
-        // console.log("OFT implementation", oftDeployment.implementationAddress);
-
-
-        // please recreate the above logic, but without using create3, just deploy directly:
-
-        // Deploy implementation directly
-        oftDeployment.implementationAddress = address(new EtherfiOFTUpgradeable(DEPLOYMENT_LZ_ENDPOINT));
-
-        // Deploy proxy directly with initialization
-        bytes memory initData = abi.encodeWithSelector(
-            EtherfiOFTUpgradeable.initialize.selector, 
-            TOKEN_NAME, 
-            TOKEN_SYMBOL, 
-            scriptDeployer
+        bytes memory proxyCreationCode = abi.encodePacked(
+            type(TransparentUpgradeableProxy).creationCode, 
+            abi.encode(oftDeployment.implementationAddress, scriptDeployer, abi.encodeWithSelector(EtherfiOFTUpgradeable.initialize.selector, TOKEN_NAME, TOKEN_SYMBOL, scriptDeployer))
         );
-        oftDeployment.proxyAddress = address(
-            new TransparentUpgradeableProxy(
-                oftDeployment.implementationAddress,
-                scriptDeployer,
-                initData
-            )
-        );
+
+        oftDeployment.proxyAddress = CREATE3.deployCreate3(keccak256("EtherfiOFTUpgradeable-proxy"), proxyCreationCode);
 
         oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
         require(oftDeployment.proxyAddress == DEPLOYMENT_OFT, "OFT proxy address is not correct");
         require(oftDeployment.implementationAddress == DEPLOYMENT_OFT_IMPL, "OFT implementation address is not correct");
-        address proxyAdminAddress = address(uint160(uint256(vm.load(oftDeployment.proxyAddress, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103))));
-        require(proxyAdminAddress == DEPLOYMENT_PROXY_ADMIN_CONTRACT, "Proxy admin address is not correct");
+
+        oftDeployment.proxyAddress = DEPLOYMENT_OFT;
+        oftDeployment.tokenContract = EtherfiOFTUpgradeable(oftDeployment.proxyAddress);
 
         address[] memory controller = new address[](1);
         controller[0] = DEPLOYMENT_CONTRACT_CONTROLLER;
@@ -121,16 +77,13 @@ contract DeployOFTScript is Script, L2Constants {
             revert("DEPLOYMENT_CONTRACT_CONTROLLER is not set");
         }
 
-        // Deploy timelock directly
-        address timelockAddress = address(
-            new EtherFiTimelock(
-                3 days,
-                controller,
-                controller,
-                address(0)
-            )
+        bytes memory timelockCreationCode = abi.encodePacked(
+            type(EtherFiTimelock).creationCode, 
+            abi.encode(3 days, controller, controller, address(0))
         );
+        address timelockAddress = CREATE3.deployCreate3(keccak256("EtherFiTimelock"), timelockCreationCode);
         require(timelockAddress == L2_TIMELOCK, "Timelock address is not correct");
+
 
         console.log("OFT proxy", oftDeployment.proxyAddress);
         console.log("OFT implementation", oftDeployment.implementationAddress);
