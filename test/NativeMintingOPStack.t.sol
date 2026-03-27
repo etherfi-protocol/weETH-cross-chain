@@ -10,6 +10,7 @@ import {MessagingFee} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfac
 
 import "../contracts/native-minting/EtherfiL1SyncPoolETH.sol";
 import "../contracts/native-minting/l2-syncpools/L2OPStackSyncPoolETHUpgradeable.sol";
+import "../contracts/native-minting/layerzero-base/L2BaseSyncPoolUpgradeable.sol";
 import "../contracts/native-minting/receivers/L1ScrollReceiverETHUpgradeable.sol";
 import "../contracts/native-minting/DummyTokenUpgradeable.sol";
 import "../contracts/libraries/Constants.sol";
@@ -40,6 +41,17 @@ contract NativeMintingOPStackForkTest is Test, L2Constants, GnosisHelpers {
         address user = address(0xBEEF);
         uint256 depositAmount = 0.1 ether;
         vm.deal(user, 10 ether);
+
+        // --- Reject non-ETH deposits ---
+        address fakeToken = address(0xdead);
+        vm.prank(user);
+        vm.expectRevert(L2BaseSyncPoolUpgradeable.L2BaseSyncPool__UnauthorizedToken.selector);
+        syncPool.deposit(fakeToken, depositAmount, 0);
+
+        // --- Reject amountIn / msg.value mismatch ---
+        vm.prank(user);
+        vm.expectRevert(L2BaseSyncPoolUpgradeable.L2BaseSyncPool__InvalidAmountIn.selector);
+        syncPool.deposit{value: 0.01 ether}(Constants.ETH_ADDRESS, depositAmount, 0);
 
         // --- Deposit ETH ---
         vm.startPrank(user);
