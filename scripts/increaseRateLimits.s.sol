@@ -21,8 +21,9 @@ contract IncreaseRateLimits is Script, L2Constants, GnosisHelpers {
     }
 
     function _generateMainnetJson() internal {
-        PairwiseRateLimiter.RateLimitConfig[] memory config = new PairwiseRateLimiter.RateLimitConfig[](1);
+        PairwiseRateLimiter.RateLimitConfig[] memory config = new PairwiseRateLimiter.RateLimitConfig[](2);
         config[0] = LayerZeroHelpers._getRateLimitConfig(SCROLL.L2_EID, NEW_LIMIT, NEW_WINDOW);
+        config[1] = LayerZeroHelpers._getRateLimitConfig(OP.L2_EID, NEW_LIMIT, NEW_WINDOW);
 
         string memory outboundData = iToHex(abi.encodeWithSignature("setOutboundRateLimits((uint32,uint256,uint256)[])", config));
         string memory inboundData = iToHex(abi.encodeWithSignature("setInboundRateLimits((uint32,uint256,uint256)[])", config));
@@ -48,8 +49,9 @@ contract IncreaseRateLimits is Script, L2Constants, GnosisHelpers {
     }
 
     function _generateOpJson() internal {
-        PairwiseRateLimiter.RateLimitConfig[] memory config = new PairwiseRateLimiter.RateLimitConfig[](1);
+        PairwiseRateLimiter.RateLimitConfig[] memory config = new PairwiseRateLimiter.RateLimitConfig[](2);
         config[0] = LayerZeroHelpers._getRateLimitConfig(SCROLL.L2_EID, NEW_LIMIT, NEW_WINDOW);
+        config[1] = LayerZeroHelpers._getRateLimitConfig(L1_EID, NEW_LIMIT, NEW_WINDOW);
 
         string memory outboundData = iToHex(abi.encodeWithSignature("setOutboundRateLimits((uint32,uint256,uint256)[])", config));
         string memory inboundData = iToHex(abi.encodeWithSignature("setInboundRateLimits((uint32,uint256,uint256)[])", config));
