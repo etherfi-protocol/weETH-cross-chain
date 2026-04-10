@@ -15,8 +15,8 @@
       "layerzero-v2": "github:JorgeAtPaladin/LayerZero-v2#21ad027cf323c323619566d2c9d1f2fa404f021f"
     },
     "resolutions": {
-      "@openzeppelin/contracts-upgradeable": "^5.0.2",
-      "@openzeppelin/contracts": "^5.0.1"
+      "@openzeppelin/contracts-upgradeable": "5.0.2",
+      "@openzeppelin/contracts": "5.0.1"
     },
     "scripts": {
 
