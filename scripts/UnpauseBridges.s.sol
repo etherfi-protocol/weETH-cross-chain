@@ -27,6 +27,9 @@ contract UnpauseBridges is Script, L2Constants, GnosisHelpers {
         _writeUnpauseJson(INK.CHAIN_ID, INK.L2_CONTRACT_CONTROLLER_SAFE, INK.L2_OFT, unpauseDataHex, "ink");
         _writeUnpauseJson(BNB.CHAIN_ID, BNB.L2_CONTRACT_CONTROLLER_SAFE, BNB.L2_OFT, unpauseDataHex, "bnb");
         _writeUnpauseJson(ZKSYNC.CHAIN_ID, ZKSYNC.L2_CONTRACT_CONTROLLER_SAFE, ZKSYNC.L2_OFT, unpauseDataHex, "zksync");
+        _writeUnpauseJson(SONIC.CHAIN_ID, SONIC.L2_CONTRACT_CONTROLLER_SAFE, SONIC.L2_OFT, unpauseDataHex, "sonic");
+        _writeUnpauseJson(PLASMA.CHAIN_ID, PLASMA.L2_CONTRACT_CONTROLLER_SAFE, PLASMA.L2_OFT, unpauseDataHex, "plasma");
+        _writeUnpauseJson(HYPEREVM.CHAIN_ID, HYPEREVM.L2_CONTRACT_CONTROLLER_SAFE, HYPEREVM.L2_OFT, unpauseDataHex, "hyperevm");
     }
 
     function _writeUnpauseJson(
