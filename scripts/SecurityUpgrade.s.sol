@@ -27,7 +27,7 @@ contract SecurityUpgrade is Script, L2Constants, GnosisHelpers {
 
         _generateEthereumJson();
 
-        // 14 chains to unpause + rate limits + DVN
+        // 15 chains to unpause + rate limits + DVN
         _generateL2Json(BASE, BASE_LIMIT, true);
         _generateL2Json(OP, OP_LIMIT, true);
         _generateL2Json(UNICHAIN, STANDARD_LIMIT, true);
@@ -41,12 +41,12 @@ contract SecurityUpgrade is Script, L2Constants, GnosisHelpers {
         _generateL2Json(SONIC, RESTRICTED_LIMIT, true);
         _generateL2Json(PLASMA, STANDARD_LIMIT, true);
         _generateL2Json(HYPEREVM, STANDARD_LIMIT, true);
+        _generateL2Json(SCROLL, RESTRICTED_LIMIT, true);
 
-        // 6 chains: rate limits + DVN only (no unpause)
+        // 5 chains: rate limits + DVN only (no unpause)
         _generateL2Json(BLAST, RESTRICTED_LIMIT, false);
         _generateL2Json(MODE, RESTRICTED_LIMIT, false);
         _generateL2Json(MORPH, RESTRICTED_LIMIT, false);
-        _generateL2Json(SCROLL, RESTRICTED_LIMIT, false);
         _generateL2Json(SWELL, RESTRICTED_LIMIT, false);
         _generateL2Json(STABLE, RESTRICTED_LIMIT, false);
     }
@@ -122,13 +122,14 @@ contract SecurityUpgrade is Script, L2Constants, GnosisHelpers {
             json = string.concat(json, _getGnosisTransaction(addressToHex(chain.L2_OFT), unpauseHex, false));
         }
 
-        // Tx 2-3: Rate limits (all peers get this chain's group rate)
+        // Tx 2-3: Rate limits — balanced: min(thisChainLimit, peerLimit) for L2 peers
         PairwiseRateLimiter.RateLimitConfig[] memory rlConfig = new PairwiseRateLimiter.RateLimitConfig[](allL2Eids.length);
         for (uint256 i = 0; i < allL2Eids.length; i++) {
             if (allL2Eids[i] == chain.L2_EID) {
                 rlConfig[i] = LayerZeroHelpers._getRateLimitConfig(L1_EID, chainLimit, RATE_WINDOW);
             } else {
-                rlConfig[i] = LayerZeroHelpers._getRateLimitConfig(allL2Eids[i], chainLimit, RATE_WINDOW);
+                uint256 effectiveLimit = chainLimit < allL2Limits[i] ? chainLimit : allL2Limits[i];
+                rlConfig[i] = LayerZeroHelpers._getRateLimitConfig(allL2Eids[i], effectiveLimit, RATE_WINDOW);
             }
         }
         string memory outboundData = iToHex(abi.encodeWithSignature("setOutboundRateLimits((uint32,uint256,uint256)[])", rlConfig));
