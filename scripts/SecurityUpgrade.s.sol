@@ -27,28 +27,28 @@ contract SecurityUpgrade is Script, L2Constants, GnosisHelpers {
 
         _generateEthereumJson();
 
-        // 15 chains to unpause + rate limits + DVN
+        // 16 chains: unpause + rate limits + DVN (direct Safe execution)
         _generateL2Json(BASE, BASE_LIMIT, true);
         _generateL2Json(OP, OP_LIMIT, true);
         _generateL2Json(UNICHAIN, STANDARD_LIMIT, true);
-        _generateL2Json(MONAD, STANDARD_LIMIT, true);
         _generateL2Json(LINEA, STANDARD_LIMIT, true);
         _generateL2Json(BERA, RESTRICTED_LIMIT, true);
         _generateL2Json(AVAX, RESTRICTED_LIMIT, true);
-        _generateL2Json(INK, STANDARD_LIMIT, true);
         _generateL2Json(BNB, RESTRICTED_LIMIT, true);
         _generateL2Json(ZKSYNC, RESTRICTED_LIMIT, true);
         _generateL2Json(SONIC, RESTRICTED_LIMIT, true);
-        _generateL2Json(PLASMA, STANDARD_LIMIT, true);
         _generateL2Json(HYPEREVM, STANDARD_LIMIT, true);
         _generateL2Json(SCROLL, RESTRICTED_LIMIT, true);
-
-        // 5 chains: rate limits + DVN only (no unpause)
-        _generateL2Json(BLAST, RESTRICTED_LIMIT, false);
-        _generateL2Json(MODE, RESTRICTED_LIMIT, false);
+        _generateL2Json(BLAST, RESTRICTED_LIMIT, true);
+        _generateL2Json(MODE, RESTRICTED_LIMIT, true);
         _generateL2Json(MORPH, RESTRICTED_LIMIT, false);
-        _generateL2Json(SWELL, RESTRICTED_LIMIT, false);
-        _generateL2Json(STABLE, RESTRICTED_LIMIT, false);
+        _generateL2Json(SWELL, RESTRICTED_LIMIT, true);
+
+        // 4 chains with timelocked owner: rate limits go through timelock schedule/execute
+        _generateTimelockL2Json(MONAD, STANDARD_LIMIT, L2_TIMELOCK, true);
+        _generateTimelockL2Json(PLASMA, STANDARD_LIMIT, L2_TIMELOCK, true);
+        _generateTimelockL2Json(INK, STANDARD_LIMIT, L2_TIMELOCK, true);
+        _generateTimelockL2Json(STABLE, RESTRICTED_LIMIT, L2_TIMELOCK_STABLE, false);
     }
 
     function _setupPeers() internal {
@@ -159,6 +159,69 @@ contract SecurityUpgrade is Script, L2Constants, GnosisHelpers {
         vm.writeJson(json, string.concat("./output/", chain.NAME, "-SecurityUpgrade.json"));
     }
 
+    function _generateTimelockL2Json(ConfigPerL2 storage chain, uint256 chainLimit, address timelockAddr, bool shouldUnpause) internal {
+        _writeTimelockSecurityUpgradeJson(chain, shouldUnpause);
+        _writeTimelockRateLimitJsons(chain, chainLimit, timelockAddr);
+    }
+
+    function _writeTimelockSecurityUpgradeJson(ConfigPerL2 storage chain, bool shouldUnpause) internal {
+        string memory json = _getGnosisHeader(chain.CHAIN_ID, chain.L2_CONTRACT_CONTROLLER_SAFE);
+
+        if (shouldUnpause) {
+            string memory unpauseHex = iToHex(abi.encodeWithSignature("unpauseBridge()"));
+            json = string.concat(json, _getGnosisTransaction(addressToHex(chain.L2_OFT), unpauseHex, false));
+        }
+
+        bytes memory ulnBytes = _encode4DVNUlnConfig(chain.LZ_DVN);
+        SetConfigParam[] memory dvnParams = new SetConfigParam[](allL2Eids.length);
+        for (uint256 i = 0; i < allL2Eids.length; i++) {
+            if (allL2Eids[i] == chain.L2_EID) {
+                dvnParams[i] = SetConfigParam(L1_EID, 2, ulnBytes);
+            } else {
+                dvnParams[i] = SetConfigParam(allL2Eids[i], 2, ulnBytes);
+            }
+        }
+        string memory sendCfg = iToHex(abi.encodeWithSignature(
+            "setConfig(address,address,(uint32,uint32,bytes)[])", chain.L2_OFT, chain.SEND_302, dvnParams
+        ));
+        string memory recvCfg = iToHex(abi.encodeWithSignature(
+            "setConfig(address,address,(uint32,uint32,bytes)[])", chain.L2_OFT, chain.RECEIVE_302, dvnParams
+        ));
+        json = string.concat(json, _getGnosisTransaction(addressToHex(chain.L2_ENDPOINT), sendCfg, false));
+        json = string.concat(json, _getGnosisTransaction(addressToHex(chain.L2_ENDPOINT), recvCfg, true));
+
+        vm.writeJson(json, string.concat("./output/", chain.NAME, "-SecurityUpgrade.json"));
+    }
+
+    function _writeTimelockRateLimitJsons(ConfigPerL2 storage chain, uint256 chainLimit, address timelockAddr) internal {
+        PairwiseRateLimiter.RateLimitConfig[] memory rlConfig = _buildRateLimitConfig(chain.L2_EID, chainLimit);
+        bytes memory outboundData = abi.encodeWithSignature("setOutboundRateLimits((uint32,uint256,uint256)[])", rlConfig);
+        bytes memory inboundData = abi.encodeWithSignature("setInboundRateLimits((uint32,uint256,uint256)[])", rlConfig);
+
+        string memory scheduleJson = _getGnosisHeader(chain.CHAIN_ID, chain.L2_CONTRACT_CONTROLLER_SAFE);
+        scheduleJson = string.concat(scheduleJson, _getGnosisScheduleTransaction(timelockAddr, chain.L2_OFT, outboundData, false));
+        scheduleJson = string.concat(scheduleJson, _getGnosisScheduleTransaction(timelockAddr, chain.L2_OFT, inboundData, true));
+        vm.writeJson(scheduleJson, string.concat("./output/", chain.NAME, "-TimelockSchedule.json"));
+
+        string memory executeJson = _getGnosisHeader(chain.CHAIN_ID, chain.L2_CONTRACT_CONTROLLER_SAFE);
+        executeJson = string.concat(executeJson, _getGnosisExecuteTransaction(timelockAddr, chain.L2_OFT, outboundData, false));
+        executeJson = string.concat(executeJson, _getGnosisExecuteTransaction(timelockAddr, chain.L2_OFT, inboundData, true));
+        vm.writeJson(executeJson, string.concat("./output/", chain.NAME, "-TimelockExecute.json"));
+    }
+
+    function _buildRateLimitConfig(uint32 chainEid, uint256 chainLimit) internal view returns (PairwiseRateLimiter.RateLimitConfig[] memory) {
+        PairwiseRateLimiter.RateLimitConfig[] memory rlConfig = new PairwiseRateLimiter.RateLimitConfig[](allL2Eids.length);
+        for (uint256 i = 0; i < allL2Eids.length; i++) {
+            if (allL2Eids[i] == chainEid) {
+                rlConfig[i] = LayerZeroHelpers._getRateLimitConfig(L1_EID, chainLimit, RATE_WINDOW);
+            } else {
+                uint256 effectiveLimit = chainLimit < allL2Limits[i] ? chainLimit : allL2Limits[i];
+                rlConfig[i] = LayerZeroHelpers._getRateLimitConfig(allL2Eids[i], effectiveLimit, RATE_WINDOW);
+            }
+        }
+        return rlConfig;
+    }
+
     function _encode4DVNUlnConfig(address[4] memory dvns) internal pure returns (bytes memory) {
         address[] memory requiredDVNs = new address[](4);
         requiredDVNs[0] = dvns[0];
@@ -176,7 +239,7 @@ contract SecurityUpgrade is Script, L2Constants, GnosisHelpers {
         }
 
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 15,
+            confirmations: 45,
             requiredDVNCount: 4,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,

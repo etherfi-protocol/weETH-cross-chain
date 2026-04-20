@@ -540,7 +540,7 @@ contract L2Constants {
 
     ConfigPerL2 BERA = ConfigPerL2({
         NAME: "bera",
-        RPC_URL: "https://rpc.berachain.com/",
+        RPC_URL: "https://berachain-rpc.publicnode.com",
         CHAIN_ID: "80094",
 
         L2_EID: 30362,
@@ -843,6 +843,9 @@ contract L2Constants {
         L1_DUMMY_TOKEN_PROXY_ADMIN: address(0),
         L1_RECEIVER_PROXY_ADMIN: address(0)
     });
+
+    // deterministic addresses was messaged up sp stable as a different timelock
+    address constant L2_TIMELOCK_STABLE = 0xd2D4171A1e81dc266e14B9694250C11C516C860b;
 
     ConfigPerL2 STABLE = ConfigPerL2({
         NAME: "stable",
