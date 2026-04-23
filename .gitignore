@@ -13,6 +13,10 @@ docs/
 # Dotenv file
 .env
 
+# Ignore foundry lock
+foundry.lock
+
+
 node_modules/
 /.idea
 *.tsbuildinfo

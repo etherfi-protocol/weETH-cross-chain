@@ -6,17 +6,22 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {EnumerableRoles} from "solady/src/auth/EnumerableRoles.sol";
 
 import {OFTUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTUpgradeable.sol";
-import {IMintableERC20} from "../interfaces/IMintableERC20.sol";
+import {IMintablePausableERC20} from "../interfaces/IMintablePausableERC20.sol";
 import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 
 /**
  * @title Etherfi mintable upgradeable OFT token
  * @dev Extends MintableOFTUpgradeable with pausing and rate limiting functionality
  */
-contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgradeable, PairwiseRateLimiter, IMintableERC20 {
+contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgradeable, PairwiseRateLimiter, IMintablePausableERC20 {
     uint256 public constant MINTER_ROLE = 1;
     uint256 public constant PAUSER_ROLE = 2;
     uint256 public constant UNPAUSER_ROLE = 3;
+    uint256 public constant PAUSE_TRANSFER_ROLE = 4;
+    uint256 public constant PAUSE_TRANSFER_UNTIL_ROLE = 5;
+
+    bool public transferPaused;
+    mapping(address => uint256) public transferPausedUntil;
 
     /**
      * @dev Constructor for MintableOFT
@@ -55,6 +60,13 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgra
         return super._credit(_to, _amountLD, 0);
     }
 
+    function _update(address from, address to, uint256 value) internal virtual override {
+        if (transferPaused) revert TransferIsPaused();
+        if (transferPausedUntil[from] >= block.timestamp) revert TransferIsPausedUntil(from, transferPausedUntil[from]);
+        if (transferPausedUntil[to] >= block.timestamp) revert TransferIsPausedUntil(to, transferPausedUntil[to]);
+        super._update(from, to, value);
+    }
+
     /**
      * @notice Mint function that can only be called by a minter
      * @dev Used by the SyncPool contract in the native minting flow
@@ -80,6 +92,38 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgra
 
     function unpauseBridge() external onlyRole(UNPAUSER_ROLE) {
         _unpause();
+    }
+
+    function pauseTransfer() external onlyRole(PAUSE_TRANSFER_ROLE) {
+        if (transferPaused) revert TransferIsPaused();
+        transferPaused = true;
+        emit TransferPaused();
+    }
+
+    function unpauseTransfer() external onlyRole(PAUSE_TRANSFER_ROLE) {
+        if (!transferPaused) revert TransferIsNotPaused();
+        transferPaused = false;
+        emit TransferUnpaused();
+    }
+
+    function pauseTransferUntil(address _user) external onlyRole(PAUSE_TRANSFER_UNTIL_ROLE) {
+        if (_user == address(0)) revert InvalidUser();
+        if (transferPausedUntil[_user] >= block.timestamp) revert TransferIsPausedUntil(_user, transferPausedUntil[_user]);
+        transferPausedUntil[_user] = block.timestamp + 1 days;
+        emit TransferPausedUntil(_user, transferPausedUntil[_user]);
+    }
+
+    function extendPauseTransferUntil(address _user, uint256 _duration) external onlyRole(PAUSE_TRANSFER_ROLE) {
+        if (_user == address(0)) revert InvalidUser();
+        if (transferPausedUntil[_user] < block.timestamp) revert TransferIsNotPausedUntil(_user);
+        transferPausedUntil[_user] = block.timestamp + _duration;
+        emit TransferPausedUntil(_user, transferPausedUntil[_user]);
+    }
+
+    function cancelPauseTransferUntil(address _user) external onlyRole(PAUSE_TRANSFER_ROLE) {
+        if (_user == address(0)) revert InvalidUser();
+        delete transferPausedUntil[_user];
+        emit TransferPausedUntilCancelled(_user);
     }
 
     /**
