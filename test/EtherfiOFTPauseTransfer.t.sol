@@ -430,8 +430,9 @@ contract EtherfiOFTPauseTransferTest is Test {
     function test_extendPauseTransferUntil_extendsActiveTimer() public {
         vm.prank(pauseTransferUntil);
         oft.pauseTransferUntil(alice);
+        uint256 armed = oft.transferPausedUntil(alice);
 
-        uint256 expected = block.timestamp + 3 days;
+        uint256 expected = armed + 3 days;
         vm.expectEmit(true, true, true, true, address(oft));
         emit TransferPausedUntil(alice, expected);
 
@@ -461,8 +462,8 @@ contract EtherfiOFTPauseTransferTest is Test {
         oft.extendPauseTransferUntil(alice, 1 days);
     }
 
-    function test_extendPauseTransferUntil_canShortenActivePause_documentedBehavior() public {
-        // Arm 1 day, then "extend" by 1 hour — effectively shortens. Documented design choice.
+    function test_extendPauseTransferUntil_strictlyAdds_cannotShorten() public {
+        // Extend now uses `+=` and strictly adds to the existing deadline; it cannot shorten.
         vm.prank(pauseTransferUntil);
         oft.pauseTransferUntil(alice);
         uint256 armed = oft.transferPausedUntil(alice);
@@ -470,30 +471,20 @@ contract EtherfiOFTPauseTransferTest is Test {
         vm.prank(pauseTransfer);
         oft.extendPauseTransferUntil(alice, 1 hours);
 
-        assertLt(oft.transferPausedUntil(alice), armed);
-        assertEq(oft.transferPausedUntil(alice), block.timestamp + 1 hours);
+        assertGt(oft.transferPausedUntil(alice), armed);
+        assertEq(oft.transferPausedUntil(alice), armed + 1 hours);
     }
 
-    function test_extendPauseTransferUntil_zeroDurationImmediatelyUnpauses() public {
+    function test_extendPauseTransferUntil_zeroDurationIsNoOp() public {
+        // With `+=`, a zero-duration extend leaves the existing deadline untouched.
         vm.prank(pauseTransferUntil);
         oft.pauseTransferUntil(alice);
+        uint256 armed = oft.transferPausedUntil(alice);
 
         vm.prank(pauseTransfer);
-        oft.extendPauseTransferUntil(alice, 0); // transferPausedUntil = block.timestamp
+        oft.extendPauseTransferUntil(alice, 0);
 
-        uint256 nowTs = block.timestamp;
-
-        // At exact timestamp we're still paused (>= boundary)...
-        vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(
-            IMintablePausableERC20.TransferIsPausedUntil.selector, alice, nowTs
-        ));
-        oft.transfer(bob, 1 ether);
-
-        // ...one second later, unpaused.
-        vm.warp(nowTs + 1);
-        vm.prank(alice);
-        oft.transfer(bob, 1 ether);
+        assertEq(oft.transferPausedUntil(alice), armed);
     }
 
     // -------------------------------------------------------------------
@@ -518,15 +509,25 @@ contract EtherfiOFTPauseTransferTest is Test {
         oft.transfer(bob, 1 ether);
     }
 
-    function test_cancelPauseTransferUntil_emitsEvenWhenNothingToCancel_documentedBehavior() public {
-        // Matches L1 behavior: cancel is a sweep-delete, always emits. Not a bug.
-        vm.expectEmit(true, true, true, true, address(oft));
-        emit TransferPausedUntilCancelled(alice);
+    function test_cancelPauseTransferUntil_revertsWhenNotPaused() public {
+        // Cancel now reverts if there is no active pause to cancel.
+        vm.prank(pauseTransfer);
+        vm.expectRevert(abi.encodeWithSelector(
+            IMintablePausableERC20.TransferIsNotPausedUntil.selector, alice
+        ));
+        oft.cancelPauseTransferUntil(alice);
+    }
+
+    function test_cancelPauseTransferUntil_revertsAfterExpiry() public {
+        vm.prank(pauseTransferUntil);
+        oft.pauseTransferUntil(alice);
+        vm.warp(oft.transferPausedUntil(alice) + 1); // strictly past boundary -> unpaused
 
         vm.prank(pauseTransfer);
+        vm.expectRevert(abi.encodeWithSelector(
+            IMintablePausableERC20.TransferIsNotPausedUntil.selector, alice
+        ));
         oft.cancelPauseTransferUntil(alice);
-
-        assertEq(oft.transferPausedUntil(alice), 0);
     }
 
     function test_weakRoleCanReArmAfterStrongCancel() public {
@@ -632,11 +633,12 @@ contract EtherfiOFTPauseTransferTest is Test {
 
         vm.prank(pauseTransferUntil);
         oft.pauseTransferUntil(alice);
+        uint256 armed = oft.transferPausedUntil(alice);
 
         vm.prank(pauseTransfer);
         oft.extendPauseTransferUntil(alice, duration);
 
-        assertEq(oft.transferPausedUntil(alice), block.timestamp + duration);
+        assertEq(oft.transferPausedUntil(alice), armed + duration);
     }
 
     function testFuzz_transferBlockedDuringActiveWindow(uint256 warpDelta) public {

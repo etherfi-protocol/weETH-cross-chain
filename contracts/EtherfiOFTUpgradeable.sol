@@ -116,12 +116,13 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgra
     function extendPauseTransferUntil(address _user, uint256 _duration) external onlyRole(PAUSE_TRANSFER_ROLE) {
         if (_user == address(0)) revert InvalidUser();
         if (transferPausedUntil[_user] < block.timestamp) revert TransferIsNotPausedUntil(_user);
-        transferPausedUntil[_user] = block.timestamp + _duration;
+        transferPausedUntil[_user] += _duration;
         emit TransferPausedUntil(_user, transferPausedUntil[_user]);
     }
 
     function cancelPauseTransferUntil(address _user) external onlyRole(PAUSE_TRANSFER_ROLE) {
         if (_user == address(0)) revert InvalidUser();
+        if (transferPausedUntil[_user] < block.timestamp) revert TransferIsNotPausedUntil(_user);
         delete transferPausedUntil[_user];
         emit TransferPausedUntilCancelled(_user);
     }
