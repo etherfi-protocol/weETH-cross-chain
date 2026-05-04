@@ -12,12 +12,18 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     error EtherfiL1SyncPoolETH__OnlyETH();
     error EtherfiL1SyncPoolETH__InvalidAmountIn();
     error EtherfiL1SyncPoolETH__UnsetDummyToken();
+    error EtherfiL1SyncPoolETH__Paused();
+    error EtherfiL1SyncPoolETH__AlreadyPaused();
+    error EtherfiL1SyncPoolETH__NotPaused();
 
     ILiquifier private _liquifier;
     IERC20 private _eEth;
 
     mapping(uint32 => IDummyToken) private _dummyTokens;
+    bool private _paused;
 
+    event Paused();
+    event Unpaused();
     event LiquifierSet(address liquifier);
     event EEthSet(address eEth);
     event DummyTokenSet(uint32 originEid, address dummyToken);
@@ -98,6 +104,24 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     }
 
     /**
+     * @dev Pause the contract
+     */
+    function pause() public onlyOwner {
+        if (_paused) revert EtherfiL1SyncPoolETH__AlreadyPaused();
+        _paused = true;
+        emit Paused();
+    }
+
+    /**
+     * @dev Unpause the contract
+     */
+    function unpause() public onlyOwner {
+        if (!_paused) revert EtherfiL1SyncPoolETH__NotPaused();
+        _paused = false;
+        emit Unpaused();
+    }
+
+    /**
      * @dev Internal function to set the liquifier address
      * @param liquifier The liquifier address
      */
@@ -146,6 +170,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
         returns (uint256 actualAmountOut)
     {
         if (tokenIn != Constants.ETH_ADDRESS) revert EtherfiL1SyncPoolETH__OnlyETH();
+        if (_paused) revert EtherfiL1SyncPoolETH__Paused();
 
         IERC20 tokenOut = IERC20(getTokenOut());
 
@@ -187,6 +212,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     {
         if (tokenIn != Constants.ETH_ADDRESS) revert EtherfiL1SyncPoolETH__OnlyETH();
         if (amountIn != msg.value) revert EtherfiL1SyncPoolETH__InvalidAmountIn();
+        if (_paused) revert EtherfiL1SyncPoolETH__Paused();
 
         ILiquifier liquifier = _liquifier;
         IDummyToken dummyToken = _dummyTokens[originEid];
