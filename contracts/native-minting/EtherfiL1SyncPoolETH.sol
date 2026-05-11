@@ -7,6 +7,7 @@ import {IDummyToken} from "../../interfaces/IDummyToken.sol";
 import {L1BaseSyncPoolUpgradeable, Constants} from "./layerzero-base/L1BaseSyncPoolUpgradeable.sol";
 import {ILiquifier} from "../../interfaces/ILiquifier.sol";
 import {IWeEth} from "../../interfaces/IWeEth.sol";
+import {IRoleRegistry} from "../../interfaces/IRoleRegistry.sol";
 
 contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     error EtherfiL1SyncPoolETH__OnlyETH();
@@ -22,17 +23,22 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     mapping(uint32 => IDummyToken) private _dummyTokens;
     bool private _paused;
 
+    IRoleRegistry public immutable _roleRegistry;
+
     event Paused();
     event Unpaused();
     event LiquifierSet(address liquifier);
     event EEthSet(address eEth);
     event DummyTokenSet(uint32 originEid, address dummyToken);
+    error IncorrectCaller();
 
     /**
      * @dev Constructor for Etherfi L1 Sync Pool ETH
      * @param endpoint Address of the LayerZero endpoint
      */
-    constructor(address endpoint) L1BaseSyncPoolUpgradeable(endpoint) {}
+    constructor(address endpoint, address roleRegistry) L1BaseSyncPoolUpgradeable(endpoint) {
+        _roleRegistry = IRoleRegistry(roleRegistry);
+    }
 
     /**
      * @dev Initialize the contract
@@ -106,7 +112,8 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     /**
      * @dev Pause the contract
      */
-    function pause() public onlyOwner {
+    function pause() public {
+        if (!_roleRegistry.hasRole(_roleRegistry.PROTOCOL_PAUSER(), msg.sender)) revert IncorrectCaller();
         if (_paused) revert EtherfiL1SyncPoolETH__AlreadyPaused();
         _paused = true;
         emit Paused();
@@ -115,7 +122,8 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     /**
      * @dev Unpause the contract
      */
-    function unpause() public onlyOwner {
+    function unpause() public {
+        if (!_roleRegistry.hasRole(_roleRegistry.PROTOCOL_UNPAUSER(), msg.sender)) revert IncorrectCaller();
         if (!_paused) revert EtherfiL1SyncPoolETH__NotPaused();
         _paused = false;
         emit Unpaused();

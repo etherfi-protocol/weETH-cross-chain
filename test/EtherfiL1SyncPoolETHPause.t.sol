@@ -9,11 +9,12 @@ import {EtherfiL1SyncPoolETH} from "../contracts/native-minting/EtherfiL1SyncPoo
 import {Constants} from "../contracts/libraries/Constants.sol";
 
 import {SimpleEndpointMock} from "./mock/SimpleEndpointMock.sol";
+import {MockRoleRegistry} from "./mock/MockRoleRegistry.sol";
 
 /// @dev Exposes the internal deposit hooks so the pause guard can be exercised
 /// directly without standing up the full LayerZero / liquifier dependency graph.
 contract EtherfiL1SyncPoolETHHarness is EtherfiL1SyncPoolETH {
-    constructor(address endpoint) EtherfiL1SyncPoolETH(endpoint) {}
+    constructor(address endpoint, address roleRegistry) EtherfiL1SyncPoolETH(endpoint, roleRegistry) {}
 
     function exposed_anticipatedDeposit(
         uint32 originEid,
@@ -39,8 +40,11 @@ contract EtherfiL1SyncPoolETHHarness is EtherfiL1SyncPoolETH {
 contract EtherfiL1SyncPoolETHPauseTest is Test {
     EtherfiL1SyncPoolETHHarness internal syncPool;
     SimpleEndpointMock internal endpoint;
+    MockRoleRegistry internal roleRegistry;
 
     address internal owner = makeAddr("owner");
+    address internal pauser = makeAddr("pauser");
+    address internal unpauser = makeAddr("unpauser");
     address internal stranger = makeAddr("stranger");
     address internal liquifier = makeAddr("liquifier");
     address internal eEth = makeAddr("eEth");
@@ -52,8 +56,14 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
 
     function setUp() public {
         endpoint = new SimpleEndpointMock(1);
+        roleRegistry = new MockRoleRegistry(owner);
 
-        EtherfiL1SyncPoolETHHarness impl = new EtherfiL1SyncPoolETHHarness(address(endpoint));
+        vm.startPrank(owner);
+        roleRegistry.grantRole(roleRegistry.PROTOCOL_PAUSER(), pauser);
+        roleRegistry.grantRole(roleRegistry.PROTOCOL_UNPAUSER(), unpauser);
+        vm.stopPrank();
+
+        EtherfiL1SyncPoolETHHarness impl = new EtherfiL1SyncPoolETHHarness(address(endpoint), address(roleRegistry));
         syncPool = EtherfiL1SyncPoolETHHarness(
             address(
                 new ERC1967Proxy(
@@ -80,18 +90,18 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     function test_Pause_OnlyOwner() public {
         vm.prank(stranger);
         vm.expectRevert(
-            abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, stranger)
+            abi.encodeWithSelector(EtherfiL1SyncPoolETH.IncorrectCaller.selector)
         );
         syncPool.pause();
     }
 
     function test_Unpause_OnlyOwner() public {
-        vm.prank(owner);
+        vm.prank(pauser);
         syncPool.pause();
 
         vm.prank(stranger);
         vm.expectRevert(
-            abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, stranger)
+            abi.encodeWithSelector(EtherfiL1SyncPoolETH.IncorrectCaller.selector)
         );
         syncPool.unpause();
     }
@@ -103,22 +113,22 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     function test_Pause_EmitsEvent() public {
         vm.expectEmit(false, false, false, false, address(syncPool));
         emit Paused();
-        vm.prank(owner);
+        vm.prank(pauser);
         syncPool.pause();
     }
 
     function test_Unpause_EmitsEvent() public {
-        vm.prank(owner);
+        vm.prank(pauser);
         syncPool.pause();
 
         vm.expectEmit(false, false, false, false, address(syncPool));
         emit Unpaused();
-        vm.prank(owner);
+        vm.prank(unpauser);
         syncPool.unpause();
     }
 
     function test_Pause_RevertsWhenAlreadyPaused() public {
-        vm.startPrank(owner);
+        vm.startPrank(pauser);
         syncPool.pause();
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__AlreadyPaused.selector);
         syncPool.pause();
@@ -126,18 +136,20 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     }
 
     function test_Unpause_RevertsWhenNotPaused() public {
-        vm.prank(owner);
+        vm.prank(unpauser);
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__NotPaused.selector);
         syncPool.unpause();
     }
 
     function test_Pause_Unpause_Cycle() public {
-        vm.startPrank(owner);
+        vm.prank(pauser);
         syncPool.pause();
+        vm.prank(unpauser);
         syncPool.unpause();
+        vm.prank(pauser);
         syncPool.pause();
+        vm.prank(unpauser);
         syncPool.unpause();
-        vm.stopPrank();
     }
 
     // -----------------------------------------------------------------
@@ -145,7 +157,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     // -----------------------------------------------------------------
 
     function test_AnticipatedDeposit_RevertsWhenPaused() public {
-        vm.prank(owner);
+        vm.prank(pauser);
         syncPool.pause();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__Paused.selector);
@@ -153,7 +165,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     }
 
     function test_FinalizeDeposit_RevertsWhenPaused() public {
-        vm.prank(owner);
+        vm.prank(pauser);
         syncPool.pause();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__Paused.selector);
@@ -163,7 +175,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     /// @dev `tokenIn != ETH` is checked before the pause flag, so a non-ETH deposit
     /// during pause must still surface as `OnlyETH`, not `Paused`.
     function test_AnticipatedDeposit_TokenInCheckBeforePauseCheck() public {
-        vm.prank(owner);
+        vm.prank(pauser);
         syncPool.pause();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__OnlyETH.selector);
@@ -172,7 +184,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
 
     /// @dev `amountIn != msg.value` is checked before the pause flag in `_finalizeDeposit`.
     function test_FinalizeDeposit_AmountMismatchBeforePauseCheck() public {
-        vm.prank(owner);
+        vm.prank(pauser);
         syncPool.pause();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__InvalidAmountIn.selector);
@@ -182,20 +194,20 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     /// @dev After unpausing, the pause guard no longer trips; execution falls through
     /// to the next validation (`UnsetDummyToken` since no dummy token is registered).
     function test_AnticipatedDeposit_AfterUnpause_PassesPauseGuard() public {
-        vm.startPrank(owner);
+        vm.prank(pauser);
         syncPool.pause();
+        vm.prank(unpauser);
         syncPool.unpause();
-        vm.stopPrank();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
         syncPool.exposed_anticipatedDeposit(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
     }
 
     function test_FinalizeDeposit_AfterUnpause_PassesPauseGuard() public {
-        vm.startPrank(owner);
+        vm.prank(pauser);
         syncPool.pause();
+        vm.prank(unpauser);
         syncPool.unpause();
-        vm.stopPrank();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
         syncPool.exposed_finalizeDeposit{value: 1 ether}(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
