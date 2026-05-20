@@ -9,6 +9,7 @@ import {PausableUntil} from "../PausableUntil.sol";
 import {ILiquifier} from "../../interfaces/ILiquifier.sol";
 import {IWeEth} from "../../interfaces/IWeEth.sol";
 import {IRoleRegistry} from "../../interfaces/IRoleRegistry.sol";
+import {IBlacklister} from "../../interfaces/IBlacklister.sol";
 
 contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     error EtherfiL1SyncPoolETH__OnlyETH();
@@ -25,6 +26,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     bool private _paused;
 
     IRoleRegistry public immutable _roleRegistry;
+    IBlacklister public immutable _blacklister;
 
     event Paused();
     event Unpaused();
@@ -39,12 +41,28 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
         _;
     }
 
+    modifier onlyAdmin() {
+        _roleRegistry.onlyOperatingTimelock(msg.sender);
+        _;
+    }
+
+    modifier onlyOperations() {
+        _roleRegistry.onlyOperatingMultisig(msg.sender);
+        _;
+    }
+
+    modifier onlyGuardian() {
+        _roleRegistry.onlyGuardian(msg.sender);
+        _;
+    }
+
     /**
      * @dev Constructor for Etherfi L1 Sync Pool ETH
      * @param endpoint Address of the LayerZero endpoint
      */
-    constructor(address endpoint, address roleRegistry) L1BaseSyncPoolUpgradeable(endpoint) {
+    constructor(address endpoint, address roleRegistry, address blacklister) L1BaseSyncPoolUpgradeable(endpoint) {
         _roleRegistry = IRoleRegistry(roleRegistry);
+        _blacklister = IBlacklister(blacklister);
     }
 
     /**
@@ -119,8 +137,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     /**
      * @dev Pause the contract
      */
-    function pause() public {
-        if (!_roleRegistry.hasRole(_roleRegistry.PROTOCOL_PAUSER(), msg.sender)) revert IncorrectCaller();
+    function pause() public onlyOperations {
         if (_paused) revert EtherfiL1SyncPoolETH__AlreadyPaused();
         _paused = true;
         emit Paused();
@@ -129,11 +146,22 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     /**
      * @dev Unpause the contract
      */
-    function unpause() public {
-        if (!_roleRegistry.hasRole(_roleRegistry.PROTOCOL_UNPAUSER(), msg.sender)) revert IncorrectCaller();
+    function unpause() public onlyOperations {
         if (!_paused) revert EtherfiL1SyncPoolETH__NotPaused();
         _paused = false;
         emit Unpaused();
+    }
+
+    function pauseUntil() public onlyGuardian {
+        _pauseUntil();
+    }
+
+    function unpauseUntil() public onlyOperations {
+        _unpauseUntil();
+    }
+
+    function setPauseUntilDuration(uint256 pauseUntilDuration) public onlyAdmin {
+        _setPauseUntilDuration(pauseUntilDuration);
     }
 
     /**
@@ -228,6 +256,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     {
         if (tokenIn != Constants.ETH_ADDRESS) revert EtherfiL1SyncPoolETH__OnlyETH();
         if (amountIn != msg.value) revert EtherfiL1SyncPoolETH__InvalidAmountIn();
+        _blacklister.nonBlacklisted(msg.sender);
 
         ILiquifier liquifier = _liquifier;
         IDummyToken dummyToken = _dummyTokens[originEid];

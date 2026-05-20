@@ -11,11 +11,14 @@ import {Constants} from "../contracts/libraries/Constants.sol";
 
 import {SimpleEndpointMock} from "./mock/SimpleEndpointMock.sol";
 import {MockRoleRegistry} from "./mock/MockRoleRegistry.sol";
+import {MockBlacklister} from "./mock/MockBlacklister.sol";
 
 /// @dev Exposes the internal deposit hooks so the pause guard can be exercised
 /// directly without standing up the full LayerZero / liquifier dependency graph.
 contract EtherfiL1SyncPoolETHHarness is EtherfiL1SyncPoolETH {
-    constructor(address endpoint, address roleRegistry) EtherfiL1SyncPoolETH(endpoint, roleRegistry) {}
+    constructor(address endpoint, address roleRegistry, address blacklister)
+        EtherfiL1SyncPoolETH(endpoint, roleRegistry, blacklister)
+    {}
 
     function exposed_anticipatedDeposit(
         uint32 originEid,
@@ -45,6 +48,10 @@ contract EtherfiL1SyncPoolETHHarness is EtherfiL1SyncPoolETH {
         _unpauseUntil();
     }
 
+    function exposed_setPauseUntilDuration(uint256 duration) external {
+        _setPauseUntilDuration(duration);
+    }
+
     function exposed_pausedUntil() external view returns (uint256) {
         return _getPausableUntilStorage().pausedUntil;
     }
@@ -58,10 +65,11 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     EtherfiL1SyncPoolETHHarness internal syncPool;
     SimpleEndpointMock internal endpoint;
     MockRoleRegistry internal roleRegistry;
+    MockBlacklister internal blacklister;
 
     address internal owner = makeAddr("owner");
-    address internal pauser = makeAddr("pauser");
-    address internal unpauser = makeAddr("unpauser");
+    address internal admin = makeAddr("admin");
+    address internal guardian = makeAddr("guardian");
     address internal stranger = makeAddr("stranger");
     address internal liquifier = makeAddr("liquifier");
     address internal eEth = makeAddr("eEth");
@@ -72,17 +80,20 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     event Unpaused();
     event PausedUntil(uint256 pausedUntil);
     event UnpausedUntil();
+    event PauseUntilDurationSet(uint256 pauseUntilDuration);
 
     function setUp() public {
         endpoint = new SimpleEndpointMock(1);
         roleRegistry = new MockRoleRegistry(owner);
+        blacklister = new MockBlacklister();
 
         vm.startPrank(owner);
-        roleRegistry.grantRole(roleRegistry.PROTOCOL_PAUSER(), pauser);
-        roleRegistry.grantRole(roleRegistry.PROTOCOL_UNPAUSER(), unpauser);
+        roleRegistry.grantRole(roleRegistry.GUARDIAN_ROLE(), guardian);
+        roleRegistry.grantRole(roleRegistry.OPERATION_MULTISIG_ROLE(), admin);
         vm.stopPrank();
 
-        EtherfiL1SyncPoolETHHarness impl = new EtherfiL1SyncPoolETHHarness(address(endpoint), address(roleRegistry));
+        EtherfiL1SyncPoolETHHarness impl =
+            new EtherfiL1SyncPoolETHHarness(address(endpoint), address(roleRegistry), address(blacklister));
         syncPool = EtherfiL1SyncPoolETHHarness(
             address(
                 new ERC1967Proxy(
@@ -99,11 +110,15 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
             )
         );
 
+        // Configure pause duration to MAX_PAUSE_DURATION so cooldown math in
+        // the tests below (which references the constant) stays consistent.
+        syncPool.exposed_setPauseUntilDuration(syncPool.MAX_PAUSE_DURATION());
+
         vm.deal(address(this), 100 ether);
 
         // Move past the initial cooldown window. `_pauseUntil` checks
-        // `lastPauseTimestamp + MAX_PAUSE_DURATION + PAUSER_UNTIL_COOLDOWN > block.timestamp`,
-        // which evaluates `0 + 2 days > 1` at Foundry's default timestamp and
+        // `lastPauseTimestamp + pauseUntilDuration + PAUSER_UNTIL_COOLDOWN > block.timestamp`,
+        // which evaluates `0 + 4 days > 1` at Foundry's default timestamp and
         // would block the very first call. Warping here makes the cooldown
         // sensible for fresh callers and gives later tests room to subtract.
         vm.warp(30 days);
@@ -113,23 +128,40 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     // Access control
     // -----------------------------------------------------------------
 
-    function test_Pause_OnlyOwner() public {
+    function test_Pause_OnlyOperatingMultisig() public {
         vm.prank(stranger);
-        vm.expectRevert(
-            abi.encodeWithSelector(EtherfiL1SyncPoolETH.IncorrectCaller.selector)
-        );
+        vm.expectRevert(MockRoleRegistry.OnlyOperatingMultisig.selector);
         syncPool.pause();
     }
 
-    function test_Unpause_OnlyOwner() public {
-        vm.prank(pauser);
+    function test_Unpause_OnlyOperatingMultisig() public {
+        vm.prank(admin);
         syncPool.pause();
 
         vm.prank(stranger);
-        vm.expectRevert(
-            abi.encodeWithSelector(EtherfiL1SyncPoolETH.IncorrectCaller.selector)
-        );
+        vm.expectRevert(MockRoleRegistry.OnlyOperatingMultisig.selector);
         syncPool.unpause();
+    }
+
+    function test_PauseUntil_OnlyGuardian() public {
+        vm.prank(stranger);
+        vm.expectRevert(MockRoleRegistry.OnlyGuardian.selector);
+        syncPool.pauseUntil();
+    }
+
+    function test_UnpauseUntil_OnlyOperatingMultisig() public {
+        vm.prank(guardian);
+        syncPool.pauseUntil();
+
+        vm.prank(stranger);
+        vm.expectRevert(MockRoleRegistry.OnlyOperatingMultisig.selector);
+        syncPool.unpauseUntil();
+    }
+
+    function test_SetPauseUntilDuration_OnlyOperatingTimelock() public {
+        vm.prank(stranger);
+        vm.expectRevert(MockRoleRegistry.OnlyOperatingTimelock.selector);
+        syncPool.setPauseUntilDuration(1 days);
     }
 
     // -----------------------------------------------------------------
@@ -139,22 +171,22 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     function test_Pause_EmitsEvent() public {
         vm.expectEmit(false, false, false, false, address(syncPool));
         emit Paused();
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
     }
 
     function test_Unpause_EmitsEvent() public {
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
 
         vm.expectEmit(false, false, false, false, address(syncPool));
         emit Unpaused();
-        vm.prank(unpauser);
+        vm.prank(admin);
         syncPool.unpause();
     }
 
     function test_Pause_RevertsWhenAlreadyPaused() public {
-        vm.startPrank(pauser);
+        vm.startPrank(admin);
         syncPool.pause();
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__AlreadyPaused.selector);
         syncPool.pause();
@@ -162,19 +194,19 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     }
 
     function test_Unpause_RevertsWhenNotPaused() public {
-        vm.prank(unpauser);
+        vm.prank(admin);
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__NotPaused.selector);
         syncPool.unpause();
     }
 
     function test_Pause_Unpause_Cycle() public {
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
-        vm.prank(unpauser);
+        vm.prank(admin);
         syncPool.unpause();
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
-        vm.prank(unpauser);
+        vm.prank(admin);
         syncPool.unpause();
     }
 
@@ -183,7 +215,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     // -----------------------------------------------------------------
 
     function test_AnticipatedDeposit_RevertsWhenPaused() public {
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__Paused.selector);
@@ -191,7 +223,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     }
 
     function test_FinalizeDeposit_RevertsWhenPaused() public {
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__Paused.selector);
@@ -201,9 +233,9 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     /// @dev After unpausing, the pause guard no longer trips; execution falls through
     /// to the next validation (`UnsetDummyToken` since no dummy token is registered).
     function test_AnticipatedDeposit_AfterUnpause_PassesPauseGuard() public {
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
-        vm.prank(unpauser);
+        vm.prank(admin);
         syncPool.unpause();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
@@ -211,9 +243,9 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     }
 
     function test_FinalizeDeposit_AfterUnpause_PassesPauseGuard() public {
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
-        vm.prank(unpauser);
+        vm.prank(admin);
         syncPool.unpause();
 
         vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
@@ -230,7 +262,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     // PausableUntil: state transitions + events
     // -----------------------------------------------------------------
 
-    function test_PauseUntil_SetsPausedUntilToTimestampPlusMaxDuration() public {
+    function test_PauseUntil_SetsPausedUntilToTimestampPlusDuration() public {
         vm.warp(1_000_000);
         syncPool.exposed_pauseUntil();
         assertEq(syncPool.exposed_pausedUntil(), block.timestamp + syncPool.MAX_PAUSE_DURATION());
@@ -307,7 +339,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
         syncPool.exposed_pauseUntil();
         syncPool.exposed_unpauseUntil();
 
-        // Cooldown ends at `lastPauseTimestamp + MAX_PAUSE_DURATION + PAUSER_UNTIL_COOLDOWN`.
+        // Cooldown ends at `lastPauseTimestamp + pauseUntilDuration + PAUSER_UNTIL_COOLDOWN`.
         // The guard uses `>` (strict), so the exact boundary is allowed.
         uint256 cooldownEnd =
             syncPool.exposed_lastPauseTimestamp(address(this)) +
@@ -338,7 +370,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
         syncPool.exposed_pauseUntil();
 
         // Move past pausedUntil so `_requireNotPausedUntil` passes, but the
-        // caller cooldown (MAX_PAUSE_DURATION + PAUSER_UNTIL_COOLDOWN) is still active.
+        // caller cooldown (pauseUntilDuration + PAUSER_UNTIL_COOLDOWN) is still active.
         vm.warp(block.timestamp + syncPool.MAX_PAUSE_DURATION() + 1);
 
         vm.expectRevert(PausableUntil.PauserCooldownStillActive.selector);
@@ -425,7 +457,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
 
     function test_GlobalPausedAndPausedUntil_AreIndependent_GlobalCheckedFirst() public {
         // Set both pauses.
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
         syncPool.exposed_pauseUntil();
 
@@ -435,7 +467,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
         syncPool.exposed_anticipatedDeposit(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
 
         // Lift the global pause; the pausedUntil guard still trips.
-        vm.prank(unpauser);
+        vm.prank(admin);
         syncPool.unpause();
         uint256 pausedUntil = syncPool.exposed_pausedUntil();
         vm.expectRevert(
@@ -448,19 +480,103 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
         syncPool.exposed_pauseUntil();
 
         // Global `pause()` should still succeed; the two flags are tracked separately.
-        vm.prank(pauser);
+        vm.prank(admin);
         syncPool.pause();
+    }
+
+    // -----------------------------------------------------------------
+    // PausableUntil: duration configuration
+    // -----------------------------------------------------------------
+
+    function test_SetPauseUntilDuration_UpdatesStorageAndEmitsEvent() public {
+        uint256 newDuration = 1 days;
+        vm.expectEmit(false, false, false, true, address(syncPool));
+        emit PauseUntilDurationSet(newDuration);
+        syncPool.exposed_setPauseUntilDuration(newDuration);
+        assertEq(syncPool.pauseUntilDuration(), newDuration);
+    }
+
+    function test_SetPauseUntilDuration_RevertsBelowMin() public {
+        // Resolve the constant before `vm.expectRevert` — it applies to the next external call.
+        uint256 belowMin = syncPool.MIN_PAUSE_DURATION() - 1;
+        vm.expectRevert(PausableUntil.InvalidPauseUntilDuration.selector);
+        syncPool.exposed_setPauseUntilDuration(belowMin);
+    }
+
+    function test_SetPauseUntilDuration_RevertsAboveMax() public {
+        uint256 aboveMax = syncPool.MAX_PAUSE_DURATION() + 1;
+        vm.expectRevert(PausableUntil.InvalidPauseUntilDuration.selector);
+        syncPool.exposed_setPauseUntilDuration(aboveMax);
+    }
+
+    function test_SetPauseUntilDuration_AllowsBoundaries() public {
+        syncPool.exposed_setPauseUntilDuration(syncPool.MIN_PAUSE_DURATION());
+        assertEq(syncPool.pauseUntilDuration(), syncPool.MIN_PAUSE_DURATION());
+
+        syncPool.exposed_setPauseUntilDuration(syncPool.MAX_PAUSE_DURATION());
+        assertEq(syncPool.pauseUntilDuration(), syncPool.MAX_PAUSE_DURATION());
     }
 
     // -----------------------------------------------------------------
     // PausableUntil: constants
     // -----------------------------------------------------------------
 
-    function test_MaxPauseDuration_Is1Day() public {
-        assertEq(syncPool.MAX_PAUSE_DURATION(), 1 days);
+    function test_MinPauseDuration_Is8Hours() public {
+        assertEq(syncPool.MIN_PAUSE_DURATION(), 8 hours);
+    }
+
+    function test_MaxPauseDuration_Is3Days() public {
+        assertEq(syncPool.MAX_PAUSE_DURATION(), 3 days);
     }
 
     function test_PauserUntilCooldown_Is1Day() public {
         assertEq(syncPool.PAUSER_UNTIL_COOLDOWN(), 1 days);
+    }
+
+    // -----------------------------------------------------------------
+    // Blacklister: _finalizeDeposit guard
+    // -----------------------------------------------------------------
+
+    function test_FinalizeDeposit_RevertsWhenSenderBlacklisted() public {
+        address user = makeAddr("blacklistedUser");
+        vm.deal(user, 10 ether);
+        blacklister.blacklistUser(user);
+
+        vm.prank(user);
+        vm.expectRevert(MockBlacklister.Blacklisted.selector);
+        syncPool.exposed_finalizeDeposit{value: 1 ether}(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
+    }
+
+    function test_FinalizeDeposit_PassesBlacklistGuard_WhenSenderNotBlacklisted() public {
+        address user = makeAddr("cleanUser");
+        vm.deal(user, 10 ether);
+
+        // No blacklist entry: guard passes, falls through to next validation.
+        vm.prank(user);
+        vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
+        syncPool.exposed_finalizeDeposit{value: 1 ether}(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
+    }
+
+    function test_FinalizeDeposit_AfterUnblacklist_PassesGuard() public {
+        address user = makeAddr("rehabilitatedUser");
+        vm.deal(user, 10 ether);
+        blacklister.blacklistUser(user);
+        blacklister.unblacklistUser(user);
+
+        vm.prank(user);
+        vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
+        syncPool.exposed_finalizeDeposit{value: 1 ether}(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
+    }
+
+    /// @dev `_anticipatedDeposit` is intentionally NOT guarded by the blacklister
+    /// (LayerZero-driven path, no end-user msg.sender to check).
+    function test_AnticipatedDeposit_NotGuardedByBlacklister() public {
+        address user = makeAddr("blacklistedAnticipatedCaller");
+        blacklister.blacklistUser(user);
+
+        vm.prank(user);
+        // No `Blacklisted` revert — falls straight through to the next check.
+        vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
+        syncPool.exposed_anticipatedDeposit(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
     }
 }
