@@ -11,13 +11,12 @@ import {Constants} from "../contracts/libraries/Constants.sol";
 
 import {SimpleEndpointMock} from "./mock/SimpleEndpointMock.sol";
 import {MockRoleRegistry} from "./mock/MockRoleRegistry.sol";
-import {MockBlacklister} from "./mock/MockBlacklister.sol";
 
 /// @dev Exposes the internal deposit hooks so the pause guard can be exercised
 /// directly without standing up the full LayerZero / liquifier dependency graph.
 contract EtherfiL1SyncPoolETHHarness is EtherfiL1SyncPoolETH {
-    constructor(address endpoint, address roleRegistry, address blacklister)
-        EtherfiL1SyncPoolETH(endpoint, roleRegistry, blacklister)
+    constructor(address endpoint, address roleRegistry)
+        EtherfiL1SyncPoolETH(endpoint, roleRegistry)
     {}
 
     function exposed_anticipatedDeposit(
@@ -65,7 +64,6 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     EtherfiL1SyncPoolETHHarness internal syncPool;
     SimpleEndpointMock internal endpoint;
     MockRoleRegistry internal roleRegistry;
-    MockBlacklister internal blacklister;
 
     address internal owner = makeAddr("owner");
     address internal admin = makeAddr("admin");
@@ -85,7 +83,6 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
     function setUp() public {
         endpoint = new SimpleEndpointMock(1);
         roleRegistry = new MockRoleRegistry(owner);
-        blacklister = new MockBlacklister();
 
         vm.startPrank(owner);
         roleRegistry.grantRole(roleRegistry.GUARDIAN_ROLE(), guardian);
@@ -93,7 +90,7 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
         vm.stopPrank();
 
         EtherfiL1SyncPoolETHHarness impl =
-            new EtherfiL1SyncPoolETHHarness(address(endpoint), address(roleRegistry), address(blacklister));
+            new EtherfiL1SyncPoolETHHarness(address(endpoint), address(roleRegistry));
         syncPool = EtherfiL1SyncPoolETHHarness(
             address(
                 new ERC1967Proxy(
@@ -531,52 +528,5 @@ contract EtherfiL1SyncPoolETHPauseTest is Test {
 
     function test_PauserUntilCooldown_Is1Day() public {
         assertEq(syncPool.PAUSER_UNTIL_COOLDOWN(), 1 days);
-    }
-
-    // -----------------------------------------------------------------
-    // Blacklister: _finalizeDeposit guard
-    // -----------------------------------------------------------------
-
-    function test_FinalizeDeposit_RevertsWhenSenderBlacklisted() public {
-        address user = makeAddr("blacklistedUser");
-        vm.deal(user, 10 ether);
-        blacklister.blacklistUser(user);
-
-        vm.prank(user);
-        vm.expectRevert(MockBlacklister.Blacklisted.selector);
-        syncPool.exposed_finalizeDeposit{value: 1 ether}(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
-    }
-
-    function test_FinalizeDeposit_PassesBlacklistGuard_WhenSenderNotBlacklisted() public {
-        address user = makeAddr("cleanUser");
-        vm.deal(user, 10 ether);
-
-        // No blacklist entry: guard passes, falls through to next validation.
-        vm.prank(user);
-        vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
-        syncPool.exposed_finalizeDeposit{value: 1 ether}(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
-    }
-
-    function test_FinalizeDeposit_AfterUnblacklist_PassesGuard() public {
-        address user = makeAddr("rehabilitatedUser");
-        vm.deal(user, 10 ether);
-        blacklister.blacklistUser(user);
-        blacklister.unblacklistUser(user);
-
-        vm.prank(user);
-        vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
-        syncPool.exposed_finalizeDeposit{value: 1 ether}(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
-    }
-
-    /// @dev `_anticipatedDeposit` is intentionally NOT guarded by the blacklister
-    /// (LayerZero-driven path, no end-user msg.sender to check).
-    function test_AnticipatedDeposit_NotGuardedByBlacklister() public {
-        address user = makeAddr("blacklistedAnticipatedCaller");
-        blacklister.blacklistUser(user);
-
-        vm.prank(user);
-        // No `Blacklisted` revert — falls straight through to the next check.
-        vm.expectRevert(EtherfiL1SyncPoolETH.EtherfiL1SyncPoolETH__UnsetDummyToken.selector);
-        syncPool.exposed_anticipatedDeposit(1, bytes32(0), Constants.ETH_ADDRESS, 1 ether, 0);
     }
 }

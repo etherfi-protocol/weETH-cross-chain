@@ -9,7 +9,6 @@ import {PausableUntil} from "../PausableUntil.sol";
 import {ILiquifier} from "../../interfaces/ILiquifier.sol";
 import {IWeEth} from "../../interfaces/IWeEth.sol";
 import {IRoleRegistry} from "../../interfaces/IRoleRegistry.sol";
-import {IBlacklister} from "../../interfaces/IBlacklister.sol";
 
 contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     error EtherfiL1SyncPoolETH__OnlyETH();
@@ -26,7 +25,6 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     bool private _paused;
 
     IRoleRegistry public immutable _roleRegistry;
-    IBlacklister public immutable _blacklister;
 
     event Paused();
     event Unpaused();
@@ -60,9 +58,8 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
      * @dev Constructor for Etherfi L1 Sync Pool ETH
      * @param endpoint Address of the LayerZero endpoint
      */
-    constructor(address endpoint, address roleRegistry, address blacklister) L1BaseSyncPoolUpgradeable(endpoint) {
+    constructor(address endpoint, address roleRegistry) L1BaseSyncPoolUpgradeable(endpoint) {
         _roleRegistry = IRoleRegistry(roleRegistry);
-        _blacklister = IBlacklister(blacklister);
     }
 
     /**
@@ -256,7 +253,6 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     {
         if (tokenIn != Constants.ETH_ADDRESS) revert EtherfiL1SyncPoolETH__OnlyETH();
         if (amountIn != msg.value) revert EtherfiL1SyncPoolETH__InvalidAmountIn();
-        _blacklister.nonBlacklisted(msg.sender);
 
         ILiquifier liquifier = _liquifier;
         IDummyToken dummyToken = _dummyTokens[originEid];
