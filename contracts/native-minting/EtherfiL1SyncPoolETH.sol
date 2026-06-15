@@ -224,7 +224,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
         dummyToken.mint(address(this), amountIn);
         dummyToken.approve(address(liquifier), amountIn);
 
-        liquifier.depositWithERC20(address(dummyToken), amountIn, address(0));
+        liquifier.depositWithERC20(address(dummyToken), amountIn, 0, address(0));
 
         uint256 eEthBalance = _eEth.balanceOf(address(this));
 

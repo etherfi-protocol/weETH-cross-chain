@@ -69,8 +69,8 @@ interface ILiquifier {
         address _tokens,
         uint256[] memory _middlewareTimesIndexes
     ) external;
-    function depositWithERC20(address _token, uint256 _amount, address _referral) external returns (uint256);
-    function depositWithERC20WithPermit(address _token, uint256 _amount, address _referral, PermitInput memory _permit)
+    function depositWithERC20(address _token, uint256 _amount, uint256 _minAmountOut, address _referral) external returns (uint256);
+    function depositWithERC20WithPermit(address _token, uint256 _amount, uint256 _minAmountOut, address _referral, PermitInput memory _permit)
         external
         returns (uint256);
     function depositWithQueuedWithdrawal(Withdrawal memory _queuedWithdrawal, address _referral)
