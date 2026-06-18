@@ -77,7 +77,7 @@ contract OFTMigrationUnitTests is Test, L2Constants {
         endpoint.getConfig(address(migrationOFT), DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2);
         endpoint.getConfig(address(migrationOFT), DEPLOYMENT_SEND_LIB_302, L1_EID, 2);
 
-        assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_SEND_LIB_302, L1_EID, 2), LayerZeroHelpers._getExpectedUln(DEPLOYMENT_LZ_DVN, DEPLOYMENT_NETHERMIND_DVN));
+        assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_SEND_LIB_302, L1_EID, 2), LayerZeroHelpers._getExpectedUln(DEPLOYMENT_LZ_DVN_MONAD, DEPLOYMENT_NETHERMIND_DVN_MONAD));
         assertEq(endpoint.getConfig(address(migrationOFT), DEPLOYMENT_RECEIVE_LIB_302, L1_EID, 2), LayerZeroHelpers._getDeadUln());
     }
     

@@ -142,19 +142,13 @@ contract DeployOFTScript is Script, L2Constants {
     // Configures the deployment chain's DVN for the given destination chain
     function _setDVN(uint32 dstEid) public {
         SetConfigParam[] memory params = new SetConfigParam[](1);
-        address[] memory requiredDVNs = new address[](2);
+        // DEPLOYMENT_DVNS is pre-sorted ascending by _loadTarget() — no runtime sort needed.
+        address[] memory requiredDVNs = new address[](4);
+        for (uint256 i = 0; i < 4; i++) requiredDVNs[i] = DEPLOYMENT_DVNS[i];
 
-        // sorting the DVNs to prevent LZ_ULN_Unsorted() errors
-        if (DEPLOYMENT_LZ_DVN > DEPLOYMENT_NETHERMIND_DVN) {
-            requiredDVNs[0] = DEPLOYMENT_NETHERMIND_DVN;
-            requiredDVNs[1] = DEPLOYMENT_LZ_DVN;
-        } else {
-            requiredDVNs[0] = DEPLOYMENT_LZ_DVN;
-            requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
-        }
         UlnConfig memory ulnConfig = UlnConfig({
             confirmations: 15,
-            requiredDVNCount: 2,
+            requiredDVNCount: 4,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,
             requiredDVNs: requiredDVNs,
