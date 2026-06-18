@@ -1,0 +1,15 @@
+{
+  "dvnProviders": ["LayerZero Labs", "Nethermind", "Horizen", "Canary"],
+  "requiredDVNCount": 4,
+  "optionalDVNCount": 0,
+  "optionalDVNThreshold": 0,
+  "confirmations": 45,
+  "rateLimit": { "limitWei": "5000000000000000000000", "windowSeconds": 14400 },
+  "canonical": {
+    "oft": "0xA3D68b74bF0528fdD07263c60d6488749044914b",
+    "oftImpl": "0x08DB0DB9b5F2dcbBFDc26FF411FB2026e81DA748",
+    "proxyAdmin": "0x373ea3AEC25eB652ACa38504254eCD5459da6d19",
+    "timelock": "0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6",
+    "create3Factory": "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed"
+  }
+}

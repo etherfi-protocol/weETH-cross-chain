@@ -1,0 +1,312 @@
+{
+  "optimism-sepolia": {
+    "created": "2026-02-12T21:44:32.000Z",
+    "updated": "2026-05-01T21:16:49.000Z",
+    "tableName": "layerzero-chain_metadata",
+    "environment": "testnet",
+    "blockExplorers": [
+      {
+        "url": "https://sepolia-optimism.etherscan.io"
+      }
+    ],
+    "deployments": [
+      {
+        "eid": "10232",
+        "chainKey": "optimism-sepolia",
+        "treasuryV2": {
+          "address": "0x3aCAAf60502791D199a5a5F0B173D78229eBFe32"
+        },
+        "ultraLightNodeV2": {
+          "address": "0x35AdD9321507A87471a11EBd4aE4f592d531e620"
+        },
+        "version": 1,
+        "nonceContract": {
+          "address": "0x88866E5A296FffA511EF8011CB1BBd4d01Cd094F"
+        },
+        "endpoint": {
+          "address": "0x55370E0fBB5f5b8dAeD978BA1c075a499eB107B8"
+        },
+        "stage": "testnet",
+        "relayerV2": {
+          "address": "0x6Ac7bdc07A0583A362F1497252872AE6c0A5F5B8"
+        },
+        "fPValidator": {
+          "address": "0x89acA20831317c6dff2A348a1e4f3D37a48bC498"
+        },
+        "sendUln301": {
+          "address": "0xFe9335A931e2262009a73842001a6F91ef7B6778"
+        },
+        "mPTValidator01": {
+          "address": "0x533fB43e6808D9634CC0DD0c6c1195e8921D4FCC"
+        },
+        "receiveUln301": {
+          "address": "0x420667429538adBF982aDa16C268ba561f097F74"
+        }
+      },
+      {
+        "eid": "40232",
+        "endpointV2View": {
+          "address": "0x1e5432719b432738aDeb8F8C5bb6d118e09E768d"
+        },
+        "chainKey": "optimism-sepolia",
+        "stage": "testnet",
+        "executor": {
+          "address": "0xDc0D68899405673b932F0DB7f8A49191491A5bcB"
+        },
+        "endpointV2": {
+          "address": "0x6EDCE65403992e310A62460808c4b910D972f10f"
+        },
+        "sendUln302": {
+          "address": "0xB31D2cb502E25B30C651842C7C3293c51Fe6d16f"
+        },
+        "lzExecutor": {
+          "address": "0x89e0599C9EA2F36d255e9B500486DC406457E3De"
+        },
+        "blockedMessageLib": {
+          "address": "0x0c77d8d771ab35e2e184e7ce127f19ced31ff8c0"
+        },
+        "version": 2,
+        "receiveUln302": {
+          "address": "0x9284fd59B95b9143AF0b9795CAC16eb3C723C9Ca"
+        }
+      }
+    ],
+    "chainDetails": {
+      "mainnetChainName": "optimism",
+      "chainKey": "optimism-sepolia",
+      "chainStatus": "ACTIVE",
+      "nativeChainId": 11155420,
+      "chainStack": "OP_STACK",
+      "chainLayer": "L1",
+      "nativeCurrency": {
+        "name": "Ether",
+        "symbol": "ETH",
+        "cgId": "ethereum",
+        "cmcId": 1027,
+        "decimals": 18
+      },
+      "name": "Optimism Sepolia",
+      "chainType": "evm",
+      "shortName": "OP Sepolia"
+    },
+    "dvns": {
+      "0x938b28dc069a7b0880f4749655cb3c727c07a442": {
+        "id": "bitgo",
+        "version": 2,
+        "canonicalName": "BitGo",
+        "deprecated": true
+      },
+      "0xfdd7dabc2f892bbf8e9abd2ba580ddcd85c7c055": {
+        "id": "frax",
+        "version": 2,
+        "canonicalName": "Frax",
+        "deprecated": true
+      },
+      "0x45841dd1ca50265da7614fc43a361e526c0e6160": {
+        "version": 1,
+        "canonicalName": "TSS",
+        "id": "tss"
+      },
+      "0x4fe728b39d5e19ff3a9702c5e156bbc6cd8c6021": {
+        "version": 2,
+        "canonicalName": "BitGo",
+        "id": "bitgo"
+      },
+      "0x4cd993429e3d478858a3ddf6edae48627a3483a4": {
+        "version": 2,
+        "canonicalName": "Frax",
+        "id": "frax"
+      },
+      "0x3e9d8fa8067938f2a62baa7114eed183040824ab": {
+        "id": "bware-labs",
+        "version": 2,
+        "canonicalName": "BWare",
+        "deprecated": true
+      },
+      "0xf1eb575035fcb1291a4c1801fcac8bd93b4e281b": {
+        "version": 2,
+        "canonicalName": "Citrea",
+        "id": "citrea"
+      },
+      "0xa33e18b98c23a93b5195fdf73dd025329a014976": {
+        "id": "frax",
+        "version": 2,
+        "canonicalName": "Frax",
+        "deprecated": true
+      },
+      "0xc041606700ef1ae6c0430d7a6f3013cb6aebdfdb": {
+        "version": 2,
+        "canonicalName": "Horizen",
+        "id": "horizen-labs"
+      },
+      "0xc9997d7e5345c8f432e98e48e34eb2719d8cf8ff": {
+        "version": 2,
+        "canonicalName": "Wyoming",
+        "id": "wyoming"
+      },
+      "0x2d15d4e61558480a9300632772e68d8b5e7cc7e5": {
+        "version": 2,
+        "canonicalName": "Nethermind",
+        "id": "nethermind"
+      },
+      "0xd680ec569f269aa7015f7979b4f1239b5aa4582c": {
+        "version": 2,
+        "canonicalName": "LayerZero Labs",
+        "id": "layerzero-labs"
+      }
+    },
+    "rpcs": [
+      {
+        "rank": 0,
+        "url": "https://optimism-sepolia.gateway.tenderly.co"
+      },
+      {
+        "rank": 0,
+        "url": "https://optimism-sepolia.drpc.org"
+      },
+      {
+        "rank": 0,
+        "url": "https://sepolia.optimism.io"
+      },
+      {
+        "rank": 1,
+        "url": "https://optimism-sepolia-public.nodies.app"
+      },
+      {
+        "rank": 1,
+        "url": "https://api.zan.top/opt-sepolia"
+      },
+      {
+        "rank": 1,
+        "url": "https://optimism-sepolia.api.onfinality.io/public"
+      }
+    ],
+    "addressToOApp": {
+      "0x205506cb8be7f5fc537cb0240ffb4273027cf11d": {
+        "id": "hermes-v2",
+        "canonicalName": "Hermes V2"
+      },
+      "0xf922d8b8ec0180b64dfcf07d205145b7e25c433e": {
+        "id": "FRNT OApp",
+        "canonicalName": "Frontier Stable Token"
+      },
+      "0xad28ba8f98b9cb5cb0a7d5c8883cb56ada656707": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0xcf26a197b5353ff886919c2a2fb4c45fe233dd3f": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0xc48c0736c8ae67a8c54dfb01d7ecc7190c12a042": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0xea461d9b1a3d1d45e2aa3a358c3b8cb9bf2c7063": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0x7a66f5a4b1b9f6de3d5f52bd32783c307675284d": {
+        "id": "predifi",
+        "canonicalName": "Predifi"
+      },
+      "0x59ff83364d20abc6a4c760c17a7d4fe2b88f08b1": {
+        "id": "soul",
+        "canonicalName": "Soul Protocol"
+      }
+    },
+    "chainName": "optsep",
+    "tokens": {
+      "0x2e56ab6fd5499fa4c501b14d7f13dfbafb9764f5": {
+        "name": "MyOFT",
+        "symbol": "MOFT",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x2b98e39cc9b5f0732dec03d13a5584575d669bab": {
+        "name": "MyOFT",
+        "symbol": "MOFT",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0xce9e3e2196f1628a511314e8d8b1f3c4a024b205": {
+        "name": "Bridged USDT (Stargate)",
+        "symbol": "USDT",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xdc443e1b760b1e3d2582a613a0bc3608ebcc71df": {
+        "name": "Tether USD",
+        "symbol": "USDT",
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0x15a2ea73f7e75264cfab564bbd3c82ae76fcec56": {
+        "proxyAddresses": [
+          "0xf922d8b8ec0180b64dfcf07d205145b7e25c433e"
+        ],
+        "symbol": "FRNT",
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0x488327236b65c61a6c083e8d811a4e0d3d1d4268": {
+        "name": "USDC",
+        "symbol": "USDC",
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0x8cad17ec95529395d36efa6918319af50a2c3d8f": {
+        "name": "Stargate Ether Vault",
+        "symbol": "SGETH",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x454f97a1116a37b47c2a942bed7c8f9eae944c31": {
+        "name": "ERC20Token Mock",
+        "symbol": "STG",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xccec13e0981e1161410b34e5edbaaa047fd4cbe9": {
+        "name": "ERC20Token Mock",
+        "symbol": "STG",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xc9c7a3ae8f1059867247a009b32ad7aad9a52d1c": {
+        "name": "RewardTokenMock",
+        "symbol": "STG",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x9554e739735ef03c7458577bba6549aec619ac50": {
+        "name": "RewardTokenMock",
+        "symbol": "STG",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x7aacd9f4944e9305470a802658b924f5467f7de0": {
+        "name": "USDT",
+        "symbol": "USDT",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x9352001271a0af0d09a4e7f6c431663a2d5aa9d2": {
+        "name": "USDT",
+        "symbol": "USDT",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xf922d8b8ec0180b64dfcf07d205145b7e25c433e": {
+        "symbol": "FRNT",
+        "erc20TokenAddress": "0x15a2ea73f7e75264cfab564bbd3c82ae76fcec56",
+        "type": "ProxyOFT",
+        "decimals": 6,
+        "sharedDecimals": 6
+      }
+    },
+    "chainKey": "optimism-sepolia"
+  }
+}

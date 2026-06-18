@@ -1,0 +1,3624 @@
+{
+  "optimism": {
+    "created": "2026-02-12T21:44:32.000Z",
+    "updated": "2026-05-22T01:45:23.000Z",
+    "tableName": "layerzero-chain_metadata",
+    "environment": "mainnet",
+    "blockExplorers": [
+      {
+        "url": "https://optimistic.etherscan.io"
+      }
+    ],
+    "deployments": [
+      {
+        "eid": "11",
+        "relayer": {
+          "address": "0xFe7C30860D01e28371D40434806F4A8fcDD3A098"
+        },
+        "chainKey": "optimism",
+        "stage": "mainnet",
+        "version": 0
+      },
+      {
+        "eid": "111",
+        "relayer": {
+          "address": "0xFe7C30860D01e28371D40434806F4A8fcDD3A098"
+        },
+        "chainKey": "optimism",
+        "mPTValidatorV4": {
+          "address": "0x15feEA944A7F4eE4835c59ABC488C1935f2301b4"
+        },
+        "treasuryV2": {
+          "address": "0x3773E1E9Deb273fCdf9f80bc88bB387B1e6Ce34d"
+        },
+        "ultraLightNodeV2": {
+          "address": "0x4D73AdB72bC3DD368966edD0f0b2148401A178E2"
+        },
+        "version": 1,
+        "nonceContract": {
+          "address": "0x5B905fE05F81F3a8ad8B28C6E17779CFAbf76068"
+        },
+        "ultraLightNode": {
+          "address": "0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675"
+        },
+        "endpoint": {
+          "address": "0x3c2269811836af69497E5F486A85D7316753cf62"
+        },
+        "stage": "mainnet",
+        "relayerV2": {
+          "address": "0x81E792e5a9003CC1C8BF5569A00f34b65d75b017"
+        },
+        "fPValidator": {
+          "address": "0x23ec43e2b8f9aE21D895eEa5a1a9c444fe301044"
+        },
+        "mPTValidatorV5": {
+          "address": "0x5c824c516bA5FA8dB75738ef5bDac4EfDCa691f1"
+        },
+        "sendUln301": {
+          "address": "0x3823094993190Fbb3bFABfEC8365b8C18517566F"
+        },
+        "mPTValidator01": {
+          "address": "0x462F7eC57C6492B983a8C8322B4369a7f149B859"
+        },
+        "receiveUln301": {
+          "address": "0x6C9AE31DFB56699d6bD553146f653DCEC3b174Fe"
+        }
+      },
+      {
+        "eid": "30111",
+        "chainKey": "optimism",
+        "endpointV2": {
+          "address": "0x1a44076050125825900e736c501f859c50fE728c"
+        },
+        "readLib1002": {
+          "address": "0x01B29c03fAD8F455184573D6624a8136cF6106Fb"
+        },
+        "version": 2,
+        "endpointV2View": {
+          "address": "0xECEE8B581960634aF89f467AE624Ff468a9Db14B"
+        },
+        "stage": "mainnet",
+        "executor": {
+          "address": "0x2D2ea0697bdbede3F01553D2Ae4B8d0c486B666e"
+        },
+        "deadDVN": {
+          "address": "0xEbc3065003e67CaaC747836dA272d9E5271A37e1"
+        },
+        "sendUln302": {
+          "address": "0x1322871e4ab09Bc7f5717189434f97bBD9546e95"
+        },
+        "lzExecutor": {
+          "address": "0xb02763373589c440Ed6ff32f47cf4b81CA285D01"
+        },
+        "blockedMessageLib": {
+          "address": "0x1ccbf0db9c192d969de57e25b3ff09a25bb1d862"
+        },
+        "receiveUln302": {
+          "address": "0x3c4962Ff6258dcfCafD23a814237B7d6Eb712063"
+        }
+      }
+    ],
+    "dexContracts": {
+      "uniswapV3QuoterV2": "0x61fFE014bA17989E743c5F6cB21bF9697530B21e"
+    },
+    "dvns": {
+      "0x539008c98b17803a273edf98aba2d4414ee3f4d7": {
+        "version": 2,
+        "canonicalName": "P2P",
+        "id": "p2p"
+      },
+      "0x9e930731cb4a6bf7ecc11f695a295c60bdd212eb": {
+        "version": 2,
+        "canonicalName": "Horizen",
+        "id": "horizen-labs"
+      },
+      "0x150a58e9e6bf69cceb1dba5ae97c166dc8792539": {
+        "version": 1,
+        "canonicalName": "Chainlink",
+        "id": "ccip"
+      },
+      "0x6075e53dc2ddcfa81142fbad52315ae627ffce75": {
+        "id": "nethermind",
+        "lzReadCompatible": true,
+        "version": 2,
+        "canonicalName": "Nethermind"
+      },
+      "0x06e8042729cef3ae6d6db5350f48f9d736c3675d": {
+        "id": "altlayer",
+        "lzReadCompatible": true,
+        "version": 2,
+        "canonicalName": "AltLayer"
+      },
+      "0xd56e4eab23cb81f43168f9f45211eb027b9ac7cc": {
+        "version": 2,
+        "canonicalName": "Google",
+        "id": "google-cloud"
+      },
+      "0xb0b2ef168f52f6d1e42f461e11117295ef992daf": {
+        "version": 2,
+        "canonicalName": "Superform",
+        "id": "superform"
+      },
+      "0xd841a741addcb6dea735d3b8c9faf96ba3f3d30d": {
+        "version": 2,
+        "canonicalName": "Luganodes",
+        "id": "luganodes"
+      },
+      "0x4873d56816f45ef341a8819d7039e4746ed77c21": {
+        "version": 2,
+        "canonicalName": "Zeeve",
+        "id": "zeeve"
+      },
+      "0x6a02d83e8d433304bba74ef1c427913958187142": {
+        "version": 2,
+        "canonicalName": "LayerZero Labs",
+        "id": "layerzero-labs"
+      },
+      "0x3b247f1b48f055ebf2db593672b98c9597e3081e": {
+        "id": "animoca-blockdaemon",
+        "lzReadCompatible": true,
+        "version": 2,
+        "canonicalName": "Animoca-Blockdaemon"
+      },
+      "0x56d675bfd1574ff170723689223c3a93dee5fa78": {
+        "version": 2,
+        "canonicalName": "StakingCabin",
+        "id": "stakingcabin"
+      },
+      "0x19670df5e16bea2ba9b9e68b48c054c5baea06b8": {
+        "id": "bware-labs",
+        "version": 2,
+        "canonicalName": "BWare",
+        "deprecated": true
+      },
+      "0xe014fe8c4d5c23edb7ac4011f226e869ac7ef5cc": {
+        "version": 1,
+        "canonicalName": "Polyhedra zkBridge",
+        "id": "polyhedra-network"
+      },
+      "0xcced05c3667877b545285b25f19f794436a1c481": {
+        "version": 2,
+        "canonicalName": "Restake",
+        "id": "restake"
+      },
+      "0xa4281c1c88f0278ff696edeb517052153190fc9e": {
+        "version": 2,
+        "canonicalName": "Lagrange",
+        "id": "lagrange-labs"
+      },
+      "0x37a37d958a43810ec169eece501c525664ddf890": {
+        "version": 2,
+        "canonicalName": "Gitcoin",
+        "id": "gitcoin"
+      },
+      "0x7a205ed4e3d7f9d0777594501705d8cd405c3b05": {
+        "version": 2,
+        "canonicalName": "Delegate",
+        "id": "delegate"
+      },
+      "0xe6cd8c2e46ef396df88048449e5b1c75172b40c3": {
+        "version": 2,
+        "canonicalName": "Nodes.Guru",
+        "id": "nodes-guru"
+      },
+      "0x313328609a9c38459cae56625fff7f2ad6dcde3b": {
+        "version": 2,
+        "canonicalName": "Switchboard",
+        "id": "switchboard"
+      },
+      "0xea0c32623d19d888e926e68667a5e42853fa91b4": {
+        "id": "stakingcabin",
+        "version": 2,
+        "canonicalName": "StakingCabin",
+        "deprecated": true
+      },
+      "0x3b0531eb02ab4ad72e7a531180beef9493a00dd2": {
+        "version": 2,
+        "canonicalName": "Nansen",
+        "id": "nansen"
+      },
+      "0x7b8a0fd9d6ae5011d5cbd3e85ed6d5510f98c9bf": {
+        "version": 2,
+        "canonicalName": "Animoca-Blockdaemon",
+        "id": "animoca-blockdaemon"
+      },
+      "0x41f3a349e6ac46caad2da04cfceae3e0de0e6c0c": {
+        "id": "bcw",
+        "lzReadCompatible": true,
+        "version": 2,
+        "canonicalName": "BCW Group"
+      },
+      "0xd36246c322ee102a2203bca9cafb84c179d306f6": {
+        "version": 2,
+        "canonicalName": "Shrapnel",
+        "id": "mercury"
+      },
+      "0x51accfb59e4bda0f8324934f9789e9ea19fbeff4": {
+        "version": 2,
+        "canonicalName": "Ubisoft",
+        "id": "ubisoft"
+      },
+      "0xd954bf7968ef68875c9100c9ec890f969504d120": {
+        "version": 2,
+        "canonicalName": "MIM",
+        "id": "mim"
+      },
+      "0x57f61546bd2259db04ee7132ac385e5447174403": {
+        "version": 2,
+        "canonicalName": "Flowdesk",
+        "id": "flowdesk"
+      },
+      "0xa3858e2a9860c935fc9586a617e9b2a674c3e4c8": {
+        "version": 2,
+        "canonicalName": "Muon",
+        "id": "muon"
+      },
+      "0xf24dc834039a1e39f6b99a51df05df9c91e35b2d": {
+        "version": 2,
+        "canonicalName": "BitGo",
+        "id": "bitgo"
+      },
+      "0x8381c626542b06963ef33dea9f47e80bf5574480": {
+        "version": 2,
+        "canonicalName": "StablecoinX",
+        "id": "stablecoinx"
+      },
+      "0xdf30c9f6a70ce65a152c5bd09826525d7e97ba49": {
+        "version": 2,
+        "canonicalName": "Portal",
+        "id": "portal"
+      },
+      "0xa0cc33dd6f4819d473226257792afe230ec3c67f": {
+        "version": 1,
+        "canonicalName": "TSS",
+        "id": "tss"
+      },
+      "0xb3ce0a5d132cd9bf965aba435e650c55edce0062": {
+        "version": 2,
+        "canonicalName": "Blockhunters",
+        "id": "blockhunters"
+      },
+      "0x427bd19a0463fc4edc2e247d35eb61323d7e5541": {
+        "version": 2,
+        "canonicalName": "Deutsche Telekom",
+        "id": "deutsche-telekom"
+      },
+      "0x6f798d30577c91e8f9291e82e633dbe4dce16b93": {
+        "version": 2,
+        "canonicalName": "WBTC Canary",
+        "id": "canary-wbtc"
+      },
+      "0xb908fc507fe3145e855cf63127349756b9ecf3a6": {
+        "id": "curve",
+        "lzReadCompatible": true,
+        "version": 2,
+        "canonicalName": "Curve"
+      },
+      "0xd37adf2200142ec766a519099e7b55cb9198b640": {
+        "version": 2,
+        "canonicalName": "Brale",
+        "id": "brale"
+      },
+      "0xcd37ca043f8479064e10635020c65ffc005d36f6": {
+        "version": 2,
+        "canonicalName": "StableLab",
+        "id": "stablelab"
+      },
+      "0x94ec5934daa761d7597b76fd0fecf8385de143be": {
+        "version": 2,
+        "canonicalName": "Wyoming",
+        "id": "wyoming"
+      },
+      "0x218b462e19d00c8fed4adbce78f33aef88d2ccfc": {
+        "version": 2,
+        "canonicalName": "Axelar",
+        "id": "axelar"
+      },
+      "0x73ddc92e39aeda95feb8d3e0008016d9f1268c76": {
+        "version": 2,
+        "canonicalName": "BCW Group",
+        "id": "bcw"
+      },
+      "0xbd78d684d1a0fc494e8bebbabfa6f9226a7aecf5": {
+        "version": 2,
+        "canonicalName": "Worldpay",
+        "id": "worldpay"
+      },
+      "0x5f5512c760f69a338cf2758d1e6a957571bb6ee0": {
+        "version": 2,
+        "canonicalName": "Bera",
+        "id": "bera"
+      },
+      "0xe552485d02edd3067fe7fcbd4dd56bb1d3a998d2": {
+        "version": 2,
+        "canonicalName": "P-OPS",
+        "id": "p-ops-team"
+      },
+      "0x021e401c2a1a60618c5e6353a40524971eba1e8d": {
+        "version": 2,
+        "canonicalName": "Planetarium Labs",
+        "id": "planetarium-labs"
+      },
+      "0x90ee303d4743f460b9a38415e09f3799b85a4efc": {
+        "id": "bitgo",
+        "version": 2,
+        "canonicalName": "BitGo",
+        "deprecated": true
+      },
+      "0x5b6735c66d97479ccd18294fc96b3084ecb2fa3f": {
+        "version": 2,
+        "canonicalName": "Canary",
+        "id": "canary"
+      },
+      "0x947bb89919d1e5996d6c46223626ac2e97bcf8a3": {
+        "version": 2,
+        "canonicalName": "USDT0",
+        "id": "usdt0"
+      },
+      "0xa7b5189bca84cd304d8553977c7c614329750d99": {
+        "version": 2,
+        "canonicalName": "Nethermind",
+        "id": "nethermind"
+      },
+      "0xaf75bfd402f3d4ee84978179a6c87d16c4bd1724": {
+        "id": "zenrock",
+        "version": 2,
+        "canonicalName": "Zenrock",
+        "deprecated": true
+      },
+      "0x723e6d1d06c14880ff9bd4b075b700ea67b88c08": {
+        "version": 2,
+        "canonicalName": "Fidelity Center for Applied Technology",
+        "id": "fidelity"
+      },
+      "0x1288cdad593856d7672f82e4cc5fdfe1cf59646d": {
+        "version": 2,
+        "canonicalName": "Nodit",
+        "id": "nodit"
+      },
+      "0x47039f4327f74e755f65821040a7e0addd596d09": {
+        "id": "nocturnal-labs",
+        "lzReadCompatible": true,
+        "version": 2,
+        "canonicalName": "Nocturnal Labs"
+      },
+      "0xd77a62b54ee18bcd667b6cd158d5a000182af5cf": {
+        "id": "paxos",
+        "version": 2,
+        "canonicalName": "Paxos",
+        "deprecated": true
+      },
+      "0x03d2414476a742aba715bcc337583c820525e22a": {
+        "version": 2,
+        "canonicalName": "Omni X",
+        "id": "omni-x"
+      },
+      "0x8ddf05f9a5c488b4973897e278b58895bf87cb24": {
+        "version": 2,
+        "canonicalName": "Polyhedra zkBridge",
+        "id": "polyhedra-network"
+      },
+      "0xb4fa7f1c67e5ec99b556ec92cbddbcdd384106f2": {
+        "id": "gitcoin",
+        "version": 2,
+        "canonicalName": "Gitcoin",
+        "deprecated": true
+      },
+      "0xeb64c44109ede90cc6e34953ab122a1f09460a44": {
+        "id": "horizen-labs",
+        "lzReadCompatible": true,
+        "version": 2,
+        "canonicalName": "Horizen"
+      },
+      "0xabc9b1819cc4d9846550f928b985993cf6240439": {
+        "version": 2,
+        "canonicalName": "Pearlnet",
+        "id": "pearlnet"
+      },
+      "0x969a0bdd86a230345ad87a6a381de5ed9e6cda85": {
+        "version": 2,
+        "canonicalName": "01node",
+        "id": "01node"
+      },
+      "0xfe6507f094155cabb4784403cd784c2df04122dd": {
+        "id": "stargate",
+        "version": 2,
+        "canonicalName": "Stargate",
+        "deprecated": true
+      },
+      "0xebc3065003e67caac747836da272d9e5271a37e1": {
+        "id": "lz-dead-dvn",
+        "version": 2,
+        "canonicalName": "LZDeadDVN",
+        "deprecated": true
+      },
+      "0xd4925b81f62457caca368412315d230535b9a48a": {
+        "id": "layerzero-labs",
+        "lzReadCompatible": true,
+        "version": 2,
+        "canonicalName": "LayerZero Labs"
+      },
+      "0x7240264781aa2f97cb994c6231297a8606483242": {
+        "version": 2,
+        "canonicalName": "Frax",
+        "id": "frax"
+      }
+    },
+    "rpcs": [
+      {
+        "rank": 0,
+        "url": "https://1rpc.io/op"
+      },
+      {
+        "rank": 0,
+        "url": "https://optimism.gateway.tenderly.co"
+      },
+      {
+        "rank": 0,
+        "url": "https://gateway.tenderly.co/public/optimism"
+      },
+      {
+        "rank": 1,
+        "url": "https://optimism-rpc.publicnode.com"
+      },
+      {
+        "rank": 1,
+        "url": "https://optimism-public.nodies.app"
+      },
+      {
+        "rank": 1,
+        "url": "https://mainnet.optimism.io"
+      },
+      {
+        "rank": 1,
+        "url": "https://optimism.api.onfinality.io/public"
+      },
+      {
+        "rank": 1,
+        "url": "https://optimism.public.blockpi.network/v1/rpc/public"
+      },
+      {
+        "rank": 1,
+        "url": "https://optimism.rpc.subquery.network/public"
+      },
+      {
+        "rank": 1,
+        "url": "https://api.zan.top/opt-mainnet"
+      },
+      {
+        "rank": 1,
+        "url": "https://op-pokt.nodies.app"
+      },
+      {
+        "rank": 1,
+        "url": "https://public-op-mainnet.fastnode.io"
+      }
+    ],
+    "chainDetails": {
+      "chainKey": "optimism",
+      "chainStatus": "ACTIVE",
+      "nativeChainId": 10,
+      "chainStack": "OP_STACK",
+      "chainLayer": "L2",
+      "nativeCurrency": {
+        "name": "ETH",
+        "symbol": "ETH",
+        "cgId": "ethereum",
+        "cmcId": 1027,
+        "decimals": 18
+      },
+      "cgNetworkId": "optimism",
+      "name": "Optimism",
+      "chainType": "evm",
+      "shortName": "Optimism",
+      "averageBlockTime": 1800
+    },
+    "addressToOApp": {
+      "0x272dfd47b3a4bc77dd8a667a327f1aca15305fcc": {
+        "id": "interport-finance",
+        "canonicalName": "Interport Finance"
+      },
+      "0x4268ddd4f1b2ab737729ec7a0c08c8510ad6a85c": {
+        "id": "interport-finance",
+        "canonicalName": "Interport Finance"
+      },
+      "0x56b3a71115b346ac58327e51715df9eb550238c6": {
+        "id": "interport-finance",
+        "canonicalName": "Interport Finance"
+      },
+      "0x809e02be51e6c01e626b252021eac254b5374b99": {
+        "id": "interport-finance",
+        "canonicalName": "Interport Finance"
+      },
+      "0x03a2bc8c6bcebf3e1de4cfdfb92e859fcfbef2b0": {
+        "id": "archly",
+        "canonicalName": "Archly"
+      },
+      "0x2d45d18bc844cfb242b77cc5943bd318dcad5407": {
+        "id": "archly",
+        "canonicalName": "Archly"
+      },
+      "0xe0bb58736b5c373ecd104068e4ab57399a3b16d7": {
+        "id": "archly",
+        "canonicalName": "Archly"
+      },
+      "0x2f05e799c61b600c65238a9df060caba63db8e78": {
+        "id": "stargator",
+        "canonicalName": "Stargator"
+      },
+      "0x3205a1cdda8741731e24d98a51a935ff04a24d62": {
+        "id": "degenscan",
+        "canonicalName": "Degenscan"
+      },
+      "0x3b8a847da3ba32a7a5804e06e39299cbe1e6198a": {
+        "id": "degenscan",
+        "canonicalName": "Degenscan"
+      },
+      "0xd83e3d560ba6f05094d9d8b3eb8aaea571d1864e": {
+        "id": "hyperbeat",
+        "canonicalName": "HyperBeat"
+      },
+      "0x0a86316e9b0f9cd1be0b9262e7e8ff7319a95b75": {
+        "id": "unison",
+        "canonicalName": "Unison"
+      },
+      "0x3220b72583ea1fa31995583ba4626683a4cf11c6": {
+        "id": "unison",
+        "canonicalName": "Unison"
+      },
+      "0xfaf2f7ade44506ee7148f2fece8e623e2a2c88a7": {
+        "id": "unison",
+        "canonicalName": "Unison"
+      },
+      "0xfc1cf7167b83fb32d963e307caed35e38448eb1c": {
+        "id": "unison",
+        "canonicalName": "Unison"
+      },
+      "0x1373a61449c26cc3f48c1b4c547322edaa36eb12": {
+        "id": "kelpdao",
+        "canonicalName": "Kelp DAO"
+      },
+      "0xe0071146416c7b22b822dda1b9bb9bc8a985f24f": {
+        "id": "prime-protocol",
+        "canonicalName": "Prime Protocol"
+      },
+      "0x6630ae120dbda654c18f04eb82ee89c54493378d": {
+        "id": "heroglyphs",
+        "canonicalName": "Heroglyphs"
+      },
+      "0xe5fed5b0f777f3244d8523f7fc41ef61147cdf4c": {
+        "id": "usdv",
+        "canonicalName": "USDV"
+      },
+      "0xe0080d2f853ecddbd81a643dc10da075df26fd3f": {
+        "id": "ETHFI OApp#0",
+        "canonicalName": "ether.fi governance token"
+      },
+      "0x55b9f84605b30df9bb9d817a6900219f25218157": {
+        "id": "billions-network",
+        "canonicalName": "Billions Network"
+      },
+      "0x8e59ec7bd482b2b7d550839ad2bb41a8962d9861": {
+        "id": "star-protocol",
+        "canonicalName": "Star Protocol"
+      },
+      "0xc924d9ae5f4f334abe543bf4a4c36e7e275c4c2c": {
+        "id": "star-protocol",
+        "canonicalName": "Star Protocol"
+      },
+      "0xd4199af4f2a9e5ed442779ecb05591be14b321a8": {
+        "id": "star-protocol",
+        "canonicalName": "Star Protocol"
+      },
+      "0xd918d7e9770b124f7b86add79c48703f6f5344a2": {
+        "id": "star-protocol",
+        "canonicalName": "Star Protocol"
+      },
+      "0x34af6175559aa0efd594db3cc75628d554ddf4c1": {
+        "id": "magic-club-token",
+        "canonicalName": "Magic Club Token"
+      },
+      "0x777b1b4e79058778f8362a3dc53ee90f35934e8e": {
+        "id": "solidly",
+        "canonicalName": "Solidly"
+      },
+      "0x777b2cc540e5e6824a5ceafb04c5a383874a6bf5": {
+        "id": "solidly",
+        "canonicalName": "Solidly"
+      },
+      "0x37f754953f7f22f9baf5c23a72d62db0afd397d0": {
+        "id": "openname",
+        "canonicalName": "OpenName"
+      },
+      "0xa6df73209a473dc6626ddf17e58d3b48fcfde875": {
+        "id": "openname",
+        "canonicalName": "OpenName"
+      },
+      "0x5ee0753e3ab9a991849200ff70b342053b61ef6d": {
+        "id": "omnisea",
+        "canonicalName": "Omnisea"
+      },
+      "0xb851e993c87e761ee88a0d2168fd90ab0449122f": {
+        "id": "omnisea",
+        "canonicalName": "Omnisea"
+      },
+      "0xc3e5a8a1c3b0b4c81f85ec322554187b3575c478": {
+        "id": "omnisea",
+        "canonicalName": "Omnisea"
+      },
+      "0x3b6564b5da73a41d3a66e6558a98fd0e9e1e77ad": {
+        "id": "unitus-finance",
+        "canonicalName": "Unitus Finance"
+      },
+      "0x2d0738eeda5277f8d905fe13a9c8c1474c7ce8a0": {
+        "id": "fronk-world",
+        "canonicalName": "Fronk World"
+      },
+      "0x797f72df23fa61d3553be1a421669bb43ce25d28": {
+        "id": "floyx",
+        "canonicalName": "Floyx"
+      },
+      "0x0a912a9e158a24fd0371e4e66fc8e81e289f9337": {
+        "id": "issuaa",
+        "canonicalName": "ISSUAA"
+      },
+      "0x6d30ab63fc4cddf268edd294a8d1b07bdb282976": {
+        "id": "issuaa",
+        "canonicalName": "ISSUAA"
+      },
+      "0x8a5c1c399dc13e9702b2955446bc9dde0a048bd0": {
+        "id": "issuaa",
+        "canonicalName": "ISSUAA"
+      },
+      "0xa9b5b64f9127c9a4a407e713080a22f35eea2794": {
+        "id": "issuaa",
+        "canonicalName": "ISSUAA"
+      },
+      "0xbdd5e7a7a4ee1ebca53ba02d7969dc3ec27f0048": {
+        "id": "issuaa",
+        "canonicalName": "ISSUAA"
+      },
+      "0xe77710ae15c5f9f1b8e31135ca4f5fbe5bec2097": {
+        "id": "issuaa",
+        "canonicalName": "ISSUAA"
+      },
+      "0xd5afa51059cda856bd6631bba99083099f4a9c87": {
+        "id": "zkitty-bot",
+        "canonicalName": "ZKitty Bot"
+      },
+      "0x80137510979822322193fc997d400d5a6c747bf7": {
+        "id": "stakestone",
+        "canonicalName": "StakeStone"
+      },
+      "0x991fc265f163fc33328fbd2b7c8aa9b77840ed42": {
+        "id": "getmint",
+        "canonicalName": "GetMint"
+      },
+      "0x8929e9dbd2785e3ba16175e596cdd61520fee0d1": {
+        "id": "altitude",
+        "canonicalName": "Altitude"
+      },
+      "0xf80e51afb613d764fa61751affd3313c190a86bb": {
+        "id": "altitude",
+        "canonicalName": "Altitude"
+      },
+      "0x7e56f460b31cd5804522cafd2f15910b09c0e8cb": {
+        "id": "bricksmint",
+        "canonicalName": "Bricksmint"
+      },
+      "0x8c648dd5d34d9b3b1b4184333e5c15843339f76b": {
+        "id": "tiny-dinos",
+        "canonicalName": "tiny dinos"
+      },
+      "0x907d2a4e0dcd20d614850800ecf83b4f59b708df": {
+        "id": "tiny-dinos",
+        "canonicalName": "tiny dinos"
+      },
+      "0xaaeef52ad4695b8e3b758215ca6bbca4d7680c62": {
+        "id": "tiny-dinos",
+        "canonicalName": "tiny dinos"
+      },
+      "0x93f4440843bd81fb539c36c25dab78edefa6a3f0": {
+        "id": "layersync",
+        "canonicalName": "LayerSync"
+      },
+      "0xd9f64ee3dd6f552c1bcfc8862dbd130bc6697a66": {
+        "id": "aspida",
+        "canonicalName": "Aspida"
+      },
+      "lz-fee-switch": {
+        "id": "layerzero",
+        "canonicalName": "LayerZero"
+      },
+      "0x175860f1629583526f74123df5b25e017e238e2b": {
+        "id": "omniart",
+        "canonicalName": "OmniArt"
+      },
+      "0x3a584caaf4b0bfa8653895ae8c9afd2e309f140b": {
+        "id": "omniart",
+        "canonicalName": "OmniArt"
+      },
+      "0x5eb4c2b550d0f69f2a01d95205fb45a4a7d9708e": {
+        "id": "omniart",
+        "canonicalName": "OmniArt"
+      },
+      "0x88f087ad825322d9ec3261712cf09a56e58575fc": {
+        "id": "omniart",
+        "canonicalName": "OmniArt"
+      },
+      "0x9e8f2bafdbd2f1ffe3cb37eda2e4fdc76cb99743": {
+        "id": "omniart",
+        "canonicalName": "OmniArt"
+      },
+      "0xbc412e4df7015453ea001908a7564b925d2e005d": {
+        "id": "omniart",
+        "canonicalName": "OmniArt"
+      },
+      "0xcf0144e919e31b22194311969682a43e0024b9a1": {
+        "id": "omniart",
+        "canonicalName": "OmniArt"
+      },
+      "0xe29d2adb5c8ebc4c5caccb8c73d0f3f1af7dcac6": {
+        "id": "omniart",
+        "canonicalName": "OmniArt"
+      },
+      "0x1f514a61bcde34f94bc39731235690ab9da737f7": {
+        "id": "tarot",
+        "canonicalName": "Tarot"
+      },
+      "0x7e6630282a88ae7318fa00658ba4a8665303c455": {
+        "id": "omnify",
+        "canonicalName": "Omnify"
+      },
+      "0x9c6d5a71fdd306329287a835e9b8edb7f0f17898": {
+        "id": "shimmer-bridge",
+        "canonicalName": "ShimmerBridge"
+      },
+      "0x29d096cd18c0da7500295f082da73316d704031a": {
+        "id": "coredao",
+        "canonicalName": "CoreDAO",
+        "type": "WAB"
+      },
+      "0xa7c48fb62ee90d91f0d4c3690787c0350bfc8223": {
+        "id": "ethforestai",
+        "canonicalName": "ETHforestAI"
+      },
+      "0xb2029f740b23d4076e37759359f3ef1ad245cf9f": {
+        "id": "omnibase",
+        "canonicalName": "OmniBase"
+      },
+      "0x385719545ef34d457a88e723504544a53f0ad9bc": {
+        "id": "mummy-finance",
+        "canonicalName": "Mummy Finance"
+      },
+      "0x7b5aa8676faddf778d8ffa555e1ca7e3b164e42c": {
+        "id": "pearl-club",
+        "canonicalName": "Pearl Club"
+      },
+      "0x851ce175d5a84730492697158a8ae476f700fec1": {
+        "id": "pearl-club",
+        "canonicalName": "Pearl Club"
+      },
+      "0x96337cde309d8a36c90186a46a37fcb97f746567": {
+        "id": "lz-fee-switch",
+        "canonicalName": "LZ Fee Switch"
+      },
+      "0xca24255bbedc2f3a8a09967ef992f59385bff559": {
+        "id": "lz-fee-switch",
+        "canonicalName": "LZ Fee Switch"
+      },
+      "0xf82cba49864e49f88db37f86d521faedb5a0990e": {
+        "id": "lz-fee-switch",
+        "canonicalName": "LZ Fee Switch"
+      },
+      "0x9006d631fc6fc7d454abedec9157db1ae81b73b9": {
+        "id": "lz-fee-switch",
+        "canonicalName": "LZ Fee Switch"
+      },
+      "0xacf63e56fd08970b43401492a02f6f38b6635c91": {
+        "id": "kanpai-pandas",
+        "canonicalName": "Kanpai Pandas"
+      },
+      "0x11392bede2daa7e8a01c379a406053f4ab2371b5": {
+        "id": "yel-finance",
+        "canonicalName": "Yel Finance"
+      },
+      "0xb32b3bb699634c7f5ed0b39ce7f2290b0e8cd601": {
+        "id": "royal-crows",
+        "canonicalName": "Royal Crows"
+      },
+      "0xb5c457ddb4ce3312a6c5a2b056a1652bd542a208": {
+        "id": "o404",
+        "canonicalName": "O404"
+      },
+      "0xba7bac71a8ee550d89b827fe6d67bc3dca07b104": {
+        "id": "magpie-protocol",
+        "canonicalName": "Magpie Protocol"
+      },
+      "0x8c65a15740b19e6a98699bec626ef25e27dabc91": {
+        "id": "omnishower",
+        "canonicalName": "OmniShower"
+      },
+      "0xc3630b805f10e91c2de084ac26c66bcd91f3d3fe": {
+        "id": "clearpool",
+        "canonicalName": "Clearpool"
+      },
+      "0x63fe9b223e7bb07e7a5f750adb1c29b2a161aff2": {
+        "id": "hunt-nft",
+        "canonicalName": "Hunt NFT"
+      },
+      "0xed18de5442297a4ec1ce59c7c7d9427adc2a012b": {
+        "id": "pendle",
+        "canonicalName": "Pendle"
+      },
+      "0xcabf0b8cc4e81c505756e7e420b775a737478d74": {
+        "id": "omnihub",
+        "canonicalName": "OmniHub"
+      },
+      "0xcdf79e85a5e8ffd8d93def3d3c7580b8ab8870cd": {
+        "id": "hardhit",
+        "canonicalName": "HARDHIT"
+      },
+      "0xce6081b3856192cc28fdb344a9e1b5a7a554e30f": {
+        "id": "layer-dapp",
+        "canonicalName": "Layer DAPP"
+      },
+      "0xceb404fdf35aeefd9229e844964a3946f1026d2d": {
+        "id": "spherium-finance",
+        "canonicalName": "Spherium finance"
+      },
+      "0x4ccd13f62aaef1757d6830a477a2374a3cca091d": {
+        "id": "uxd-protocol",
+        "canonicalName": "UXD Protocol"
+      },
+      "0x73c75655a76cac8f7f1df18158f92ba06b4c0f6f": {
+        "id": "toinou-oft",
+        "canonicalName": "TOINOU OFT"
+      },
+      "0xcecb301c2e2a04dd631428c386dd21db70716f8a": {
+        "id": "metis",
+        "canonicalName": "Metis"
+      },
+      "0xe110af9bc0c40beaa8b797c5b45d8b4299bd5ab7": {
+        "id": "metis",
+        "canonicalName": "Metis"
+      },
+      "0x6d3576df9858a2075442bed3c5bdc184ccd706c4": {
+        "id": "zkpengz",
+        "canonicalName": "ZkPengz"
+      },
+      "0x35644a949d2eeb4b5e592f13166aafd330645cf6": {
+        "id": "zro-token",
+        "canonicalName": "ZRO Token"
+      },
+      "0xe241c6e48ca045c7f631600a0f1403b2bfea05ad": {
+        "id": "balancer",
+        "canonicalName": "Balancer"
+      },
+      "0xb043b321b5abc6ddbf71f944d145b85b2d3fbb70": {
+        "id": "zkrank",
+        "canonicalName": "zkRank"
+      },
+      "0xec1df7edfcdc2e2042c63252c1cef480f64f9189": {
+        "id": "gh0stly-gh0sts",
+        "canonicalName": "Gh0stly Gh0sts"
+      },
+      "0x8c756880599d31fa8c838a845056e7588c327c87": {
+        "id": "toinou-oft",
+        "canonicalName": "TOINOU OFT"
+      },
+      "0x3c5b31b158dcaba76df46bd853c8af3ccf0f0022": {
+        "id": "starlab",
+        "canonicalName": "StarLab"
+      },
+      "0xef0e8ba283b209cbbd0f1fbf958a436d180fbee2": {
+        "id": "ashes-of-light",
+        "canonicalName": "Ashes of Light"
+      },
+      "0xfd28f108e95f4d41daae9dbfff707d677985998e": {
+        "id": "parallel-protocol",
+        "canonicalName": "Parallel Protocol"
+      },
+      "0x76a9a0062ec6712b99b4f63bd2b4270185759dd5": {
+        "id": "parallel-protocol",
+        "canonicalName": "Parallel Protocol"
+      },
+      "0xc5e782e2a4e2cfcb7ed454cf5a7b6aa2bb424b90": {
+        "id": "lynx",
+        "canonicalName": "Lynx"
+      },
+      "0x69420f9e38a4e60a62224c489be4bf7a94402496": {
+        "id": "defimoney",
+        "canonicalName": "Defi.money"
+      },
+      "0xcbc02963eef555f755e8af71fd66d3366631fe74": {
+        "id": "defimoney",
+        "canonicalName": "Defi.money"
+      },
+      "0xafa8a3b0d17415b59d28cca8678f8d37ae5ba780": {
+        "id": "xstar",
+        "canonicalName": "XStar"
+      },
+      "0x8be9a5aec98cf06023a8c18161964240cc0383df": {
+        "id": "hyperbridge",
+        "canonicalName": "Hyperbridge"
+      },
+      "0xd4423795fd904d9b87554940a95fb7016f172773": {
+        "id": "ainetwork",
+        "canonicalName": "AI Network"
+      },
+      "0x33800de7e817a70a694f31476313a7c572bba100": {
+        "id": "derive",
+        "canonicalName": "Derive"
+      },
+      "0x3788f0553ff58ce2a3d15880498c11af9bc0ab87": {
+        "id": "betswirl",
+        "canonicalName": "BetSwirl"
+      },
+      "0x7ce98347b805f3c53b66efc121eb92909dd36215": {
+        "id": "bettabridge",
+        "canonicalName": "BettaBridge"
+      },
+      "0x0c9d44f5a573f6cfc9e8264a5ca72a1184616ef4": {
+        "id": "extra-finance",
+        "canonicalName": "Extra Finance"
+      },
+      "0x87de645d6a2617a79e3baea8e56203bb3359c17a": {
+        "id": "extra-finance",
+        "canonicalName": "Extra Finance"
+      },
+      "0xf375aa64772258cdd07a1e08d20dd71af3a1b6c3": {
+        "id": "cockadoods",
+        "canonicalName": "Cockadoods"
+      },
+      "0x9efb28060e0c4ea2538a2b5ede883e86219182b2": {
+        "id": "unsheth",
+        "canonicalName": "unshETH"
+      },
+      "0xe71bdfe1df69284f00ee185cf0d95d0c7680c0d4": {
+        "id": "testnet-bridge",
+        "canonicalName": "Testnet Bridge"
+      },
+      "0xdd69db25f6d620a7bad3023c5d32761d353d3de9": {
+        "id": "testnet-bridge",
+        "canonicalName": "Testnet Bridge"
+      },
+      "0x01cacca455d04f0d52231589f0deb543de9213e3": {
+        "id": "hextrust",
+        "canonicalName": "Hex Trust"
+      },
+      "0x2297aebd383787a160dd0d9f71508148769342e3": {
+        "id": "btc.b",
+        "canonicalName": "BTC.b"
+      },
+      "0x5bff88ca1442c2496f7e475e9e7786383bc070c0": {
+        "id": "frax-finance",
+        "canonicalName": "Frax Finance"
+      },
+      "0xfb168af156cc2e2c259597bca3e06b989508590b": {
+        "id": "zeroway",
+        "canonicalName": "Zeroway"
+      },
+      "0xac9b40599aa05adfdf45f6c55904d60d091ad008": {
+        "id": "polyhedra",
+        "canonicalName": "Polyhedra Network"
+      },
+      "0xe0ea4b9921bed053839adae297c3925ec16dee8d": {
+        "id": "polyhedra",
+        "canonicalName": "Polyhedra Network"
+      },
+      "0x0f518f700b123dbbe67df12eede41a071a40a9c2": {
+        "id": "risk",
+        "canonicalName": "Risk"
+      },
+      "0x089154a7e4c562d5998ab3d7ca57b504a8912482": {
+        "id": "paladin",
+        "canonicalName": "Paladin"
+      },
+      "0x0dac12432d034b3fd923709fdc097b84557d0bb4": {
+        "id": "maat",
+        "canonicalName": "MAAT"
+      },
+      "0x588f3b1ce9af2f924f7f89577225c2cb5a5ec578": {
+        "id": "maat",
+        "canonicalName": "MAAT"
+      },
+      "0xd4cdd1bae5c358d1e1bb74597cdcdd168bd22545": {
+        "id": "maat",
+        "canonicalName": "MAAT"
+      },
+      "0xf08c77ac7056ad2172c8b688c80ff8b8d93cb562": {
+        "id": "maat",
+        "canonicalName": "MAAT"
+      },
+      "0x10498cbbe46946ca5b0d86cb5a5b225000a7a3a7": {
+        "id": "mintdao",
+        "canonicalName": "MintDAO"
+      },
+      "0x772aba56597c68402b66c3e8df38c5a394185ae2": {
+        "id": "mintdao",
+        "canonicalName": "MintDAO"
+      },
+      "0xd908faa99c16c77b362278fb03e45f7485be677f": {
+        "id": "mintdao",
+        "canonicalName": "MintDAO"
+      },
+      "0xe3f55c427fef83911c6491cbf8278f6b2973badb": {
+        "id": "mintdao",
+        "canonicalName": "MintDAO"
+      },
+      "0xf190f29b61f2664d413aba437b06d55b381f8976": {
+        "id": "mintdao",
+        "canonicalName": "MintDAO"
+      },
+      "0x104fd294cd556d1e5fd98661735d5cc92250fa45": {
+        "id": "tenet",
+        "canonicalName": "Tenet"
+      },
+      "0xf932863e538af568df9c79da379fd8ffd8525342": {
+        "id": "euler",
+        "canonicalName": "Euler"
+      },
+      "0x012caeb558dffc053a6a092835a1e7f5c8eeba8b": {
+        "id": "omni-x",
+        "canonicalName": "Omni X"
+      },
+      "0x133a5cbfbad965b7f9f2f00b726a4756b0dabf7d": {
+        "id": "omni-x",
+        "canonicalName": "Omni X"
+      },
+      "0x43a1421b40a6feab59850dde01d5662a336d9304": {
+        "id": "omni-x",
+        "canonicalName": "Omni X"
+      },
+      "0xbb2e4b6e10fe9ccebfdca805cdcf9fa9fb65248f": {
+        "id": "omni-x",
+        "canonicalName": "Omni X"
+      },
+      "0xd12999440402d30f69e282d45081999412013844": {
+        "id": "omni-x",
+        "canonicalName": "Omni X"
+      },
+      "0xd26ee1836e288387a0e5c836bc5368fb761d791c": {
+        "id": "omni-x",
+        "canonicalName": "Omni X"
+      },
+      "0xf57fc45434082f9c047e60b4be779cd405d38527": {
+        "id": "omni-x",
+        "canonicalName": "Omni X"
+      },
+      "0xf6f02e017870859e7265010bb6ffb0664747169f": {
+        "id": "omni-x",
+        "canonicalName": "Omni X"
+      },
+      "0x12db0b8f6ad8d7fb6ffda350eb6c28f17db73737": {
+        "id": "utilitydao",
+        "canonicalName": "UtilityDAO"
+      },
+      "0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0 ": {
+        "id": "beethoven-x",
+        "canonicalName": "Beethoven X"
+      },
+      "0x894134a25a5fac1c2c26f1d8fbf05111a3cb9487": {
+        "id": "gravita-protocol",
+        "canonicalName": "Gravita Protocol"
+      },
+      "0xc9b2c37a2368325f6806f97c309080c2ea3ba05e": {
+        "id": "glue",
+        "canonicalName": "Glue"
+      },
+      "0x80eede496655fb9047dd39d9f418d5483ed600df": {
+        "id": "frax-finance",
+        "canonicalName": "Frax Finance"
+      },
+      "0x13675ac4ba8bee98cf94781c71eafb29c0d1ec04": {
+        "id": "cryptorank",
+        "canonicalName": "CryptoRank"
+      },
+      "0x0981a1104b7ab9d1c3e3e9df0402bb31a5cf2351": {
+        "id": "l2marathon",
+        "canonicalName": "L2Marathon"
+      },
+      "0xba91ffd8a2b9f68231eca6af51623b3433a89b13": {
+        "id": "woofi",
+        "canonicalName": "WOOFi"
+      },
+      "0xbeae1b06949d033da628ba3e5af267c3e740494b": {
+        "id": "woofi",
+        "canonicalName": "WOOFi"
+      },
+      "0x2863582272a424234fce76d97099acbd432acc01": {
+        "id": "aura-finance",
+        "canonicalName": "Aura Finance"
+      },
+      "0x2b6c227b26bc0ace74bb12da86571179c2c8bc54": {
+        "id": "aura-finance",
+        "canonicalName": "Aura Finance"
+      },
+      "0xc4ef943b7c2f6b387b37689f1e9fa6ecb738845d": {
+        "id": "aura-finance",
+        "canonicalName": "Aura Finance"
+      },
+      "0xec1c780a275438916e7ceb174d80878f29580606": {
+        "id": "aura-finance",
+        "canonicalName": "Aura Finance"
+      },
+      "0x4d1fc1ad1639ec68290e267c8d799788c1074941": {
+        "id": "decent",
+        "canonicalName": "Decent"
+      },
+      "0xe2510aa4b019af3eb835d3ac9c800382109a4631": {
+        "id": "decent",
+        "canonicalName": "Decent"
+      },
+      "0xefa4486cf8ebae3137f1b5445808445d28a8511e": {
+        "id": "decent",
+        "canonicalName": "Decent"
+      },
+      "0xe8cdf27acd73a434d661c84887215f7598e7d0d3": {
+        "id": "glue",
+        "canonicalName": "Glue"
+      },
+      "0x173b47edbeca665125edc24c509bfe545cda60a9": {
+        "id": "orderly-network",
+        "canonicalName": "Orderly Network"
+      },
+      "0x461c12fba639303da045255dd32eea7e38ac69b0": {
+        "id": "orderly-network",
+        "canonicalName": "Orderly Network"
+      },
+      "0xa7580d4adc6d302d2d4c7c3db93e9ae3f82c4617": {
+        "id": "fx-protocol",
+        "canonicalName": "f(x) Protocol"
+      },
+      "0xc608dfb90a430df79a8a1edbc8be7f1a0eb4e763": {
+        "id": "fx-protocol",
+        "canonicalName": "f(x) Protocol"
+      },
+      "0xc752c6daa143e1a0ba3e7df06f3117182432b991": {
+        "id": "fx-protocol",
+        "canonicalName": "f(x) Protocol"
+      },
+      "0x3f343f13051801551655e5f6be11ed746531255b": {
+        "id": "xenobunny",
+        "canonicalName": "Xenobunny"
+      },
+      "0xba2d7a92bfebac6fbb031bd25625a017da07ad23": {
+        "id": "xenobunny",
+        "canonicalName": "Xenobunny"
+      },
+      "0xc16be3db4104f088fc464f51c9feccb4ecff37a9": {
+        "id": "hermes-v2",
+        "canonicalName": "Hermes V2"
+      },
+      "0x00000000000e1a99dddd5610111884278bdbda1d": {
+        "id": "clusters",
+        "canonicalName": "Clusters"
+      },
+      "0x0000049f63ef0d60abe49fdd8bebfa5a68822222": {
+        "id": "l2pass",
+        "canonicalName": "L2Pass"
+      },
+      "0x0000c74e9931c7d6c1a6e811fe96a8a808e06969": {
+        "id": "l2pass",
+        "canonicalName": "L2Pass"
+      },
+      "0x222228060e7efbb1d78bb5d454581910e3922222": {
+        "id": "l2pass",
+        "canonicalName": "L2Pass"
+      },
+      "0x00000d4900d72e000000fb00c004fe9abc7ca600": {
+        "id": "cortexprotocol",
+        "canonicalName": "Cortex Protocol"
+      },
+      "0x6ced48efbb581a141667d7487222e42a3fa17cf7": {
+        "id": "tangible",
+        "canonicalName": "Tangible"
+      },
+      "0xc03b43d492d904406db2d7d57e67c7e8234ba752": {
+        "id": "tangible",
+        "canonicalName": "Tangible"
+      },
+      "0x42069d11a2cc72388a2e06210921e839cfbd3280": {
+        "id": "gnomeland",
+        "canonicalName": "GnomeLand"
+      },
+      "0x69a705a1450219564071ffa47d9afe2bd5a44b53": {
+        "id": "valio",
+        "canonicalName": "Valio"
+      },
+      "0xfacf89c2a86288ce7b7055bb0d885e777f690544": {
+        "id": "valio",
+        "canonicalName": "Valio"
+      },
+      "0x841ce2611371e2db9eb49dda783ec67654f6818a": {
+        "id": "l2marathon",
+        "canonicalName": "L2Marathon"
+      },
+      "0x9e66eba102b77fc75cd87b5e60141b85573bc8e8": {
+        "id": "l2marathon",
+        "canonicalName": "L2Marathon"
+      },
+      "0x4591dbff62656e7859afe5e45f6f47d3669fbb28": {
+        "id": "prisma-finance",
+        "canonicalName": "Prisma Finance"
+      },
+      "0x296f55f8fb28e498b858d0bcda06d955b2cb3f97": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0x7a61b11a6a489650d2859345e1401542b51ae9e6": {
+        "id": "gorgon-network",
+        "canonicalName": "Gorgon Network"
+      },
+      "0xa496c5c45e23f71ddf74e8a37dbf5df6d4730614": {
+        "id": "tide-exchange",
+        "canonicalName": "Tide Exchange"
+      },
+      "0x17f87fa8fc0850667164e796c0af7a075ca551da": {
+        "id": "tradable",
+        "canonicalName": "Tradable"
+      },
+      "0x2d23bf0edd1d6884b2373a354675f2b36a23aa28": {
+        "id": "tradable",
+        "canonicalName": "Tradable"
+      },
+      "0x45adacf85e77fc069577a869c87b08a5fc586add": {
+        "id": "tradable",
+        "canonicalName": "Tradable"
+      },
+      "0x5fc63b1ba32866778e1c2caa5a586c73f712530f": {
+        "id": "tradable",
+        "canonicalName": "Tradable"
+      },
+      "0x957ab754bd2d2dfc68e9b288d59f3f172cb3b30f": {
+        "id": "tradable",
+        "canonicalName": "Tradable"
+      },
+      "0xaf20f5f19698f1d19351028cd7103b63d30de7d7": {
+        "id": "wagmi",
+        "canonicalName": "WAGMI"
+      },
+      "0x9ed7e4b1bff939ad473da5e7a218c771d1569456": {
+        "id": "reunit-wallet",
+        "canonicalName": "Reunit Wallet"
+      },
+      "0x6a661312938d22a2a0e27f585073e4406903990a": {
+        "id": "maha",
+        "canonicalName": "MAHA"
+      },
+      "0x4f4f540ab854518fc37dea8084bb9e2ee0ba1ac8": {
+        "id": "etherway",
+        "canonicalName": "Etherway"
+      },
+      "0x89bafad9b675973f374ee541634afb9242d65ffc": {
+        "id": "etherway",
+        "canonicalName": "Etherway"
+      },
+      "0x61b6b8c7c00aa7f060a2bedee6b11927cc9c3ef1": {
+        "id": "helixbridge",
+        "canonicalName": "HelixBridge"
+      },
+      "0x3134f3ff6c0daf74b32fc683b4098f9de0086589": {
+        "id": "nftearth",
+        "canonicalName": "NFTEarth"
+      },
+      "0x840b25c87b626a259ca5ac32124fa752f0230a72": {
+        "id": "angle",
+        "canonicalName": "Angle"
+      },
+      "0x8637725ada78db0674a679cea2a5e0a0869ef4a1": {
+        "id": "nftearth",
+        "canonicalName": "NFTEarth"
+      },
+      "0xb4f1bab2e5b7ed6b0f4cc2ce2c9e5b5a66a570af": {
+        "id": "time-token-finance",
+        "canonicalName": "TIME Token Finance"
+      },
+      "0xc7c557028d7ce323c22091c12730ad68000d156b": {
+        "id": "scroll-punks",
+        "canonicalName": "Scroll Punks"
+      },
+      "0x5aebac007b835cc9dc6a35ce0d1bf8fc71ce9577": {
+        "id": "weave-name",
+        "canonicalName": "Weave Name"
+      },
+      "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34": {
+        "id": "ethena",
+        "canonicalName": "Ethena"
+      },
+      "0x2a14460fee6f73b408c6acf627190614dac97df0": {
+        "id": "superform",
+        "canonicalName": "Superform"
+      },
+      "0x3721b0e122768ceddfb3dec810e64c361177f826": {
+        "id": "superform",
+        "canonicalName": "Superform"
+      },
+      "0x8a3e646d9fdaa5ce032743fce4d81b5fa8723be2": {
+        "id": "superform",
+        "canonicalName": "Superform"
+      },
+      "0x908da814cc9725616d410b2978e88ff2fb9482ee": {
+        "id": "superform",
+        "canonicalName": "Superform"
+      },
+      "0xa195608c2306a26f727d5199d5a382a4508308da": {
+        "id": "superform",
+        "canonicalName": "Superform"
+      },
+      "0xc100592b40eeb4cbc7524092a00400917421ab64": {
+        "id": "superform",
+        "canonicalName": "Superform"
+      },
+      "0xc6868edf1d2a7a8b759856cb8afa333210dfeda6": {
+        "id": "aori",
+        "canonicalName": "Aori"
+      },
+      "0x2b1d36f5b61addaf7da7ebbd11b35fd8cfb0de31": {
+        "id": "interport-finance",
+        "canonicalName": "Interport Finance"
+      },
+      "0x247bb53a70194e31efd9900dd02f659e51bb7883": {
+        "id": "jonesdao",
+        "canonicalName": "Jones DAO"
+      },
+      "0x0c372e16918f1e1acffa977f8ea2f28591c45c49": {
+        "id": "glue",
+        "canonicalName": "Glue"
+      },
+      "0x788d86e00ab31db859c3d6b80d5a9375801d7f2a": {
+        "id": "tenet",
+        "canonicalName": "Tenet"
+      },
+      "0x348fdfe2c35934a96c1353185f09d0f9efbada86": {
+        "id": "arbitrove-protocol",
+        "canonicalName": "Arbitrove Protocol"
+      },
+      "0x43b66c8a6f5d337b3890f46908e7f6dfdb5e65fa": {
+        "id": "mintly",
+        "canonicalName": "Mintly"
+      },
+      "0x5bce28f10a93c9b07a2e556fb039bcd23148217a": {
+        "id": "mintly",
+        "canonicalName": "Mintly"
+      },
+      "0xec5d4172da5b15587db2b955d7f5aa8c1c8ae496": {
+        "id": "mintly",
+        "canonicalName": "Mintly"
+      },
+      "0xd3fdcb837dafdb7c9c3ebd48fe22a53f6dd3d7d7": {
+        "id": "qi-dao",
+        "canonicalName": "Qi Dao"
+      },
+      "0xbfd5206962267c7b4b4a8b3d76ac2e1b2a5c4d5e": {
+        "id": "osaka-protocol",
+        "canonicalName": "Osaka Protocol"
+      },
+      "0xac800fd6159c2a2cb8fc31ef74621eb430287a5a": {
+        "id": "gmx",
+        "canonicalName": "GMX"
+      },
+      "0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2": {
+        "id": "ethena",
+        "canonicalName": "Ethena"
+      },
+      "0x58538e6a46e07434d7e7375bc268d3cb839c0133": {
+        "id": "ethena",
+        "canonicalName": "Ethena"
+      },
+      "0x48686c24697fe9042531b64d792304e514e74339": {
+        "id": "abracadabra-money",
+        "canonicalName": "Abracadabra Money"
+      },
+      "0x18c61629e6cbadb85c29ba7993f251b3ebe2b356": {
+        "id": "equilibria-finance",
+        "canonicalName": "Equilibria Finance"
+      },
+      "0x8a5a4348f5cfe9da08b0f3d9ae76bef6e8bbd36c": {
+        "id": "equilibria-finance",
+        "canonicalName": "Equilibria Finance"
+      },
+      "0xad29951cda3dcd0e570e65a6ee34aa455c53421c": {
+        "id": "equilibria-finance",
+        "canonicalName": "Equilibria Finance"
+      },
+      "0xfe80d611c6403f70e5b1b9b722d2b3510b740b2b": {
+        "id": "equilibria-finance",
+        "canonicalName": "Equilibria Finance"
+      },
+      "0x16ed8e219cde31e14a80dcb6c9127a5ec6e88e46": {
+        "id": "redacted-finance",
+        "canonicalName": "Redacted Finance"
+      },
+      "0x3544e25cb527620950c1694cf2a320ac71f78389": {
+        "id": "l2portal",
+        "canonicalName": "l2portal"
+      },
+      "0xb1d63771f421bd039e4dfca007352c1449e7bbe7": {
+        "id": "l2portal",
+        "canonicalName": "l2portal"
+      },
+      "0x66e535e8d2ebf13f49f3d49e5c50395a97c137b1": {
+        "id": "molten-network",
+        "canonicalName": "Molten Network"
+      },
+      "0x6985884c4392d348587b19cb9eaaf157f13271cd": {
+        "id": "zro-token",
+        "canonicalName": "ZRO Token"
+      },
+      "0x4e200fe2f3efb977d5fd9c430a41531fb04d97b8": {
+        "id": "orderly-network",
+        "canonicalName": "Orderly Network"
+      },
+      "0x300d2c875c6fb8ce4bf5480b4d34b7c9ea8a33a4": {
+        "id": "redacted-finance",
+        "canonicalName": "Redacted Finance"
+      },
+      "0xb3cb073ade360e9faaaac8f8de935858da3ef62c": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0xda82a31df339bfdf0123661134b4db63cb1706f5": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0x73e0c0d45e048d25fc26fa3159b0aa04bfa4db98": {
+        "id": "kraken",
+        "canonicalName": "Kraken"
+      },
+      "0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0": {
+        "id": "beethoven-x",
+        "canonicalName": "Beethoven X"
+      },
+      "0x6f484eacd997d9880205af22f6a4881ea0e1ccd7": {
+        "id": "holograph",
+        "canonicalName": "Holograph"
+      },
+      "0x777c19834a1a2ff6353a1e9cfb7c799ed7943a11": {
+        "id": "holograph",
+        "canonicalName": "Holograph"
+      },
+      "0x7969414aa6958a44e276e9c3c5f28c5bc42e0271": {
+        "id": "holograph",
+        "canonicalName": "Holograph"
+      },
+      "0x803305930c1bbae396d03f496a7bf53ad7fd4303": {
+        "id": "holograph",
+        "canonicalName": "Holograph"
+      },
+      "0xc9264255e1ae0cc80ceadd0056c63dc1caed28ad": {
+        "id": "holograph",
+        "canonicalName": "Holograph"
+      },
+      "0xe9e30a0ad0d8af5cf2606ea720052e28d6fcbaaf": {
+        "id": "holograph",
+        "canonicalName": "Holograph"
+      },
+      "0x85af271d1dfcbf53486d996f61d7ff0bba5582ea": {
+        "id": "altlayer",
+        "canonicalName": "AltLayer"
+      },
+      "0x7209d8881a3fd83d1fb94df76b90bd99aa53be54": {
+        "id": "cosmic-bears",
+        "canonicalName": "Cosmic Bears"
+      },
+      "0x67a1fd5f393e9ceee4fb4739d73bf75c1efb9e40": {
+        "id": "millennium-club",
+        "canonicalName": "Millennium Club DAO"
+      },
+      "0x4186bfc76e2e237523cbc30fd220fe055156b41f": {
+        "id": "kelpdao",
+        "canonicalName": "Kelp DAO"
+      },
+      "0x58ea2bb193b1429cb90d24195e6ac4ccb0b27a12": {
+        "id": "vtao",
+        "canonicalName": "vTAO - Latent"
+      },
+      "0x3ec3849c33291a9ef4c5db86de593eb4a37fde45": {
+        "id": "frax-finance",
+        "canonicalName": "Frax Finance"
+      },
+      "0x7ff7fa94b8b66ef313f7970d4eebd2cb3103a2c0": {
+        "id": "vana",
+        "canonicalName": "Vana"
+      },
+      "0xf03b4d9ac1d5d1e7c4cef54c2a313b9fe051a0ad": {
+        "id": "usdt0",
+        "canonicalName": "USDT0"
+      },
+      "0x3c64adf3ac6aafcbb358973482ee8dee85858371": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0x505ecdf2f14cd4f1f413d04624b009a449d38d7e": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0x701a95707a0290ac8b90b3719e8ee5b210360883": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0xf1fcb4cbd57b67d683972a59b6a7b1e2e8bf27e6": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0x8efbdff3bae9a3ed3c0ac7ad86bebf9aee46086f": {
+        "id": "stargate",
+        "canonicalName": "Stargate"
+      },
+      "0xd450db3188b7fbf52c670eee30372ba74b4c5857": {
+        "id": "allbridge",
+        "canonicalName": "Allbridge"
+      },
+      "0x419e450b899cb40a00d5e804870d57ab3f92351f": {
+        "id": "hermes-v2",
+        "canonicalName": "Hermes V2"
+      },
+      "0xbe82cbe217bf4e0a87dd88c552e93054f4ef2c7c": {
+        "id": "yieldnest",
+        "canonicalName": "YieldNest"
+      },
+      "0x64445f0aecc51e94ad52d8ac56b7190e764e561a": {
+        "id": "frax-finance",
+        "canonicalName": "Frax Finance"
+      },
+      "0xfd72fbb61798f3bcb707f5ba98cb72a87cca02a2": {
+        "id": "kerneldao",
+        "canonicalName": "KernelDAO"
+      },
+      "0xb9d852a3f9b3a82e243faab0272604102a111e1a": {
+        "id": "brale",
+        "canonicalName": "Brale"
+      },
+      "0x367a0cb94ae395e03e421ee6b95ae35263501386": {
+        "id": "beefy",
+        "canonicalName": "Beefy"
+      },
+      "0x98cbcd43f28bc0a7bf058191dbe3ad3bd9b49fe6": {
+        "id": "beefy",
+        "canonicalName": "Beefy"
+      },
+      "0xd57f1714a0928310f08fc23f882fa784d8bd0dff": {
+        "id": "beefy",
+        "canonicalName": "Beefy"
+      },
+      "0xddb0199304a1e61ffaf4cc237d4c1fd1e46ebc71": {
+        "id": "beefy",
+        "canonicalName": "Beefy"
+      },
+      "0xdddaec9c267df24ad66edc3b2cbe25db86422051": {
+        "id": "beefy",
+        "canonicalName": "Beefy"
+      },
+      "0x86bb63148d17d445ed5398ef26aa05bf76dd5b59": {
+        "id": "aptos-bridge",
+        "canonicalName": "Aptos Bridge",
+        "type": "WAB"
+      },
+      "0x30acbee042310be38a9f39209128e2d360635a1e": {
+        "id": "stableunit",
+        "canonicalName": "StableUnit"
+      },
+      "0x218e7ef1a96283a44406cf4633f9e28df7382842": {
+        "id": "noya-network",
+        "canonicalName": "Noya Network"
+      },
+      "0x2746a26cc4e879b4740e2aea98b1f4a3fc9bb6d5": {
+        "id": "noya-network",
+        "canonicalName": "Noya Network"
+      },
+      "0x76c02ce2f83a76ac5c7b7b60f482432b561d8c3b": {
+        "id": "noya-network",
+        "canonicalName": "Noya Network"
+      },
+      "0xe997bab9e4eb91506a3aa062a073522fdd5d8efb": {
+        "id": "noya-network",
+        "canonicalName": "Noya Network"
+      },
+      "0x1c04925779805f2df7bbd0433abe92ea74829bf6": {
+        "id": "kresko",
+        "canonicalName": "Kresko"
+      },
+      "0xabdb949a18d27367118573a217e5353ede5a0f1e": {
+        "id": "kresko",
+        "canonicalName": "Kresko"
+      },
+      "0x1e6c9f4c89ac4d75048155a0dbd0be1f49c460f9": {
+        "id": "xenify",
+        "canonicalName": "Xenify"
+      },
+      "0x37bb209b118a22f233dea252a5d7f56455765b4d": {
+        "id": "xenify",
+        "canonicalName": "Xenify"
+      },
+      "0x1f8e735f424b7a49a885571a2fa104e8c13c26c7": {
+        "id": "etherlink",
+        "canonicalName": "Etherlink"
+      },
+      "0xa3b615667cbd33cfc69843bf11fbb2a1d926bd46": {
+        "id": "magpiexyz",
+        "canonicalName": "Magpiexyz"
+      },
+      "0xc4a65a93dd6cd9717551ebe827e8baee025d1d7e": {
+        "id": "magpiexyz",
+        "canonicalName": "Magpiexyz"
+      },
+      "0x22ae99d07584a2ae1af748de573c83f1b9cdb4c0": {
+        "id": "olympus",
+        "canonicalName": "Olympus"
+      },
+      "0x83ff86c252a41578a7301219aa23ab6e4f2fded3": {
+        "id": "whale",
+        "canonicalName": "Whale"
+      },
+      "0x8845b2d99995c0d93260b15c46f92d4d34833b21": {
+        "id": "whale",
+        "canonicalName": "Whale"
+      },
+      "0xde3d84e555c9a46b88897da45ec9f35aced72c0b": {
+        "id": "whale",
+        "canonicalName": "Whale"
+      },
+      "0xe87492ae9151769412f40af251d1d2793271e699": {
+        "id": "whale",
+        "canonicalName": "Whale"
+      },
+      "0x0fc2a55d5bd13033f1ee0cdd11f60f7efe66f467": {
+        "id": "lagrange",
+        "canonicalName": "Lagrange"
+      },
+      "0x30c8cf6b46aa4df3f9fbc2857aca92f10a6cad7f": {
+        "id": "eliteness-network",
+        "canonicalName": "Eliteness.Network"
+      },
+      "0x2c281fabfbed9f1300fc26fc9aa100b560947045": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0x450a31f7984423713edb401d3ace391a734a4c6e": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0x627222579c2f3020cf7dd10cab80200ec50ac316": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0x65f597cbef33f7b5a46b28ae2af40237078c274d": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0xb8c9aa9c947cc14155b18c46102658c2915277e5": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0xed07eabe7e48b2418ae81dde838e0ba003d752c5": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0xeee8f849bab1bcd168d938caa0903be0a1be7488": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0x68217ead11a77f559e29460a4665257a6a163877": {
+        "id": "nogem",
+        "canonicalName": "NOGEM"
+      },
+      "0x6d594b9fcb39e7e8942b431c0826beeae25ba39a": {
+        "id": "nogem",
+        "canonicalName": "NOGEM"
+      },
+      "0xe73c6f1b6f43142ea545053daab6fc2c514dfeaa": {
+        "id": "nogem",
+        "canonicalName": "NOGEM"
+      },
+      "0xe7dba4c592114f821822a7e9ea490541c6121abb": {
+        "id": "nogem",
+        "canonicalName": "NOGEM"
+      },
+      "0xfb7ef0bbd8bfb5f129f995fbc34f4d786ccc63cf": {
+        "id": "nogem",
+        "canonicalName": "NOGEM"
+      },
+      "0x207bcc253ba86ae10158c7642ce515e09ff02f6a": {
+        "id": "dappgate",
+        "canonicalName": "DappGate"
+      },
+      "0x41e07e0b0fe07d4e7617acf0e2f6936caeb2897d": {
+        "id": "dappgate",
+        "canonicalName": "DappGate"
+      },
+      "0x577046a82e6b85ce1e37586bc918dec09555a497": {
+        "id": "dappgate",
+        "canonicalName": "DappGate"
+      },
+      "0xc2ed142a428ae7d551fcd260318db85e9f4ffba5": {
+        "id": "dappgate",
+        "canonicalName": "DappGate"
+      },
+      "0xc67505deaa9c0c08b9bcf2f55476c66b77e0c82f": {
+        "id": "dappgate",
+        "canonicalName": "DappGate"
+      },
+      "0xd37f0a54956401e082ec3307f2829f404e3c1ab4": {
+        "id": "dappgate",
+        "canonicalName": "DappGate"
+      },
+      "0xfc340113b34056669924da8c6a22f3d9b78a3bca": {
+        "id": "dappgate",
+        "canonicalName": "DappGate"
+      },
+      "0x1509706a6c66ca549ff0cb464de88231ddbe213b": {
+        "id": "aura-finance",
+        "canonicalName": "Aura Finance"
+      },
+      "0x23ebeb9538df8f844f774a102de27579fab980c7": {
+        "id": "you-are-here",
+        "canonicalName": "You Are Here"
+      },
+      "0xc099ab708e20e8b25c63ca156d7cc94404c55416": {
+        "id": "yieldnest",
+        "canonicalName": "YieldNest"
+      },
+      "0xd517bc7ba17271a8d87be7355b2523bf5c750295": {
+        "id": "centrifuge",
+        "canonicalName": "Centrifuge"
+      },
+      "0x5ef37628d45c80740fb6db7ed9c0a753b4f85263": {
+        "id": "lucidlabs",
+        "canonicalName": "Lucid Labs"
+      },
+      "0x09b11b1cadc08e239970a8993783f0f8eec60abf": {
+        "id": "venus-protocol",
+        "canonicalName": "Venus Protocol"
+      },
+      "0xbbe46baec851355c3fc4856914c47eb6cea0b8b4": {
+        "id": "venus-protocol",
+        "canonicalName": "Venus Protocol"
+      },
+      "0x18ba2bd4ee131ff6620144fb04e1fb4648f942d9": {
+        "id": "defi-kingdoms",
+        "canonicalName": "DeFi Kingdoms"
+      },
+      "0x2c0ef4ab6ed55f75b9cc6a4252d61d1fc6e9882a": {
+        "id": "defi-kingdoms",
+        "canonicalName": "DeFi Kingdoms"
+      },
+      "0x9464e1cb12ca53040d10229074c30cf891e08cee": {
+        "id": "defi-kingdoms",
+        "canonicalName": "DeFi Kingdoms"
+      },
+      "0xaba4da4c283d5d73aea3e7615a1d8a82f2241e22": {
+        "id": "defi-kingdoms",
+        "canonicalName": "DeFi Kingdoms"
+      },
+      "0xa5c1b32f414d6c040dab0efa4218c6e9c3fa962d": {
+        "id": "traversemyonft",
+        "canonicalName": "Traversemyonft"
+      },
+      "0xb591169e6508983cc6618738cc73c9f09c38de14": {
+        "id": "VUSD OApp",
+        "canonicalName": "Vetro USD"
+      },
+      "0x178608ffe2cca5d36f3fc6e69426c4d3a5a74a41": {
+        "id": "zerius",
+        "canonicalName": "Zerius"
+      },
+      "0x2076bdd52af431ba0e5411b3dd9b5eeda31bb9eb": {
+        "id": "zerius",
+        "canonicalName": "Zerius"
+      },
+      "0x4f1c698e5ca32b28030e9d9f17c164f27ab5d866": {
+        "id": "zerius",
+        "canonicalName": "Zerius"
+      },
+      "0x5188368a92b49f30f4cf9bef64635bcf8459c7a7": {
+        "id": "zerius",
+        "canonicalName": "Zerius"
+      },
+      "0x12a8e658792e940bdb344264318dd2af9e5c25b2": {
+        "id": "xzeros",
+        "canonicalName": "xZEROs"
+      },
+      "0x0ddaeb3cff09ef98f06d73c25e7505862e05daab": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0x1812d05671eefa040ac605a0198476ded081d520": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0x20279b6d57ba6d3ef852f34800e43e39d46d6487": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0x4def20238339d01ac15198d574cd23fb17bdbdfb": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0x6d0e508d82e65dc60929066aeab3454816ff4440": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0x885ef5813e46ab6efb10567b50b77aaad4d258ce": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0x9c5df4caa9734ee5eb15ef56cdb7d430d8943f29": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0xa2c203d7ef78ed80810da8404090f926d67cd892": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0xafa5f9313f1f2b599173f24807a882f498be118c": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0xd7ba4057f43a7c4d4a34634b2a3151a60bf78f0d": {
+        "id": "merkly",
+        "canonicalName": "Merkly"
+      },
+      "0xdab290f956da2486f188f6f98a34c8bb319bff0c": {
+        "id": "ghostmint",
+        "canonicalName": "GhostMint"
+      },
+      "0x1ebd336c09198692f6a23831b024ada016eb7f16": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0x523d5581a0bb8bb2bc9f23b5202894e31124ea3e": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0x64e0f6164ac110b67df9a4848707ffbcb86c87a9": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0x7599d1275831c9fc63f9a27a3c67fe0c8fc19a47": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0xa5b72e35e35d219c3274cee227fbe4d317915e0c": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0xc162cf8c4c6697ab8e613ce0cd37c0ab97ba5a60": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0xd43a183c97db9174962607a8b6552ce320eac5aa": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0xdc60fd9d2a4ccf97f292969580874de69e6c326e": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0xf38fc31bfa4bc000e8f7bcfa5e4a217d2c61f064": {
+        "id": "l2telegraph",
+        "canonicalName": "l2telegraph"
+      },
+      "0x081df5af5d022d4a4a4520d4d0d336b8432fdbbb": {
+        "id": "fuse-bridge",
+        "canonicalName": "Fuse Bridge"
+      },
+      "0xeed9154f63f6f0044e6b00dddefd895b5b4ed580": {
+        "id": "fuse-bridge",
+        "canonicalName": "Fuse Bridge"
+      },
+      "0x26da582889f59eaae9da1f063be0140cd93e6a4f": {
+        "id": "gas.zip",
+        "canonicalName": "Gas.zip"
+      },
+      "0xbf94ed69281709958c8f60bc15cd1bb6badcd4a4": {
+        "id": "gas.zip",
+        "canonicalName": "Gas.zip"
+      },
+      "0x762f491a899525ec5270ed67697d8c8a6835e1d7": {
+        "id": "womex",
+        "canonicalName": "Womex"
+      },
+      "0xc9940d3c5fce7f5868d127b38128768aec7a0809": {
+        "id": "womex",
+        "canonicalName": "Womex"
+      },
+      "0x1fc12ebaf4b749f31b959e868ecf8e5fd5b92513": {
+        "id": "wilderworld",
+        "canonicalName": "Wilder World"
+      },
+      "0x17f2bf4eeb0591c25ac52a1e6385a25f4f445130": {
+        "id": "frontier-stable-token",
+        "canonicalName": "Frontier Stable Token"
+      },
+      "0xb5259c05764468c33c9c36e327caad020a8e5fe1": {
+        "id": "hemi",
+        "canonicalName": "Hemi Network"
+      },
+      "0x1ad02cd579c7668d50e0003f428701b70a1b42b7": {
+        "id": "hemi",
+        "canonicalName": "Hemi Network"
+      },
+      "0xc3f854b2970f8727d28527ece33176fac67fef48": {
+        "id": "wbtc",
+        "canonicalName": "wBTC"
+      },
+      "0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff": {
+        "id": "etherfi",
+        "canonicalName": "Ether.Fi"
+      },
+      "0x09d9420332bff75522a45fcff4855f82a0a3ff50": {
+        "id": "dinero",
+        "canonicalName": "Dinero"
+      },
+      "0x5d1942345d63562fd38d17c28dcd22e7b3e9cfb4": {
+        "id": "kim-exchange",
+        "canonicalName": "Kim Exchange"
+      },
+      "0x084382d1cc4f4dfd1769b1cc1ac2a9b1f8365e90": {
+        "id": "mode-network",
+        "canonicalName": "Mode Network"
+      },
+      "0xc5ecb8c506898bd5eeec63c5f69c7819e37084b8": {
+        "id": "dinero",
+        "canonicalName": "Dinero"
+      },
+      "0x95dcff2bfd19af97267b8c9d516206dcc87eecdd": {
+        "id": "metronome",
+        "canonicalName": "Metronome"
+      },
+      "0xc2c433d36d7184192e442a243b351a9e3055fd5f": {
+        "id": "metronome",
+        "canonicalName": "Metronome"
+      },
+      "0x43edd7f3831b08fe70b7555ddd373c8bf65a9050": {
+        "id": "frax-finance",
+        "canonicalName": "Frax Finance"
+      },
+      "0x9a9d5a29206dde4f70825032df32333de5f63921": {
+        "id": "cyber",
+        "canonicalName": "Cyber"
+      },
+      "0x90581eca9469d8d7f5d3b60f4715027adfcf7927": {
+        "id": "frax-finance",
+        "canonicalName": "Frax Finance"
+      },
+      "0x74dB7a52773A52699dbC0c01b1254E5301E3e119": {
+        "id": "altura",
+        "canonicalName": "Altura"
+      },
+      "0x840b20fa3d48ac709fd841fcd878c3e8aabd7087": {
+        "id": "glue",
+        "canonicalName": "Glue"
+      },
+      "0x92273ca3356379c2fe870fe3805cc5e7ab6d19c6": {
+        "id": "sVUSD OApp",
+        "canonicalName": "Staked Vetro USD"
+      },
+      "0x3d63825b0d8669307366e6c8202f656b9e91d368": {
+        "id": "wildgoatcoin",
+        "canonicalName": "Wild Goat Coin"
+      },
+      "0x4edc2460b0891955e2d11ee3103cd705a6d6288a": {
+        "id": "paypal",
+        "canonicalName": "PayPal"
+      },
+      "0x57015e9eb7e3efca7b40292752078bd58071ad51": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0xea52e0fa4b59935f721e9ee99e78d6204510f65c": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0xf21dddc8e3236f30fbe9ad5e7aca6ede99967348": {
+        "id": "hourglass",
+        "canonicalName": "Hourglass"
+      },
+      "0xdcb612005417dc906ff72c87df732e5a90d49e11": {
+        "id": "etherfi",
+        "canonicalName": "Ether.Fi"
+      },
+      "0x50023d91645022d1eefeeaa02d306910dcd93a81": {
+        "id": "polyhedra",
+        "canonicalName": "Polyhedra Network",
+        "deprecated": true
+      },
+      "0x836fe98ba52085dbbbdfdcc9e4a7a06e9e9480bc": {
+        "id": "polyhedra",
+        "canonicalName": "Polyhedra Network",
+        "deprecated": true
+      },
+      "0xbcd40bd88be04996903eedd76d221fd68d796969": {
+        "id": "tiny-dinos",
+        "canonicalName": "tiny dinos",
+        "deprecated": true
+      },
+      "0xa519afbc91986c0e7501d7e34968fee51cd901ac": {
+        "id": "hyperbeat",
+        "canonicalName": "HyperBeat"
+      },
+      "0xc69e66109943faf5cbda22f360b7eb7c27bb5c88": {
+        "id": "angle",
+        "canonicalName": "Angle"
+      },
+      "0x9201cc18965792808549566e6b06b016d915313a": {
+        "id": "angle",
+        "canonicalName": "Angle"
+      }
+    },
+    "chainName": "optimism",
+    "tokens": {
+      "0xd83e3d560ba6f05094d9d8b3eb8aaea571d1864e": {
+        "symbol": "WHYPE",
+        "decimals": 18,
+        "type": "NativeOFT",
+        "peggedTo": {
+          "address": "0x5555555555555555555555555555555555555555",
+          "chainName": "hyperliquid",
+          "programaticallyPegged": true
+        },
+        "sharedDecimals": 6,
+        "oftVersion": 3,
+        "eid": 30111
+      },
+      "0xe0080d2f853ecddbd81a643dc10da075df26fd3f": {
+        "symbol": "ETHFI",
+        "decimals": 18,
+        "type": "NativeOFT",
+        "peggedTo": {
+          "address": "0xfe0c30065b384f05761f15d0cc899d4f9f9cc0eb",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "sharedDecimals": 6,
+        "oftVersion": 3,
+        "eid": 30111
+      },
+      "0x55b9f84605b30df9bb9d817a6900219f25218157": {
+        "symbol": "BILL",
+        "decimals": 18,
+        "type": "NativeOFT",
+        "peggedTo": {
+          "address": "0xb1110919016846972056ab995054d65560d5f05e",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "sharedDecimals": 6,
+        "oftVersion": 3,
+        "eid": 30111
+      },
+      "0x0b2c639c533813f4aa9d7837caf62653d097ff85": {
+        "peggedTo": {
+          "symbol": "USDC",
+          "chainName": "ethereum",
+          "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "programaticallyPegged": true
+        },
+        "name": "USD Coin",
+        "symbol": "USDC",
+        "stablecoin": true,
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0x871f2f2ff935fd1ed867842ff2a7bfd051a5e527": {
+        "peggedTo": {
+          "symbol": "WOO",
+          "chainName": "ethereum",
+          "address": "0x4691937a7508860f876c9c0a2a617e7d9e945d4b",
+          "programaticallyPegged": true
+        },
+        "name": "Wootrade Network",
+        "symbol": "WOO",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1": {
+        "peggedTo": {
+          "symbol": "DAI",
+          "chainName": "ethereum",
+          "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+          "programaticallyPegged": true
+        },
+        "name": "Dai Stablecoin",
+        "symbol": "DAI",
+        "stablecoin": true,
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x1f514a61bcde34f94bc39731235690ab9da737f7": {
+        "peggedTo": {
+          "symbol": "TAROT",
+          "chainName": "ethereum",
+          "address": "0xa10bf0aba0c7953f279c4cb8192d3b5de5ea56e8",
+          "programaticallyPegged": true
+        },
+        "name": "Tarot",
+        "symbol": "TAROT",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x68f180fcce6836688e9084f035309e29bf0a2095": {
+        "peggedTo": {
+          "symbol": "WBTC",
+          "chainName": "ethereum",
+          "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+          "programaticallyPegged": true
+        },
+        "name": "Wrapped BTC",
+        "symbol": "WBTC",
+        "type": "ERC20",
+        "decimals": 8
+      },
+      "0xb73ee5488647a6302ebf5fee8af3152f6960ae4c": {
+        "peggedTo": {
+          "symbol": "wXRP",
+          "chainName": "ethereum",
+          "address": "0xb73ee5488647a6302ebf5fee8af3152f6960ae4c",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0x01cacca455d04f0d52231589f0deb543de9213e3"
+        ],
+        "symbol": "wXRP",
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0xf9fb20b8e097904f0ab7d12e9dbee88f2dcd0f16": {
+        "peggedTo": {
+          "symbol": "SBC",
+          "chainName": "ethereum",
+          "address": "0xf9fb20b8e097904f0ab7d12e9dbee88f2dcd0f16",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0xb9d852a3f9b3a82e243faab0272604102a111e1a"
+        ],
+        "symbol": "SBC",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xe71bdfe1df69284f00ee185cf0d95d0c7680c0d4": {
+        "name": "SepoliaETH",
+        "peggedTo": {
+          "symbol": "SepoliaETH",
+          "chainName": "ethereum",
+          "address": "0xe71bdfe1df69284f00ee185cf0d95d0c7680c0d4",
+          "programaticallyPegged": true
+        },
+        "symbol": "SepoliaETH",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 18
+      },
+      "0xdd69db25f6d620a7bad3023c5d32761d353d3de9": {
+        "name": "GoerliETH",
+        "peggedTo": {
+          "symbol": "GoerliETH",
+          "chainName": "ethereum",
+          "address": "0xdd69db25f6d620a7bad3023c5d32761d353d3de9",
+          "programaticallyPegged": true
+        },
+        "symbol": "GoerliETH",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 18
+      },
+      "0x2297aebd383787a160dd0d9f71508148769342e3": {
+        "eid": 111,
+        "symbol": "BTC.b",
+        "canonicalAsset": true,
+        "decimals": 8,
+        "fee": true,
+        "peggedTo": {
+          "symbol": "BTC.b",
+          "chainName": "avalanche",
+          "address": "0x152b9d0fdc40c096757f570a51e494bd4b943e50",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 8
+      },
+      "0x5bff88ca1442c2496f7e475e9e7786383bc070c0": {
+        "symbol": "sfrxUSD",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "sfrxUSD",
+          "chainName": "ethereum",
+          "address": "0xcf62f905562626cfcdd2261162a51fd02fc9c5b6",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x894134a25a5fac1c2c26f1d8fbf05111a3cb9487": {
+        "peggedTo": {
+          "symbol": "GRAI",
+          "chainName": "ethereum",
+          "address": "0x15f74458ae0bfdaa1a96ca1aa779d715cc1eefe4",
+          "programaticallyPegged": true
+        },
+        "name": "Gravita Debt Token",
+        "symbol": "GRAI",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x80eede496655fb9047dd39d9f418d5483ed600df": {
+        "symbol": "frxUSD",
+        "stablecoin": true,
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "frxUSD",
+          "chainName": "ethereum",
+          "address": "0xcacd6fd266af91b8aed52accc382b4e165586e29",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x32af9ed768b48745a8e805fbce5616d0bd9868cf": {
+        "name": "MyOFT2",
+        "endpointVersion": 2,
+        "symbol": "MOFT2",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x4591dbff62656e7859afe5e45f6f47d3669fbb28": {
+        "eid": 111,
+        "symbol": "mkUSD",
+        "stablecoin": true,
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "Prisma mkUSD",
+        "peggedTo": {
+          "symbol": "mkUSD",
+          "chainName": "ethereum",
+          "address": "0x4591dbff62656e7859afe5e45f6f47d3669fbb28",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 18
+      },
+      "0x296f55f8fb28e498b858d0bcda06d955b2cb3f97": {
+        "eid": 111,
+        "symbol": "STG",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "StargateToken",
+        "peggedTo": {
+          "symbol": "STG",
+          "chainName": "ethereum",
+          "address": "0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 1,
+        "type": "NativeOFT",
+        "sharedDecimals": 18
+      },
+      "0xaf20f5f19698f1d19351028cd7103b63d30de7d7": {
+        "eid": 111,
+        "symbol": "WAGMI",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "Wagmi",
+        "peggedTo": {
+          "symbol": "WAGMI",
+          "chainName": "ethereum",
+          "address": "0x92cc36d66e9d739d50673d1f27929a371fb83a67",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 18
+      },
+      "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58": {
+        "peggedTo": {
+          "symbol": "USDT",
+          "chainName": "ethereum",
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "programaticallyPegged": true
+        },
+        "name": "Tether USD",
+        "symbol": "USDT",
+        "stablecoin": true,
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0x9ed7e4b1bff939ad473da5e7a218c771d1569456": {
+        "eid": 111,
+        "symbol": "REUNI",
+        "canonicalAsset": true,
+        "decimals": 6,
+        "fee": false,
+        "name": "Reunit Token",
+        "peggedTo": {
+          "symbol": "REUNI",
+          "chainName": "ethereum",
+          "address": "0x9ed7e4b1bff939ad473da5e7a218c771d1569456",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0xb153fb3d196a8eb25522705560ac152eeec57901": {
+        "proxyAddresses": [
+          "0x48686c24697fe9042531b64d792304e514e74339"
+        ],
+        "eid": 111,
+        "symbol": "MIM",
+        "decimals": 18,
+        "fee": false,
+        "name": "Magic Internet Money",
+        "peggedTo": {
+          "symbol": "MIM",
+          "chainName": "ethereum",
+          "address": "0x99d8a9c45b2eca8864373a26d1459e3dff1e17f3",
+          "programaticallyPegged": true
+        },
+        "type": "ERC20",
+        "sharedDecimals": 8
+      },
+      "0x6a661312938d22a2a0e27f585073e4406903990a": {
+        "symbol": "MAHA",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "MAHA",
+          "chainName": "ethereum",
+          "address": "0x745407c86df8db893011912d3ab28e68b62e49b0",
+          "programaticallyPegged": true
+        },
+        "name": "MAHA.xyz",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x7f5c764cbc14f9669b88837ca1490cca17c31607": {
+        "peggedTo": {
+          "symbol": "USDC",
+          "chainName": "ethereum",
+          "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "programaticallyPegged": true
+        },
+        "name": "USD Coin",
+        "symbol": "USDC",
+        "stablecoin": true,
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0x9485aca5bbbe1667ad97c7fe7c4531a624c8b1ed": {
+        "peggedTo": {
+          "symbol": "EURA",
+          "chainName": "ethereum",
+          "address": "0x1a7e4e63778b4f12a199c062f3efdd288afcbce8",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0x840b25c87b626a259ca5ac32124fa752f0230a72"
+        ],
+        "symbol": "EURA",
+        "stablecoin": true,
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x840b25c87b626a259ca5ac32124fa752f0230a72": {
+        "symbol": "EURA",
+        "erc20TokenAddress": "0x9485aca5bbbe1667ad97c7fe7c4531a624c8b1ed",
+        "stablecoin": true,
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "EURA",
+          "chainName": "ethereum",
+          "address": "0x1a7e4e63778b4f12a199c062f3efdd288afcbce8",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT"
+      },
+      "0x350a791bfc2c21f9ed5d10980dad2e2638ffa7f6": {
+        "peggedTo": {
+          "symbol": "LINK",
+          "chainName": "ethereum",
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "programaticallyPegged": true
+        },
+        "name": "ChainLink Token",
+        "symbol": "LINK",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34": {
+        "eid": 111,
+        "symbol": "USDe",
+        "stablecoin": true,
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "USDe",
+        "peggedTo": {
+          "symbol": "USDe",
+          "chainName": "ethereum",
+          "address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x8c6f28f2f1a3c87f0f938b96d27520d9751ec8d9": {
+        "peggedTo": {
+          "symbol": "sUSD",
+          "chainName": "ethereum",
+          "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+          "programaticallyPegged": true
+        },
+        "name": "Synth sUSD",
+        "symbol": "sUSD",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x2b1d36f5b61addaf7da7ebbd11b35fd8cfb0de31": {
+        "eid": 111,
+        "symbol": "ITP",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "Interport Token",
+        "peggedTo": {
+          "symbol": "ITP",
+          "chainName": "ethereum",
+          "address": "0x2b1d36f5b61addaf7da7ebbd11b35fd8cfb0de31",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 8
+      },
+      "0x788d86e00ab31db859c3d6b80d5a9375801d7f2a": {
+        "eid": 111,
+        "symbol": "TENET",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": true,
+        "name": "TENET",
+        "peggedTo": {
+          "symbol": "TENET",
+          "chainName": "ethereum",
+          "address": "0x788d86e00ab31db859c3d6b80d5a9375801d7f2a",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x348fdfe2c35934a96c1353185f09d0f9efbada86": {
+        "eid": 111,
+        "symbol": "TROVE",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "Arbitrove Governance Token",
+        "peggedTo": {
+          "symbol": "TROVE",
+          "chainName": "arbitrum",
+          "address": "0x982239d38af50b0168da33346d85fb12929c4c07",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 18
+      },
+      "0xd3fdcb837dafdb7c9c3ebd48fe22a53f6dd3d7d7": {
+        "eid": 111,
+        "symbol": "QI",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "QiDao",
+        "peggedTo": {
+          "symbol": "QI",
+          "chainName": "ethereum",
+          "address": "0x559b7bfc48a5274754b08819f75c5f27af53d53b",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 8
+      },
+      "0xbfd5206962267c7b4b4a8b3d76ac2e1b2a5c4d5e": {
+        "eid": 111,
+        "symbol": "OSAK",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": true,
+        "name": "Osaka Protocol",
+        "peggedTo": {
+          "symbol": "OSAK",
+          "chainName": "ethereum",
+          "address": "0xa21af1050f7b26e0cff45ee51548254c41ed6b5c",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 4
+      },
+      "0x4200000000000000000000000000000000000042": {
+        "proxyAddresses": [
+          "0xac800fd6159c2a2cb8fc31ef74621eb430287a5a"
+        ],
+        "eid": 111,
+        "symbol": "OP",
+        "cgId": "optimism",
+        "cmcId": 11840,
+        "decimals": 18,
+        "fee": false,
+        "name": "OP",
+        "type": "ERC20",
+        "sharedDecimals": 6
+      },
+      "0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2": {
+        "eid": 111,
+        "symbol": "sUSDe",
+        "stablecoin": true,
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "sUSDe",
+        "peggedTo": {
+          "symbol": "sUSDe",
+          "chainName": "ethereum",
+          "address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x58538e6a46e07434d7e7375bc268d3cb839c0133": {
+        "eid": 111,
+        "symbol": "ENA",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": true,
+        "name": "ENA",
+        "peggedTo": {
+          "symbol": "ENA",
+          "chainName": "ethereum",
+          "address": "0x57e114b691db790c35207b2e685d4a43181e6061",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x16ed8e219cde31e14a80dcb6c9127a5ec6e88e46": {
+        "symbol": "apxETH",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "apxETH",
+          "chainName": "ethereum",
+          "address": "0x9ba021b0a9b958b5e75ce9f6dff97c7ee52cb3e6",
+          "programaticallyPegged": true
+        },
+        "name": "Autocompounding Pirex Ether OFT",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x6985884c4392d348587b19cb9eaaf157f13271cd": {
+        "symbol": "ZRO",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "ZRO",
+          "chainName": "ethereum",
+          "address": "0x6985884c4392d348587b19cb9eaaf157f13271cd",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x4e200fe2f3efb977d5fd9c430a41531fb04d97b8": {
+        "symbol": "ORDER",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "ORDER",
+          "chainName": "ethereum",
+          "address": "0xabd4c63d2616a5201454168269031355f4764337",
+          "programaticallyPegged": true
+        },
+        "name": "Orderly Network",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 18
+      },
+      "0x300d2c875c6fb8ce4bf5480b4d34b7c9ea8a33a4": {
+        "symbol": "pxETH",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "pxETH",
+          "chainName": "ethereum",
+          "address": "0x04c154b66cb340f3ae24111cc767e0184ed00cc6",
+          "programaticallyPegged": true
+        },
+        "name": "Pirex Ether OFT",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x73e0c0d45e048d25fc26fa3159b0aa04bfa4db98": {
+        "peggedTo": {
+          "symbol": "kBTC",
+          "chainName": "ethereum",
+          "address": "0x73e0c0d45e048d25fc26fa3159b0aa04bfa4db98",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "symbol": "kBTC",
+        "type": "NativeOFT",
+        "decimals": 8,
+        "sharedDecimals": 6
+      },
+      "0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0": {
+        "eid": 111,
+        "symbol": "BEETS",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "BeethovenxToken",
+        "peggedTo": {
+          "symbol": "BEETS",
+          "chainName": "fantom",
+          "address": "0xf24bcf4d1e507740041c9cfd2dddb29585adce1e",
+          "programaticallyPegged": true
+        },
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x85af271d1dfcbf53486d996f61d7ff0bba5582ea": {
+        "symbol": "ALT",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "ALT",
+          "chainName": "ethereum",
+          "address": "0x8457ca5040ad67fdebbcc8edce889a335bc0fbfb",
+          "programaticallyPegged": true
+        },
+        "name": "AltLayer Token ",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x2dad3a13ef0c6366220f989157009e501e7938f8": {
+        "name": "Extra Finance",
+        "symbol": "EXTRA",
+        "cgId": "extra-finance",
+        "cmcId": 27603,
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x4186bfc76e2e237523cbc30fd220fe055156b41f": {
+        "eid": 111,
+        "symbol": "rsETH",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "fee": false,
+        "name": "Kelp DAO Restaked ETH",
+        "peggedTo": {
+          "symbol": "rsETH",
+          "chainName": "ethereum",
+          "address": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x58ea2bb193b1429cb90d24195e6ac4ccb0b27a12": {
+        "peggedTo": {
+          "symbol": "vTAO",
+          "chainName": "subtensorevm",
+          "address": "0x31049849ccdd983d8f401077537438eaf12b12af",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "symbol": "vTAO",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x3ec3849c33291a9ef4c5db86de593eb4a37fde45": {
+        "endpointVersion": 2,
+        "peggedTo": {
+          "symbol": "sfrxETH",
+          "chainName": "ethereum",
+          "address": "0xac3e018457b222d93114458476f3e3416abbe38f",
+          "programaticallyPegged": true
+        },
+        "symbol": "sfrxETH",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x7ff7fa94b8b66ef313f7970d4eebd2cb3103a2c0": {
+        "symbol": "VANA",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "VANA",
+          "chainName": "islander",
+          "address": "0x0000000000000000000000000000000000000000",
+          "programaticallyPegged": true
+        },
+        "name": "Vana",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x01bff41798a0bcf287b996046ca68b395dbc1071": {
+        "proxyAddresses": [
+          "0xf03b4d9ac1d5d1e7c4cef54c2a313b9fe051a0ad",
+          "0x8efbdff3bae9a3ed3c0ac7ad86bebf9aee46086f"
+        ],
+        "symbol": "USDT0",
+        "stablecoin": true,
+        "decimals": 6,
+        "stargateOverride": {
+          "symbol": "USDT0.s"
+        },
+        "peggedTo": {
+          "symbol": "USDT0",
+          "chainName": "ethereum",
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "programaticallyPegged": true
+        },
+        "type": "ERC20"
+      },
+      "0xe231db5f348d709239ef1741ea30961b3b635a61": {
+        "peggedTo": {
+          "symbol": "ynETHx",
+          "chainName": "ethereum",
+          "address": "0x657d9aba1dbb59e53f9f3ecaa878447dcfc96dcb",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0xbe82cbe217bf4e0a87dd88c552e93054f4ef2c7c"
+        ],
+        "symbol": "ynETHx",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x2e3d870790dc77a83dd1d18184acc7439a53f475": {
+        "peggedTo": {
+          "symbol": "FRAX",
+          "chainName": "ethereum",
+          "address": "0x853d955acef822db058eb8505911ed77f175b99e",
+          "programaticallyPegged": true
+        },
+        "name": "Frax",
+        "symbol": "FRAX",
+        "stablecoin": true,
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xb69c8cbcd90a39d8d3d3ccf0a3e968511c3856a0": {
+        "peggedTo": {
+          "symbol": "ETH",
+          "chainName": "ethereum",
+          "address": "0x0000000000000000000000000000000000000000",
+          "programaticallyPegged": true
+        },
+        "name": "Stargate Ether Vault",
+        "symbol": "SGETH",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x64445f0aecc51e94ad52d8ac56b7190e764e561a": {
+        "symbol": "WFRAX",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "stargateOverride": {
+          "symbol": "FXS"
+        },
+        "peggedTo": {
+          "symbol": "WFRAX",
+          "chainName": "ethereum",
+          "address": "0x04acaf8d2865c0714f79da09645c13fd2888977f",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x68589adc7687a23ff2b06fb032b997f09b44ed5d": {
+        "peggedTo": {
+          "symbol": "ynBTCk",
+          "chainName": "ethereum",
+          "address": "0x68589adc7687a23ff2b06fb032b997f09b44ed5d",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0xfd72fbb61798f3bcb707f5ba98cb72a87cca02a2"
+        ],
+        "symbol": "ynBTCk",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xc40f949f8a4e094d1b49a23ea9241d289b7b2819": {
+        "peggedTo": {
+          "symbol": "LUSD",
+          "chainName": "ethereum",
+          "address": "0x5f98805a4e8be255a32880fdec7f6728c6568ba0",
+          "programaticallyPegged": true
+        },
+        "name": "LUSD Stablecoin",
+        "symbol": "LUSD",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xdfa46478f9e5ea86d57387849598dbfb2e964b02": {
+        "peggedTo": {
+          "symbol": "MAI",
+          "chainName": "polygon",
+          "address": "0xa3fa99a148fa48d14ed51d610c367c61876997f1",
+          "programaticallyPegged": true
+        },
+        "name": "Mai Stablecoin",
+        "symbol": "MAI",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x4200000000000000000000000000000000000006": {
+        "peggedTo": {
+          "symbol": "WETH",
+          "chainName": "ethereum",
+          "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "programaticallyPegged": true
+        },
+        "name": "Wrapped Ether",
+        "symbol": "WETH",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x0fc2a55d5bd13033f1ee0cdd11f60f7efe66f467": {
+        "peggedTo": {
+          "symbol": "LA",
+          "chainName": "solana",
+          "address": "4dAfd12qxvcwGWD51UUmLreUvQBqQrvtXiSj88kKN5cf",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "symbol": "LA",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x323665443cef804a3b5206103304bd4872ea4253": {
+        "peggedTo": {
+          "symbol": "USDV",
+          "chainName": "ethereum",
+          "address": "0x0e573ce2736dd9637a0b21058352e1667925c7a8",
+          "programaticallyPegged": true
+        },
+        "name": "USDV",
+        "eid": 111,
+        "symbol": "USDV",
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0x1509706a6c66ca549ff0cb464de88231ddbe213b": {
+        "peggedTo": {
+          "symbol": "AURA",
+          "chainName": "ethereum",
+          "address": "0xc0c293ce456ff0ed870add98a0828dd4d2903dbf",
+          "programaticallyPegged": true
+        },
+        "name": "Aura",
+        "symbol": "AURA",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xdb8e54f39aff243b25a41e4747957ed517af0511": {
+        "peggedTo": {
+          "symbol": "YND",
+          "chainName": "ethereum",
+          "address": "0x7159cc276d7d17ab4b3beb19959e1f39368a45ba",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0xc099ab708e20e8b25c63ca156d7cc94404c55416"
+        ],
+        "symbol": "YND",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xfe8b128ba8c78aabc59d4c64cee7ff28e9379921": {
+        "peggedTo": {
+          "symbol": "BAL",
+          "chainName": "ethereum",
+          "address": "0xba100000625a3754423978a60c9317c58a424e3d",
+          "programaticallyPegged": true
+        },
+        "name": "Balancer",
+        "symbol": "BAL",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0xb591169e6508983cc6618738cc73c9f09c38de14": {
+        "symbol": "VUSD",
+        "decimals": 18,
+        "type": "NativeOFT",
+        "peggedTo": {
+          "address": "0xca83dde9c22254f58e771be5e157773212acbac3",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "sharedDecimals": 6,
+        "oftVersion": 3,
+        "eid": 30111
+      },
+      "0x1fc12ebaf4b749f31b959e868ecf8e5fd5b92513": {
+        "peggedTo": {
+          "symbol": "WILD",
+          "chainName": "ethereum",
+          "address": "0x2a3bff78b79a009976eea096a51a948a3dc00e34",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "symbol": "WILD",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x5e817f2abccb9095585d26c2a3ce234a440574fc": {
+        "peggedTo": {
+          "symbol": "FRNT",
+          "chainName": "ethereum",
+          "address": "0x5e817f2abccb9095585d26c2a3ce234a440574fc",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0x17f2bf4eeb0591c25ac52a1e6385a25f4f445130"
+        ],
+        "symbol": "FRNT",
+        "type": "ERC20",
+        "decimals": 6
+      },
+      "0xb5259c05764468c33c9c36e327caad020a8e5fe1": {
+        "peggedTo": {
+          "symbol": "hemiBTC",
+          "chainName": "hemi",
+          "address": "0xaa40c0c7644e0b2b224509571e10ad20d9c4ef28",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "symbol": "hemiBTC",
+        "type": "NativeOFT",
+        "decimals": 8,
+        "sharedDecimals": 6
+      },
+      "0x1ad02cd579c7668d50e0003f428701b70a1b42b7": {
+        "peggedTo": {
+          "symbol": "HEMI",
+          "chainName": "hemi",
+          "address": "0x99e3de3817f6081b2568208337ef83295b7f591d",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "symbol": "HEMI",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x0555e30da8f98308edb960aa94c0db47230d2b9c": {
+        "peggedTo": {
+          "symbol": "WBTC",
+          "chainName": "ethereum",
+          "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0xc3f854b2970f8727d28527ece33176fac67fef48"
+        ],
+        "symbol": "WBTC",
+        "type": "ERC20",
+        "decimals": 8
+      },
+      "0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff": {
+        "symbol": "weETH",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "weETH",
+          "chainName": "ethereum",
+          "address": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+          "programaticallyPegged": true
+        },
+        "name": "Wrapped eETH",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x09d9420332bff75522a45fcff4855f82a0a3ff50": {
+        "symbol": "DINERO",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "DINERO",
+          "chainName": "ethereum",
+          "address": "0x6df0e641fc9847c0c6fde39be6253045440c14d3",
+          "programaticallyPegged": true
+        },
+        "name": "Dinero OFT",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x5d1942345d63562fd38d17c28dcd22e7b3e9cfb4": {
+        "symbol": "KIM",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "KIM",
+          "chainName": "mode",
+          "address": "0x6863fb62ed27a9ddf458105b507c15b5d741d62e",
+          "programaticallyPegged": true
+        },
+        "name": "KIM",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x084382d1cc4f4dfd1769b1cc1ac2a9b1f8365e90": {
+        "symbol": "MODE",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "MODE",
+          "chainName": "mode",
+          "address": "0xdfc7c877a950e49d2610114102175a06c2e3167a",
+          "programaticallyPegged": true
+        },
+        "name": "MODE",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0xc5ecb8c506898bd5eeec63c5f69c7819e37084b8": {
+        "symbol": "sDINERO",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "sDINERO",
+          "chainName": "ethereum",
+          "address": "0x55769490c825ccb09b2a6ae955203fabf04857fd",
+          "programaticallyPegged": true
+        },
+        "name": "Staked Dinero OFT",
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0x1610e3c85dd44af31ed7f33a63642012dca0c5a5": {
+        "proxyAddresses": [
+          "0x95dcff2bfd19af97267b8c9d516206dcc87eecdd"
+        ],
+        "eid": 111,
+        "symbol": "msETH",
+        "decimals": 18,
+        "fee": false,
+        "name": "Metronome Synth ETH",
+        "peggedTo": {
+          "symbol": "msETH",
+          "chainName": "ethereum",
+          "address": "0x64351fc9810adad17a690e4e1717df5e7e085160",
+          "programaticallyPegged": true
+        },
+        "type": "ERC20"
+      },
+      "0x9dabae7274d28a45f0b65bf8ed201a5731492ca0": {
+        "proxyAddresses": [
+          "0xc2c433d36d7184192e442a243b351a9e3055fd5f"
+        ],
+        "eid": 111,
+        "symbol": "msUSD",
+        "decimals": 18,
+        "fee": false,
+        "name": "Metronome Synth USD",
+        "peggedTo": {
+          "symbol": "msUSD",
+          "chainName": "ethereum",
+          "address": "0xab5eb14c09d416f0ac63661e57edb7aecdb9befa",
+          "programaticallyPegged": true
+        },
+        "type": "ERC20"
+      },
+      "0x43edd7f3831b08fe70b7555ddd373c8bf65a9050": {
+        "endpointVersion": 2,
+        "peggedTo": {
+          "symbol": "frxETH",
+          "chainName": "ethereum",
+          "address": "0x5e8422345238f34275888049021821e8e08caa1f",
+          "programaticallyPegged": true
+        },
+        "symbol": "frxETH",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x14778860e937f509e651192a90589de711fb88a9": {
+        "peggedTo": {
+          "symbol": "CYBER",
+          "chainName": "ethereum",
+          "address": "0x14778860e937f509e651192a90589de711fb88a9",
+          "programaticallyPegged": true
+        },
+        "name": "CyberConnect",
+        "proxyAddresses": [
+          "0x9a9d5a29206dde4f70825032df32333de5f63921"
+        ],
+        "symbol": "CYBER",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x90581eca9469d8d7f5d3b60f4715027adfcf7927": {
+        "endpointVersion": 2,
+        "peggedTo": {
+          "chainName": "fraxtal",
+          "symbol": "FPI",
+          "address": "0xfc00000000000000000000000000000000000003",
+          "programaticallyPegged": true
+        },
+        "symbol": "FPI",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x74db7a52773a52699dbc0c01b1254e5301e3e119": {
+        "symbol": "AVLT",
+        "decimals": 18,
+        "type": "NativeOFT",
+        "peggedTo": {
+          "address": "0x74db7a52773a52699dbc0c01b1254e5301e3e119",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "sharedDecimals": 6,
+        "oftVersion": 3,
+        "eid": 30111
+      },
+      "0x840b20fa3d48ac709fd841fcd878c3e8aabd7087": {
+        "endpointVersion": 2,
+        "peggedTo": {
+          "symbol": "GLUE",
+          "chainName": "glue",
+          "address": "0x0000000000000000000000000000000000000000",
+          "programaticallyPegged": true
+        },
+        "symbol": "GLUE",
+        "type": "NativeOFT",
+        "decimals": 18,
+        "sharedDecimals": 6
+      },
+      "0x92273ca3356379c2fe870fe3805cc5e7ab6d19c6": {
+        "symbol": "sVUSD",
+        "decimals": 18,
+        "type": "NativeOFT",
+        "peggedTo": {
+          "address": "0x476310e34d2810f7d79c43a74e4d79405bd7a925",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "sharedDecimals": 6,
+        "oftVersion": 3,
+        "eid": 30111
+      },
+      "0x3d63825b0d8669307366e6c8202f656b9e91d368": {
+        "symbol": "WGC",
+        "canonicalAsset": true,
+        "decimals": 6,
+        "peggedTo": {
+          "symbol": "WGC",
+          "chainName": "solana",
+          "address": "8aB8hdzyqjCJdtP1rfdLNX8bGDjjM8S42BZ3j4zNVtRN",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "type": "NativeOFT",
+        "sharedDecimals": 6
+      },
+      "0xa0c9b923f4551f1ec1a49665943160b18704ce06": {
+        "symbol": "PYUSD0",
+        "decimals": 6,
+        "type": "ERC20",
+        "peggedTo": {
+          "address": "0x6c3ea9036406852006290770bedfcaba0e23a0e8",
+          "chainName": "ethereum",
+          "programaticallyPegged": true,
+          "symbol": "PYUSD"
+        },
+        "proxyAddresses": [
+          "0x4edc2460b0891955e2d11ee3103cd705a6d6288a"
+        ]
+      },
+      "0xdcb612005417dc906ff72c87df732e5a90d49e11": {
+        "symbol": "EURC",
+        "decimals": 6,
+        "stablecoin": true,
+        "type": "NativeOFT",
+        "peggedTo": {
+          "address": "0x1abaea1f7c830bd89acc67ec4af516284b1bc33c",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "sharedDecimals": 6,
+        "oftVersion": 3,
+        "eid": 30111
+      },
+      "0xa519afbc91986c0e7501d7e34968fee51cd901ac": {
+        "symbol": "beHYPE",
+        "decimals": 18,
+        "type": "NativeOFT",
+        "peggedTo": {
+          "address": "0xd8fc8f0b03eba61f64d08b0bef69d80916e5dda9",
+          "chainName": "hyperliquid",
+          "programaticallyPegged": true
+        },
+        "sharedDecimals": 6,
+        "oftVersion": 3,
+        "eid": 30111
+      },
+      "0x0000206329b97db379d5e1bf586bbdb969c63274": {
+        "peggedTo": {
+          "symbol": "USDA",
+          "chainName": "ethereum",
+          "address": "0x0000206329b97db379d5e1bf586bbdb969c63274",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0xc69e66109943faf5cbda22f360b7eb7c27bb5c88"
+        ],
+        "symbol": "USDA",
+        "stablecoin": true,
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x58441e37255b09f9f545e9dc957f1c41658ff665": {
+        "peggedTo": {
+          "symbol": "ANGLE",
+          "chainName": "ethereum",
+          "address": "0x31429d1856ad1377a8a0079410b297e1a9e214c2",
+          "programaticallyPegged": true
+        },
+        "proxyAddresses": [
+          "0x9201cc18965792808549566e6b06b016d915313a"
+        ],
+        "symbol": "ANGLE",
+        "type": "ERC20",
+        "decimals": 18
+      },
+      "0x0000000000000000000000000000000000000000": {
+        "peggedTo": {
+          "symbol": "ETH",
+          "chainName": "ethereum",
+          "address": "0x0000000000000000000000000000000000000000",
+          "programaticallyPegged": true
+        },
+        "symbol": "ETH",
+        "type": "NativeToken",
+        "decimals": 18
+      },
+      "0x01cacca455d04f0d52231589f0deb543de9213e3": {
+        "symbol": "wXRP",
+        "erc20TokenAddress": "0xb73ee5488647a6302ebf5fee8af3152f6960ae4c",
+        "decimals": 6,
+        "peggedTo": {
+          "symbol": "wXRP",
+          "chainName": "ethereum",
+          "address": "0xb73ee5488647a6302ebf5fee8af3152f6960ae4c",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "sharedDecimals": 6
+      },
+      "0xc9b2c37a2368325f6806f97c309080c2ea3ba05e": {
+        "symbol": "OP",
+        "erc20TokenAddress": "0x4200000000000000000000000000000000000042",
+        "decimals": 18,
+        "endpointVersion": 2,
+        "peggedTo": {
+          "symbol": "OP",
+          "chainName": "optimism",
+          "address": "0x4200000000000000000000000000000000000042",
+          "programaticallyPegged": true
+        },
+        "type": "ProxyOFT",
+        "sharedDecimals": 6
+      },
+      "0xe8cdf27acd73a434d661c84887215f7598e7d0d3": {
+        "endpointVersion": 2,
+        "peggedTo": {
+          "symbol": "ETH",
+          "chainName": "ethereum",
+          "address": "0x0000000000000000000000000000000000000000",
+          "programaticallyPegged": true
+        },
+        "symbol": "ETH",
+        "type": "ProxyOFT",
+        "sharedDecimals": 6
+      },
+      "0xac800fd6159c2a2cb8fc31ef74621eb430287a5a": {
+        "symbol": "OP",
+        "erc20TokenAddress": "0x4200000000000000000000000000000000000042",
+        "decimals": 18,
+        "name": "OP",
+        "peggedTo": {
+          "symbol": "OP",
+          "chainName": "optimism",
+          "address": "0x4200000000000000000000000000000000000042",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "sharedDecimals": 6
+      },
+      "0x48686c24697fe9042531b64d792304e514e74339": {
+        "symbol": "MIM",
+        "erc20TokenAddress": "0xb153fb3d196a8eb25522705560ac152eeec57901",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "name": "Magic Internet Money",
+        "peggedTo": {
+          "symbol": "MIM",
+          "chainName": "ethereum",
+          "address": "0x99d8a9c45b2eca8864373a26d1459e3dff1e17f3",
+          "programaticallyPegged": true
+        },
+        "oftVersion": 2,
+        "type": "ProxyOFT",
+        "sharedDecimals": 8
+      },
+      "0xf03b4d9ac1d5d1e7c4cef54c2a313b9fe051a0ad": {
+        "symbol": "USDT0",
+        "erc20TokenAddress": "0x01bff41798a0bcf287b996046ca68b395dbc1071",
+        "stablecoin": true,
+        "decimals": 6,
+        "stargateOverride": {
+          "symbol": "USDT"
+        },
+        "peggedTo": {
+          "symbol": "USDT0",
+          "chainName": "ethereum",
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "mintAndBurn": true,
+        "sharedDecimals": 6
+      },
+      "0x8efbdff3bae9a3ed3c0ac7ad86bebf9aee46086f": {
+        "symbol": "USDT0",
+        "erc20TokenAddress": "0x01bff41798a0bcf287b996046ca68b395dbc1071",
+        "stablecoin": true,
+        "decimals": 6,
+        "stargateOverride": {
+          "symbol": "USDT0.s"
+        },
+        "peggedTo": {
+          "symbol": "USDT0",
+          "chainName": "base",
+          "address": "0x102d758f688a4c1c5a80b116bd945d4455460282",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "sharedDecimals": 6
+      },
+      "0xbe82cbe217bf4e0a87dd88c552e93054f4ef2c7c": {
+        "symbol": "ynETHx",
+        "erc20TokenAddress": "0xe231db5f348d709239ef1741ea30961b3b635a61",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "ynETHx",
+          "chainName": "ethereum",
+          "address": "0x657d9aba1dbb59e53f9f3ecaa878447dcfc96dcb",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "mintAndBurn": true,
+        "sharedDecimals": 6
+      },
+      "0xfd72fbb61798f3bcb707f5ba98cb72a87cca02a2": {
+        "symbol": "ynBTCk",
+        "erc20TokenAddress": "0x68589adc7687a23ff2b06fb032b997f09b44ed5d",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "ynBTCk",
+          "chainName": "ethereum",
+          "address": "0x68589adc7687a23ff2b06fb032b997f09b44ed5d",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "mintAndBurn": true,
+        "sharedDecimals": 6
+      },
+      "0xb9d852a3f9b3a82e243faab0272604102a111e1a": {
+        "symbol": "SBC",
+        "erc20TokenAddress": "0xf9fb20b8e097904f0ab7d12e9dbee88f2dcd0f16",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "SBC",
+          "chainName": "ethereum",
+          "address": "0xf9fb20b8e097904f0ab7d12e9dbee88f2dcd0f16",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "sharedDecimals": 6
+      },
+      "0xc099ab708e20e8b25c63ca156d7cc94404c55416": {
+        "symbol": "YND",
+        "erc20TokenAddress": "0xdb8e54f39aff243b25a41e4747957ed517af0511",
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "YND",
+          "chainName": "ethereum",
+          "address": "0x7159cc276d7d17ab4b3beb19959e1f39368a45ba",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "mintAndBurn": true,
+        "sharedDecimals": 6
+      },
+      "0x17f2bf4eeb0591c25ac52a1e6385a25f4f445130": {
+        "symbol": "FRNT",
+        "erc20TokenAddress": "0x5e817f2abccb9095585d26c2a3ce234a440574fc",
+        "decimals": 6,
+        "peggedTo": {
+          "symbol": "FRNT",
+          "chainName": "ethereum",
+          "address": "0x5e817f2abccb9095585d26c2a3ce234a440574fc",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "sharedDecimals": 6
+      },
+      "0xc3f854b2970f8727d28527ece33176fac67fef48": {
+        "symbol": "WBTC",
+        "erc20TokenAddress": "0x0555e30da8f98308edb960aa94c0db47230d2b9c",
+        "canonicalAsset": true,
+        "decimals": 8,
+        "peggedTo": {
+          "symbol": "WBTC",
+          "chainName": "ethereum",
+          "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+          "programaticallyPegged": true
+        },
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "sharedDecimals": 8
+      },
+      "0x95dcff2bfd19af97267b8c9d516206dcc87eecdd": {
+        "symbol": "msETH",
+        "erc20TokenAddress": "0x1610e3c85dd44af31ed7f33a63642012dca0c5a5",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "name": "Metronome Synth ETH",
+        "peggedTo": {
+          "symbol": "msETH",
+          "chainName": "ethereum",
+          "address": "0x64351fc9810adad17a690e4e1717df5e7e085160",
+          "programaticallyPegged": true
+        },
+        "oftVersion": 1,
+        "type": "ProxyOFT",
+        "sharedDecimals": 18
+      },
+      "0xc2c433d36d7184192e442a243b351a9e3055fd5f": {
+        "symbol": "msUSD",
+        "erc20TokenAddress": "0x9dabae7274d28a45f0b65bf8ed201a5731492ca0",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "name": "Metronome Synth USD",
+        "peggedTo": {
+          "symbol": "msUSD",
+          "chainName": "ethereum",
+          "address": "0xab5eb14c09d416f0ac63661e57edb7aecdb9befa",
+          "programaticallyPegged": true
+        },
+        "oftVersion": 1,
+        "type": "ProxyOFT",
+        "sharedDecimals": 18
+      },
+      "0x9a9d5a29206dde4f70825032df32333de5f63921": {
+        "symbol": "CYBER",
+        "erc20TokenAddress": "0x14778860e937f509e651192a90589de711fb88a9",
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "CYBER",
+          "chainName": "ethereum",
+          "address": "0x14778860e937f509e651192a90589de711fb88a9",
+          "programaticallyPegged": true
+        },
+        "name": "CyberConnect",
+        "endpointVersion": 2,
+        "oftVersion": 3,
+        "type": "ProxyOFT",
+        "sharedDecimals": 6
+      },
+      "0x4edc2460b0891955e2d11ee3103cd705a6d6288a": {
+        "type": "ProxyOFT",
+        "sharedDecimals": 6,
+        "erc20TokenAddress": "0xa0c9b923f4551f1ec1a49665943160b18704ce06",
+        "decimals": 6,
+        "symbol": "PYUSD0",
+        "oftVersion": 3,
+        "eid": 30111,
+        "mintAndBurn": true,
+        "peggedTo": {
+          "address": "0x6c3ea9036406852006290770bedfcaba0e23a0e8",
+          "chainName": "ethereum",
+          "programaticallyPegged": true,
+          "symbol": "PYUSD"
+        }
+      },
+      "0xc69e66109943faf5cbda22f360b7eb7c27bb5c88": {
+        "symbol": "USDA",
+        "erc20TokenAddress": "0x0000206329b97db379d5e1bf586bbdb969c63274",
+        "stablecoin": true,
+        "canonicalAsset": true,
+        "decimals": 18,
+        "peggedTo": {
+          "symbol": "USDA",
+          "chainName": "ethereum",
+          "address": "0x0000206329b97db379d5e1bf586bbdb969c63274",
+          "programaticallyPegged": true
+        },
+        "type": "ProxyOFT"
+      },
+      "0x9201cc18965792808549566e6b06b016d915313a": {
+        "peggedTo": {
+          "symbol": "ANGLE",
+          "chainName": "ethereum",
+          "address": "0x31429d1856ad1377a8a0079410b297e1a9e214c2",
+          "programaticallyPegged": true
+        },
+        "symbol": "ANGLE",
+        "erc20TokenAddress": "0x58441e37255b09f9f545e9dc957f1c41658ff665",
+        "canonicalAsset": true,
+        "type": "ProxyOFT",
+        "decimals": 18
+      }
+    },
+    "chainKey": "optimism"
+  }
+}
