@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+import "forge-std/Vm.sol";
+
     struct ConfigPerL2 {
         // General chain info
         string NAME;
@@ -55,17 +57,31 @@ contract L2Constants {
                         OFT Deployment Parameters
     //////////////////////////////////////////////////////////////*/
 
-    // General chain constants
-    string constant DEPLOYMENT_RPC_URL = "https://rpc1.monad.xyz";
+    // General chain constants (populated by _loadTarget() from registry/chains.json)
     string constant DEPLOYMENT_CHAIN_ID =  "143";
-    
-    // LayerZero addresses
-    uint32 constant DEPLOYMENT_EID = 30390;
-    address constant DEPLOYMENT_SEND_LIB_302 = 0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7;
-    address constant DEPLOYMENT_RECEIVE_LIB_302 = 0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043;
-    address constant DEPLOYMENT_LZ_DVN = 0x282b3386571f7f794450d5789911a9804FA346b4;
-    address constant DEPLOYMENT_NETHERMIND_DVN = 0xaCDe1f22EEAb249d3ca6Ba8805C8fEe9f52a16e7;
-    address constant DEPLOYMENT_LZ_ENDPOINT = 0x6F475642a6e85809B1c36Fa62763669b1b48DD5B;
+
+    // Deployment target state variables — set by _loadTarget() in the constructor.
+    // When TARGET_CHAIN env var is set, values come from registry/chains.json[TARGET_CHAIN].
+    uint32  public DEPLOYMENT_EID;
+    address public DEPLOYMENT_LZ_ENDPOINT;
+    address public DEPLOYMENT_SEND_LIB_302;
+    address public DEPLOYMENT_RECEIVE_LIB_302;
+    string  public DEPLOYMENT_RPC_URL;
+    // 4-of-4 DVN array (sorted ascending by address — LZ reverts LZ_ULN_Unsorted otherwise)
+    address[4] public DEPLOYMENT_DVNS;
+
+    // Per-pathway peer config (loaded from registry peerEids/peerOfts/peerLimits/peerWindows).
+    // Length is 0 for chains that don't carry these fields in the registry.
+    uint32[]  public DEPLOYMENT_PEER_EIDS;
+    address[] public DEPLOYMENT_PEER_OFTS;
+    uint256[] public DEPLOYMENT_PEER_LIMITS;
+    uint256[] public DEPLOYMENT_PEER_WINDOWS;
+
+    // Legacy 2-DVN Monad constants — kept only for adapter-migration scripts
+    // (02_DeployMigrationOFT) which were written against the old 2-DVN Monad config.
+    // Do NOT use these in new deployment scripts; use DEPLOYMENT_DVNS instead.
+    address constant DEPLOYMENT_LZ_DVN_MONAD     = 0x282b3386571f7f794450d5789911a9804FA346b4;
+    address constant DEPLOYMENT_NETHERMIND_DVN_MONAD = 0xaCDe1f22EEAb249d3ca6Ba8805C8fEe9f52a16e7;
 
     address constant DEPLOYMENT_CONTRACT_CONTROLLER = 0x7a00657a45420044bc526B90Ad667aFfaee0A868;
     /*//////////////////////////////////////////////////////////////
@@ -104,6 +120,8 @@ contract L2Constants {
     address constant L1_CONTRACT_CONTROLLER = 0x2aCA71020De61bb532008049e1Bd41E451aE8AdC;
     address constant L1_TIMELOCK_GNOSIS = 0xcdd57D11476c22d265722F68390b036f3DA48c21;
     address constant L1_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
+    // 2-day operating timelock; L1_CONTRACT_CONTROLLER holds PROPOSER + EXECUTOR.
+    address constant L1_OPERATING_TIMELOCK = 0xcD425f44758a08BaAB3C4908f3e3dE5776e45d7a;
 
     address constant L1_SYNC_POOL = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
     address constant L1_OFT_ADAPTER = 0xcd2eb13D6831d4602D80E5db9230A57596CDCA63;
@@ -131,8 +149,49 @@ contract L2Constants {
     // Construct an array of all the L2s that are currently supported
     ConfigPerL2[] L2s;
 
+    // Loads deployment target from registry/chains.json using TARGET_CHAIN env var.
+    // TARGET_CHAIN is required — reverts if unset.
+    // RPC_URL is optional (may be absent for chains without a public RPC).
+    function _loadTarget() internal {
+        // Access cheatcodes via the magic address; works in Script and Test contexts.
+        Vm _vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+        string memory key = _vm.envOr("TARGET_CHAIN", string(""));
+        require(bytes(key).length > 0, "TARGET_CHAIN env var required");
+        string memory j = _vm.readFile("registry/chains.json");
+        string memory b = string.concat(".", key, ".");
+        DEPLOYMENT_EID             = uint32(_vm.parseJsonUint(j, string.concat(b, "L2_EID")));
+        DEPLOYMENT_LZ_ENDPOINT     = _vm.parseJsonAddress(j, string.concat(b, "L2_ENDPOINT"));
+        DEPLOYMENT_SEND_LIB_302    = _vm.parseJsonAddress(j, string.concat(b, "SEND_302"));
+        DEPLOYMENT_RECEIVE_LIB_302 = _vm.parseJsonAddress(j, string.concat(b, "RECEIVE_302"));
+        // RPC_URL may be absent for chains without a public RPC — guard with keyExistsJson
+        if (_vm.keyExistsJson(j, string.concat(b, "RPC_URL"))) {
+            DEPLOYMENT_RPC_URL = _vm.parseJsonString(j, string.concat(b, "RPC_URL"));
+        }
+        address[] memory dvns = _vm.parseJsonAddressArray(j, string.concat(b, "LZ_DVN"));
+        require(dvns.length == 4, "policy requires 4 DVNs");
+        for (uint256 i = 0; i < 4; i++) DEPLOYMENT_DVNS[i] = dvns[i];
+
+        // Per-pathway peer config — optional; only present on chains that use an explicit allow-list.
+        if (_vm.keyExistsJson(j, string.concat(b, "peerEids"))) {
+            uint256[] memory rawEids = _vm.parseJsonUintArray(j, string.concat(b, "peerEids"));
+            address[] memory peerOfts = _vm.parseJsonAddressArray(j, string.concat(b, "peerOfts"));
+            uint256[] memory peerLimits = _vm.parseJsonUintArray(j, string.concat(b, "peerLimits"));
+            uint256[] memory peerWindows = _vm.parseJsonUintArray(j, string.concat(b, "peerWindows"));
+            require(rawEids.length == peerOfts.length, "peerEids/peerOfts length mismatch");
+            require(rawEids.length == peerLimits.length, "peerEids/peerLimits length mismatch");
+            require(rawEids.length == peerWindows.length, "peerEids/peerWindows length mismatch");
+            for (uint256 i = 0; i < rawEids.length; i++) {
+                DEPLOYMENT_PEER_EIDS.push(uint32(rawEids[i]));
+                DEPLOYMENT_PEER_OFTS.push(peerOfts[i]);
+                DEPLOYMENT_PEER_LIMITS.push(peerLimits[i]);
+                DEPLOYMENT_PEER_WINDOWS.push(peerWindows[i]);
+            }
+        }
+    }
+
     // Only connecting to base and mainnet
     constructor () {
+        _loadTarget();
         // L2s.push(BLAST);
         // L2s.push(MODE);
         // L2s.push(BNB);
