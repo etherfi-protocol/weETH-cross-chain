@@ -14,6 +14,28 @@ chain** (CREATE3). Full prose runbook: `NEW-CHAIN-ONBOARDING.md`.
 - Dry-running or deploying the weETH OFT on a new chain.
 - Adding a chain's registry entry, wiring peers, verifying, or handing off ownership.
 
+## On invocation — gather inputs, confirm the Ledger, set expectations FIRST
+When the user says "deploy weETH to <chain>" (or similar), do this **before any broadcast**:
+
+**1. Collect the inputs — ask the user, or have them set in `.env`. If any is missing, STOP and ask; never guess:**
+- **Chain key** (e.g. `robinhood`) → becomes `TARGET_CHAIN`.
+- **RPC** in `.env` as `<CHAIN>_MAINNET_RPC_URL` (API keys stay out of git).
+- **Explorer + API key** for verification — Blockscout base URL + `<CHAIN>_API_KEY`.
+- **Peer allow-list** — which existing chains it bridges with (e.g. Eth/Base/OP) and the per-pathway rate limit (default **1000 weETH / 4h**). Hand-added to `registry/chains.json`.
+- **Controller Safe** (default canonical `0x7a00657a…`) and **deployer** Ledger (`0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150`).
+
+**2. Confirm the deployer Ledger is ready (broadcasts can't sign otherwise):**
+- Connected and **unlocked**, **Ethereum app open**, with **Ledger Live / other wallet apps closed** (they grab the USB → "device not found").
+- **Blind signing / contract data ENABLED** in the Ethereum app — otherwise every tx fails with APDU `6985 (Conditions of use not satisfied)`.
+- The selected derivation path resolves to the deployer `0x8D5AAc…` (else pass `--mnemonic-derivation-paths`).
+- The deployer holds **gas on the new chain** (~0.005 ETH; CREATE3 → addresses are deployer-independent, so any funded path works).
+
+**3. Tell the user what to expect, so there's no misalignment:**
+- A **dry run runs first** — no signing, no gas, nothing sent on-chain.
+- Then **Ledger-signed broadcasts** (run in the background; confirm each tx on the device): OFT deploy + config (~15 txns), controller Safe (1 tx), ownership handoff (~5 txns).
+- The remaining steps are **3CP proposals** — PRs to `3CP-secure`, signed later by the multisig, **not signed now**: reverse-peer wiring, Safe 2-of-5→4-of-7 migration, and the L1 leg (timelock schedule+execute, ~2-day delay).
+- Ends with **explorer verification** of every deployed contract.
+
 ## Hard guardrails
 - **Never `--broadcast` before the dry-run passes** (`Script ran successfully`).
 - **Broadcast only via `--ledger`** (deployer `0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150`); no hot keys.
