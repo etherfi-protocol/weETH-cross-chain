@@ -18,7 +18,7 @@ import "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import "../../contracts/EtherfiOFTUpgradeable.sol";
 import "../../utils/L2Constants.sol";
 
-// forge script scripts/oft-deployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --sender 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550 --ledger 
+// forge script scripts/oft-deployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url "deployment rpc" --sender 0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150 --ledger 
 contract OFTOwnershipTransfer is Script, L2Constants {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
@@ -34,8 +34,9 @@ contract OFTOwnershipTransfer is Script, L2Constants {
         ProxyAdmin oftProxyAdmin = ProxyAdmin(DEPLOYMENT_PROXY_ADMIN_CONTRACT);
 
 
-        // setting the contract controller as the delegate
-        oft.setDelegate(DEPLOYMENT_CONTRACT_CONTROLLER);
+        // setting the timelock as the LZ delegate so endpoint config (DVNs,
+        // message libraries, enforced options) is gated by the timelock delay
+        oft.setDelegate(L2_TIMELOCK);
 
         // granting pauser roles
         oft.setRole(PAUSER_EOA, oft.PAUSER_ROLE(), true);

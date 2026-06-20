@@ -59,7 +59,8 @@ contract verifyOFT is ContractCodeChecker, Script, L2Constants, Test {
         assertEq(oft.roleHolders(oft.UNPAUSER_ROLE()).length, 1);
         assertEq(oft.roleHolders(oft.UNPAUSER_ROLE())[0], DEPLOYMENT_CONTRACT_CONTROLLER);
 
-        assertEq(endpoint.delegates(DEPLOYMENT_OFT), DEPLOYMENT_CONTRACT_CONTROLLER);
+        // LZ delegate is the timelock (DVN/library/enforced-options config is timelock-gated)
+        assertEq(endpoint.delegates(DEPLOYMENT_OFT), L2_TIMELOCK);
 
         console2.log("All roles are correct!\n");
 

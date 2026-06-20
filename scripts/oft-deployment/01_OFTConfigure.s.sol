@@ -25,7 +25,7 @@ struct OFTDeployment {
     EtherfiOFTUpgradeable tokenContract;
 }
 
-// forge script scripts/oft-deployment/01_OFTConfigure.s.sol:DeployOFTScript --via-ir  --ledger --sender 0xd8F3803d8412e61e04F53e1C9394e13eC8b32550 --rpc-url "deployment rpc"  --verify --etherscan-api-key "etherscan key"
+// forge script scripts/oft-deployment/01_OFTConfigure.s.sol:DeployOFTScript --via-ir  --ledger --sender 0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150 --rpc-url "deployment rpc"  --verify --etherscan-api-key "etherscan key"
 contract DeployOFTScript is Script, L2Constants {
     using OptionsBuilder for bytes;
 
@@ -91,11 +91,19 @@ contract DeployOFTScript is Script, L2Constants {
 
     function configureRateLimits() internal {
         console.log("Configuring rate limits...");
-        // Individual rate limits must be set for each chain
+        // Per-pathway rate limits: one config per peer, sourced from the registry
+        // (DEPLOYMENT_PEER_LIMITS / DEPLOYMENT_PEER_WINDOWS). Values may differ per
+        // chain; for the current peers they are all 1000 weETH / 4h.
 
-        rateLimitConfigs.push(LayerZeroHelpers._getRateLimitConfig(L1_EID, LIMIT, WINDOW));
-        for (uint256 i = 0; i < L2s.length; i++) {
-            rateLimitConfigs.push(LayerZeroHelpers._getRateLimitConfig(L2s[i].L2_EID, LIMIT, WINDOW));
+        if (DEPLOYMENT_PEER_EIDS.length > 0) {
+            for (uint256 i = 0; i < DEPLOYMENT_PEER_EIDS.length; i++) {
+                rateLimitConfigs.push(LayerZeroHelpers._getRateLimitConfig(DEPLOYMENT_PEER_EIDS[i], DEPLOYMENT_PEER_LIMITS[i], DEPLOYMENT_PEER_WINDOWS[i]));
+            }
+        } else {
+            rateLimitConfigs.push(LayerZeroHelpers._getRateLimitConfig(L1_EID, LIMIT, WINDOW));
+            for (uint256 i = 0; i < L2s.length; i++) {
+                rateLimitConfigs.push(LayerZeroHelpers._getRateLimitConfig(L2s[i].L2_EID, LIMIT, WINDOW));
+            }
         }
 
         oftDeployment.tokenContract.setInboundRateLimits(rateLimitConfigs);
@@ -105,35 +113,39 @@ contract DeployOFTScript is Script, L2Constants {
     function configurePeer() internal {
         console.log("Configuring peers...");
 
-        // Setting L1 peer
-        oftDeployment.tokenContract.setPeer(L1_EID, LayerZeroHelpers._toBytes32(L1_OFT_ADAPTER));
-
-        // Iterating through all existing L2s to set peers 
-        for (uint256 i = 0; i < L2s.length; i++) {
-            oftDeployment.tokenContract.setPeer(L2s[i].L2_EID, LayerZeroHelpers._toBytes32(L2s[i].L2_OFT));
+        if (DEPLOYMENT_PEER_EIDS.length > 0) {
+            // Registry allow-list (the only peers this chain bridges with)
+            for (uint256 i = 0; i < DEPLOYMENT_PEER_EIDS.length; i++) {
+                oftDeployment.tokenContract.setPeer(DEPLOYMENT_PEER_EIDS[i], LayerZeroHelpers._toBytes32(DEPLOYMENT_PEER_OFTS[i]));
+            }
+        } else {
+            oftDeployment.tokenContract.setPeer(L1_EID, LayerZeroHelpers._toBytes32(L1_OFT_ADAPTER));
+            for (uint256 i = 0; i < L2s.length; i++) {
+                oftDeployment.tokenContract.setPeer(L2s[i].L2_EID, LayerZeroHelpers._toBytes32(L2s[i].L2_OFT));
+            }
         }
-
     }
 
     function configureDVN() internal {
         console.log("Configuring DVNs...");
-        // `setConfig` be called for each other chain in the mesh network
+        // `setConfig` must be called for each peer in the mesh network
 
-        // Set DVN for L1
-        _setDVN(L1_EID);
-
-        // Iterate over each L2 and set the config
-        for (uint256 i = 0; i < L2s.length; i++) {
-            _setDVN(L2s[i].L2_EID);
+        if (DEPLOYMENT_PEER_EIDS.length > 0) {
+            for (uint256 i = 0; i < DEPLOYMENT_PEER_EIDS.length; i++) _setDVN(DEPLOYMENT_PEER_EIDS[i]);
+        } else {
+            _setDVN(L1_EID);
+            for (uint256 i = 0; i < L2s.length; i++) _setDVN(L2s[i].L2_EID);
         }
     }
 
     function configureEnforcedOptions() internal {
         console.log("Configuring enforced options...");
 
-        _appendEnforcedOptions(L1_EID);
-        for (uint256 i = 0; i < L2s.length; i++) {
-            _appendEnforcedOptions(L2s[i].L2_EID);
+        if (DEPLOYMENT_PEER_EIDS.length > 0) {
+            for (uint256 i = 0; i < DEPLOYMENT_PEER_EIDS.length; i++) _appendEnforcedOptions(DEPLOYMENT_PEER_EIDS[i]);
+        } else {
+            _appendEnforcedOptions(L1_EID);
+            for (uint256 i = 0; i < L2s.length; i++) _appendEnforcedOptions(L2s[i].L2_EID);
         }
 
         oftDeployment.tokenContract.setEnforcedOptions(enforcedOptions);
@@ -147,7 +159,7 @@ contract DeployOFTScript is Script, L2Constants {
         for (uint256 i = 0; i < 4; i++) requiredDVNs[i] = DEPLOYMENT_DVNS[i];
 
         UlnConfig memory ulnConfig = UlnConfig({
-            confirmations: 15,
+            confirmations: 45,
             requiredDVNCount: 4,
             optionalDVNCount: 0,
             optionalDVNThreshold: 0,

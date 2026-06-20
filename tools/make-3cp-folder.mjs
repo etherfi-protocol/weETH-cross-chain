@@ -1,0 +1,317 @@
+#!/usr/bin/env node
+// Emit 3CP proposal folders (queued/<id>/<id>.json + .md) for the on-chain
+// steps of onboarding a chain to the weETH OFT mesh. ABI encoding is delegated
+// to `cast calldata` so there is no hand-rolled selector/encoding drift.
+//
+// Types (--type):
+//   handoff         (default) new chain: setDelegate + transferOwnership -> timelock
+//   safe-migration  new chain's controller Safe: 2-of-5 -> 4-of-7 (self-calls)
+//   peer            existing peer chain accepts the new chain: setPeer (+ rate
+//                   limits on L2s). Routed automatically: direct-Safe when the
+//                   peer OFT is Safe-owned, timelock schedule+execute when it is
+//                   timelock-owned (e.g. the L1 adapter).
+//
+// 3CP convention: folder = next-free GLOBAL proposal id (local queued/ + open
+// PRs); Safe nonce is separate (--nonce, or read on-chain with --rpc).
+//
+// Usage:
+//   node tools/make-3cp-folder.mjs --type handoff        --chain <key> [--rpc url] [--out repo]
+//   node tools/make-3cp-folder.mjs --type safe-migration --chain <key>            [--out repo]
+//   node tools/make-3cp-folder.mjs --type peer --chain <newKey> --peer <peerKey> --rpc <peerRpc> [--out repo]
+//
+// Defaults: --out $CP3_REPO or ../../3CP-secure ; --multisend 0xA238CB…7761
+
+import {readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync} from "node:fs";
+import {dirname, resolve} from "node:path";
+import {fileURLToPath} from "node:url";
+import {execFileSync} from "node:child_process";
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const MULTISEND_CALL_ONLY = "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761";
+const GH_REPO = process.env.CP3_GH_REPO || "etherfi-protocol/3CP-secure";
+const ZERO32 = "0x" + "0".repeat(64);
+const DEFAULT_DELAY = 172800; // 2 days, fallback if timelock minDelay is unreadable
+
+const parseArgs = (argv) => {
+  const a = {};
+  for (let i = 0; i < argv.length; i += 2) a[argv[i].replace(/^--/, "")] = argv[i + 1];
+  return a;
+};
+const toBytes32 = (addr) => "0x" + "0".repeat(24) + addr.replace(/^0x/, "").toLowerCase();
+const cast = (args) => execFileSync("cast", args, {encoding: "utf8", stdio: ["ignore", "pipe", "ignore"]}).trim();
+const calldata = (sig, ...args) => cast(["calldata", sig, ...args]);
+const abiEncode = (sig, ...args) => cast(["abi-encode", sig, ...args]);
+// 170k lzReceive enforced option (type-3 options), msgType 1 & 2
+const ENFORCED_OPTS = "0x00030100110100000000000000000000000000029810";
+const ULN_CONFIRMATIONS = "45";
+const callView = (to, sig, rpc, ...args) => {
+  try {
+    return cast(["call", to, sig, ...args, "--rpc-url", rpc]).split(/\s+/)[0];
+  } catch {
+    return null;
+  }
+};
+
+function loadRegistry() {
+  return JSON.parse(readFileSync(resolve(REPO_ROOT, "registry/chains.json"), "utf8"));
+}
+function loadPolicy() {
+  return JSON.parse(readFileSync(resolve(REPO_ROOT, "registry/policy.json"), "utf8"));
+}
+function requireChain(reg, key) {
+  const c = reg[key];
+  if (!c) {
+    console.error(`error: chain "${key}" not found in registry/chains.json`);
+    process.exit(1);
+  }
+  return c;
+}
+
+// ---- bundle builders: each returns [{label, safe, chainId, transactions, lines}] ----
+
+function buildHandoff(c) {
+  const oft = c.OFT.toLowerCase();
+  return [{
+    label: `${c.NAME}: OFT owner + delegate -> timelock`,
+    safe: c.CONTROLLER_SAFE,
+    chainId: String(c.CHAIN_ID),
+    transactions: [
+      {to: oft, value: "0", data: calldata("setDelegate(address)", c.TIMELOCK)},
+      {to: oft, value: "0", data: calldata("transferOwnership(address)", c.TIMELOCK)},
+    ],
+    lines: [`1. setDelegate(${c.TIMELOCK}) -> OFT`, `2. transferOwnership(${c.TIMELOCK}) -> OFT`],
+  }];
+}
+
+function buildSafeMigration(c, policy) {
+  const cs = policy.controllerSafe;
+  const safe = c.CONTROLLER_SAFE.toLowerCase();
+  const initial = new Set(cs.initialOwners.map((a) => a.toLowerCase()));
+  const toAdd = cs.finalOwners.filter((a) => !initial.has(a.toLowerCase()));
+  const txs = toAdd.map((owner, i) => {
+    const threshold = i === toAdd.length - 1 ? cs.finalThreshold : cs.initialThreshold;
+    return {to: safe, value: "0", data: calldata("addOwnerWithThreshold(address,uint256)", owner, String(threshold))};
+  });
+  return [{
+    label: `${c.NAME}: controller Safe ${cs.initialThreshold}-of-${cs.initialOwners.length} -> ${cs.finalThreshold}-of-${cs.finalOwners.length}`,
+    safe,
+    chainId: String(c.CHAIN_ID),
+    transactions: txs,
+    lines: txs.map((_, i) =>
+      `${i + 1}. addOwnerWithThreshold(${toAdd[i]}, ${i === toAdd.length - 1 ? cs.finalThreshold : cs.initialThreshold})  [Safe self-call]`),
+    note: "Signed by the initial owners. Safe self-calls (to == Safe).",
+  }];
+}
+
+// Full-pathway inner calls that make `peer` accept `nc` (the new chain) with
+// symmetric 4-of-4 DVN security. Owner-gated calls (setPeer / rate limits /
+// enforced options) target the OFT; delegate-gated DVN config targets the
+// endpoint. On every current peer owner == delegate, so they share one bundle.
+// The L1 adapter has no pairwise rate limiter, so it skips the limit calls.
+function peerInnerCalls(nc, peer) {
+  const peerOft = peer.OFT.toLowerCase();
+  const endpoint = peer.L2_ENDPOINT.toLowerCase();
+  const eid = String(nc.L2_EID);
+  const calls = [];
+
+  // setPeer (owner)
+  calls.push({to: peerOft, value: "0", data: calldata("setPeer(uint32,bytes32)", eid, toBytes32(nc.OFT)), desc: `setPeer(${eid}, ${nc.OFT})`});
+
+  // per-pathway rate limits (owner) — mirrors the new chain's own limit; L1 adapter has none
+  if (String(peer.CHAIN_ID) !== "1") {
+    const limit = String(nc.peerLimits[0]);
+    const window = String(nc.peerWindows[0]);
+    const cfg = `[(${eid},${limit},${window})]`;
+    calls.push({to: peerOft, value: "0", data: calldata("setInboundRateLimits((uint32,uint256,uint256)[])", cfg), desc: `setInboundRateLimits(${eid}, ${limit}, ${window})`});
+    calls.push({to: peerOft, value: "0", data: calldata("setOutboundRateLimits((uint32,uint256,uint256)[])", cfg), desc: `setOutboundRateLimits(${eid}, ${limit}, ${window})`});
+  }
+
+  // enforced options (owner) — 170k lzReceive, msgType 1 & 2
+  const eo = `[(${eid},1,${ENFORCED_OPTS}),(${eid},2,${ENFORCED_OPTS})]`;
+  calls.push({to: peerOft, value: "0", data: calldata("setEnforcedOptions((uint32,uint16,bytes)[])", eo), desc: `setEnforcedOptions(${eid}, msgType 1&2, 170k)`});
+
+  // 4-of-4 DVN ULN config (delegate) on send + receive libs — uses this chain's own DVN set
+  const dvns = `[${peer.LZ_DVN.join(",")}]`;
+  const uln = abiEncode("f(uint64,uint8,uint8,uint8,address[],address[])", ULN_CONFIRMATIONS, "4", "0", "0", dvns, "[]");
+  calls.push({to: endpoint, value: "0", data: calldata("setConfig(address,address,(uint32,uint32,bytes)[])", peerOft, peer.SEND_302, `[(${eid},2,${uln})]`), desc: `endpoint.setConfig(SEND lib, ${eid}, 4-of-4 DVN @ ${ULN_CONFIRMATIONS})`});
+  calls.push({to: endpoint, value: "0", data: calldata("setConfig(address,address,(uint32,uint32,bytes)[])", peerOft, peer.RECEIVE_302, `[(${eid},2,${uln})]`), desc: `endpoint.setConfig(RECEIVE lib, ${eid}, 4-of-4 DVN @ ${ULN_CONFIRMATIONS})`});
+
+  return calls;
+}
+
+function buildPeer(nc, peer, policy, args) {
+  const inner = peerInnerCalls(nc, peer);
+  const owner = args.rpc ? callView(peer.OFT, "owner()(address)", args.rpc) : null;
+  const timelockOwned = owner && owner.toLowerCase() === peer.TIMELOCK.toLowerCase();
+
+  if (!timelockOwned) {
+    if (args.rpc && owner && owner.toLowerCase() !== peer.CONTROLLER_SAFE.toLowerCase()) {
+      console.error(`error: ${peer.NAME} OFT owner ${owner} is neither its Safe nor its timelock; refusing to guess routing`);
+      process.exit(1);
+    }
+    return [{
+      label: `${peer.NAME}: accept ${nc.NAME} peer (direct Safe)`,
+      safe: peer.CONTROLLER_SAFE,
+      chainId: String(peer.CHAIN_ID),
+      transactions: inner.map(({to, value, data}) => ({to, value, data})),
+      lines: inner.map((c, i) => `${i + 1}. ${c.desc}`),
+    }];
+  }
+
+  // timelock-owned: schedule + execute, submitted by the controlling Safe.
+  const tl = peer.TIMELOCK.toLowerCase();
+  const delay = (args.rpc && Number(callView(peer.TIMELOCK, "getMinDelay()(uint256)", args.rpc))) || DEFAULT_DELAY;
+  const targets = `[${inner.map((c) => c.to).join(",")}]`;
+  const values = `[${inner.map(() => "0").join(",")}]`;
+  const datas = `[${inner.map((c) => c.data).join(",")}]`;
+  const scheduleData = calldata("scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)", targets, values, datas, ZERO32, ZERO32, String(delay));
+  const executeData = calldata("executeBatch(address[],uint256[],bytes[],bytes32,bytes32)", targets, values, datas, ZERO32, ZERO32);
+  const lines = inner.map((c, i) => `   - ${i + 1}. ${c.desc}`);
+  return [
+    {
+      label: `${peer.NAME}: schedule accept-${nc.NAME} (timelock, delay ${delay}s)`,
+      safe: peer.CONTROLLER_SAFE,
+      chainId: String(peer.CHAIN_ID),
+      transactions: [{to: tl, value: "0", data: scheduleData}],
+      lines: [`1. scheduleBatch(delay=${delay}s) on timelock ${tl}, batching:`, ...lines],
+      note: `Execute after the ${delay}s delay with the matching execute proposal.`,
+    },
+    {
+      label: `${peer.NAME}: execute accept-${nc.NAME} (timelock)`,
+      safe: peer.CONTROLLER_SAFE,
+      chainId: String(peer.CHAIN_ID),
+      transactions: [{to: tl, value: "0", data: executeData}],
+      lines: [`1. executeBatch() on timelock ${tl}, batching:`, ...lines],
+      note: "Submit only after the schedule proposal has cleared the timelock delay.",
+    },
+  ];
+}
+
+// ---- folder-id + nonce + open-PR plumbing ----
+
+function gh(args) {
+  return execFileSync("gh", args, {encoding: "utf8", stdio: ["ignore", "pipe", "ignore"]});
+}
+function openPrFolders() {
+  try {
+    const prs = JSON.parse(gh(["pr", "list", "-R", GH_REPO, "--state", "open", "--limit", "200", "--json", "files,title"]));
+    const ids = new Set();
+    for (const pr of prs) for (const f of pr.files || []) {
+      const m = f.path.match(/^queued\/(\d+)\//);
+      if (m) ids.add(Number(m[1]));
+    }
+    return {ids, prs, ok: true};
+  } catch {
+    return {ids: new Set(), prs: [], ok: false};
+  }
+}
+function localFolders(outRepo) {
+  const dir = resolve(outRepo, "queued");
+  if (!existsSync(dir)) return new Set();
+  return new Set(readdirSync(dir).filter((d) => /^\d+$/.test(d)).map(Number));
+}
+function sameSafePrs(prs, safe) {
+  const want = safe.toLowerCase();
+  return prs.filter((pr) => (pr.title.match(/0x[0-9a-fA-F]{40}/g) || []).some((a) => a.toLowerCase() === want)).map((pr) => pr.title);
+}
+function readSafeNonce(safe, rpc) {
+  const n = callView(safe, "nonce()(uint256)", rpc);
+  return n === null ? 0 : Number(n);
+}
+
+function renderMd(p, id, nonce, multisend, chainKey, jsonPath) {
+  const noteBlock = p.note ? `\n> ${p.note}\n` : "";
+  return `# ${p.label}
+
+| field | value |
+|-------|-------|
+| proposal | #${id} |
+| chainId | ${p.chainId} |
+| Safe | \`${p.safe.toLowerCase()}\` |
+| Safe nonce | ${nonce} |
+${noteBlock}
+## Transactions
+
+${p.lines.join("\n")}
+
+## Verify
+
+\`\`\`bash
+./build_multisend.sh ${jsonPath} ${p.safe.toLowerCase()} \\
+  --network ${chainKey} --multisend ${multisend} --nonce ${nonce}
+\`\`\`
+`;
+}
+
+// "ethereum: schedule …" -> "schedule"; falls back to the index.
+function leafSuffix(label, idx) {
+  const m = label.match(/\b(schedule|execute)\b/i);
+  return m ? m[1].toLowerCase() : String(idx + 1);
+}
+
+function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const type = args.type || "handoff";
+  const reg = loadRegistry();
+  const policy = loadPolicy();
+  const c = requireChain(reg, args.chain);
+
+  let proposals;
+  if (type === "handoff") proposals = buildHandoff(c);
+  else if (type === "safe-migration") proposals = buildSafeMigration(c, policy);
+  else if (type === "peer") {
+    if (!args.peer) {
+      console.error("error: --peer <peerKey> is required for --type peer");
+      process.exit(1);
+    }
+    proposals = buildPeer(c, requireChain(reg, args.peer), policy, args);
+  } else {
+    console.error(`error: unknown --type "${type}" (handoff | safe-migration | peer)`);
+    process.exit(1);
+  }
+
+  const outRepo = args.out || process.env.CP3_REPO || resolve(REPO_ROOT, "../../3CP-secure");
+  if (!existsSync(outRepo)) {
+    console.error(`error: 3CP repo not found at ${outRepo} (set --out or $CP3_REPO)`);
+    process.exit(1);
+  }
+
+  const {ids: prIds, prs, ok: ghOk} = openPrFolders();
+  const claimed = new Set([...localFolders(outRepo), ...prIds]);
+  let id = args.id !== undefined ? Number(args.id) : (claimed.size ? Math.max(...claimed) + 1 : 1);
+  const multisend = args.multisend || MULTISEND_CALL_ONLY;
+  // Batch mode: --subdir <chain> puts this chain's proposal(s) inside a shared
+  // proposal number as a subfolder (queued/<id>/<subdir>/<leaf>.{json,md}), so a
+  // multi-chain batch lives under ONE number in ONE PR. Pass the same --id for
+  // every chain in the batch. Without --subdir, each proposal gets its own
+  // top-level numbered folder (queued/<id>/<id>.{json,md}).
+  const subdir = args.subdir;
+  if (subdir) while (claimed.has(id) && args.id === undefined) id++;
+
+  proposals.forEach((p, k) => {
+    if (!subdir) { while (claimed.has(id)) id++; claimed.add(id); }
+    const nonce =
+      args.nonce !== undefined ? Number(args.nonce) : args.rpc ? readSafeNonce(p.safe, args.rpc) : 0;
+    const bundle = {chainId: p.chainId, safeAddress: p.safe.toLowerCase(), meta: {txBuilderVersion: "1.16.5"}, transactions: p.transactions};
+    const leaf = subdir
+      ? (proposals.length > 1 ? `${subdir}-${leafSuffix(p.label, k)}` : subdir)
+      : String(id);
+    const folder = subdir ? resolve(outRepo, "queued", String(id), subdir) : resolve(outRepo, "queued", String(id));
+    const relJson = subdir ? `./queued/${id}/${subdir}/${leaf}.json` : `./queued/${id}/${leaf}.json`;
+    mkdirSync(folder, {recursive: true});
+    writeFileSync(resolve(folder, `${leaf}.json`), JSON.stringify(bundle, null, 2) + "\n");
+    writeFileSync(resolve(folder, `${leaf}.md`), renderMd(p, id, nonce, multisend, args.chain, relJson));
+
+    console.log(`#${id}${subdir ? `/${leaf}` : ""}  ${p.label}`);
+    console.log(`      Safe ${p.safe} nonce ${nonce}  (${p.transactions.length} tx)`);
+    const conflicts = ghOk ? sameSafePrs(prs, p.safe) : [];
+    if (conflicts.length) {
+      console.log(`      WARN: open PR(s) target this Safe — confirm nonce ${nonce} is free:`);
+      for (const t of conflicts) console.log(`        - ${t}`);
+    }
+    if (!subdir) id++;
+  });
+  if (!ghOk) console.log("WARN: gh unavailable — folder ids from local queued/ only; check open PRs manually.");
+}
+
+main();

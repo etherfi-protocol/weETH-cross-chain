@@ -1,0 +1,24 @@
+{
+  "chainId": "10",
+  "safeAddress": "0x764682c769ccb119349d92f1b63ee1c03d6aecff",
+  "meta": {
+    "txBuilderVersion": "1.16.5"
+  },
+  "transactions": [
+    {
+      "to": "0xeca0b8088bf30efd476f0a4e6b7e4b5d652b1ded",
+      "value": "0",
+      "data": "0xf2fde38b000000000000000000000000851dd540f4d2ec78120de0a0cc87b21ede5df5c6"
+    },
+    {
+      "to": "0x5ab0dce5dbef9c0284fbdb34a8f8e3cf5216ba2c",
+      "value": "0",
+      "data": "0xf2fde38b000000000000000000000000851dd540f4d2ec78120de0a0cc87b21ede5df5c6"
+    },
+    {
+      "to": "0xc706ac2f5c9332890a7dc37837675ed3dd116416",
+      "value": "0",
+      "data": "0xf2fde38b000000000000000000000000851dd540f4d2ec78120de0a0cc87b21ede5df5c6"
+    }
+  ]
+}
