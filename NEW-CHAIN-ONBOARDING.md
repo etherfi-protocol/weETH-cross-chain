@@ -15,8 +15,12 @@ must already exist on it — that is the gating check).
 - **Chain key** — short lowercase name (e.g. `robinhood`). Becomes `TARGET_CHAIN`.
 - **RPC URL** — added to `.env` (keep API keys out of git; the registry RPC is optional).
 - **Peer allow-list** — which existing chains this chain bridges with, and the
-  per-pathway rate limit. Current policy: **1,000 weETH / 1h** with
+  per-pathway rate limit. Current policy: **1,000 weETH / 4h** with
   Ethereum (EID 30101), Base (30184), Optimism (30111).
+
+Fixed for every chain (do not vary): **controller Safe** `0x7a00657a45420044bc526B90Ad667aFfaee0A868`
+and recommended **deployer** Ledger `0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150`
+(`registry/policy.json` → `canonical`).
 
 ## Steps
 
@@ -29,8 +33,9 @@ node tools/resolve-chain.mjs <chainKey> --rpc "$NEW_CHAIN_RPC_URL"
 Resolves the endpoint, send/receive 302 libraries, and the 4 policy DVNs
 (LayerZero Labs, Nethermind, Horizen, Canary — sorted ascending) from LayerZero
 metadata and writes them into `registry/chains.json`. Then hand-add the peer
-allow-list fields (`peerEids`, `peerOfts`, `peerLimits`, `peerWindows`) and the
-controller Safe. Policy constants live in `registry/policy.json`.
+allow-list fields (`peerEids`, `peerOfts`, `peerLimits`, `peerWindows`) and set
+`CONTROLLER_SAFE` to the canonical `0x7a00657a…` (same on every chain — from
+`policy.json` → `canonical.controllerSafe`). Policy constants live in `registry/policy.json`.
 
 If a DVN provider is missing on the chain, the resolver throws — **do not
 deploy** until all four are live (this is the hard security gate).

@@ -10,6 +10,8 @@
     "oftImpl": "0x08DB0DB9b5F2dcbBFDc26FF411FB2026e81DA748",
     "proxyAdmin": "0x373ea3AEC25eB652ACa38504254eCD5459da6d19",
     "timelock": "0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6",
+    "controllerSafe": "0x7a00657a45420044bc526B90Ad667aFfaee0A868",
+    "deployer": "0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150",
     "create3Factory": "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed"
   },
   "controllerSafe": {

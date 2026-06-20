@@ -22,7 +22,7 @@ When the user says "deploy weETH to <chain>" (or similar), do this **before any 
 - **RPC** in `.env` as `<CHAIN>_MAINNET_RPC_URL` (API keys stay out of git).
 - **Explorer + API key** for verification — Blockscout base URL + `<CHAIN>_API_KEY`.
 - **Peer allow-list** — which existing chains it bridges with (e.g. Eth/Base/OP) and the per-pathway rate limit (default **1000 weETH / 4h**). Hand-added to `registry/chains.json`.
-- **Controller Safe** (default canonical `0x7a00657a…`) and **deployer** Ledger (`0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150`).
+- **Controller Safe** — **always** the canonical `0x7a00657a45420044bc526B90Ad667aFfaee0A868` (deployed deterministically on each chain via `DeployControllerSafe`; do **not** vary it per chain). **Deployer** — recommended Ledger `0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150` (`policy.json` → `canonical.deployer`). Both live in `registry/policy.json` → `canonical`.
 
 **2. Confirm the deployer Ledger is ready (broadcasts can't sign otherwise):**
 - Connected and **unlocked**, **Ethereum app open**, with **Ledger Live / other wallet apps closed** (they grab the USB → "device not found").
@@ -53,7 +53,7 @@ Runs pre-flight (CreateX present, OFT address free, deployer gas) + the full
 Pass `rpcUrl` if the chain's RPC isn't in the registry / `.env`.
 
 ## Full flow (each step; pause for the human at signing/funding)
-1. **Registry entry:** `node tools/resolve-chain.mjs <chainKey> --rpc <url>` → resolves endpoint, 302 libs, 4 sorted DVNs into `registry/chains.json`. Then hand-add the peer allow-list (`peerEids`/`peerOfts`/`peerLimits`/`peerWindows`) and `CONTROLLER_SAFE`. Policy in `registry/policy.json`.
+1. **Registry entry:** `node tools/resolve-chain.mjs <chainKey> --rpc <url>` → resolves endpoint, 302 libs, 4 sorted DVNs into `registry/chains.json`. Then hand-add the peer allow-list (`peerEids`/`peerOfts`/`peerLimits`/`peerWindows`). Set `CONTROLLER_SAFE` to the canonical `0x7a00657a…` (same on every chain — copy from `policy.json` → `canonical.controllerSafe`); set `OFT`/`OFT_IMPL`/`PROXY_ADMIN`/`TIMELOCK` to the canonical CREATE3 addresses. Policy in `registry/policy.json`.
 2. **Load check:** `TARGET_CHAIN=<chainKey> forge test --match-contract TargetLoaderTest -vvv`.
 3. **Dry run:** the script above. Must end `Script ran successfully`.
 4. **Deploy OFT + config (Ledger):**
