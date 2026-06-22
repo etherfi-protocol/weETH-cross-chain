@@ -132,7 +132,10 @@ function peerInnerCalls(nc, peer) {
 
   // 4-of-4 DVN ULN config (delegate) on send + receive libs — uses this chain's own DVN set
   const dvns = `[${peer.LZ_DVN.join(",")}]`;
-  const uln = abiEncode("f(uint64,uint8,uint8,uint8,address[],address[])", ULN_CONFIRMATIONS, "4", "0", "0", dvns, "[]");
+  // UlnConfig is a dynamic struct -> the lib does abi.decode(config,(UlnConfig)),
+  // which expects a single-struct encoding WITH a leading 0x20 offset. Encode it
+  // as a tuple type, NOT 6 flat params (flat omits the offset -> setConfig reverts).
+  const uln = abiEncode("f((uint64,uint8,uint8,uint8,address[],address[]))", `(${ULN_CONFIRMATIONS},4,0,0,${dvns},[])`);
   calls.push({to: endpoint, value: "0", data: calldata("setConfig(address,address,(uint32,uint32,bytes)[])", peerOft, peer.SEND_302, `[(${eid},2,${uln})]`), desc: `endpoint.setConfig(SEND lib, ${eid}, 4-of-4 DVN @ ${ULN_CONFIRMATIONS})`});
   calls.push({to: endpoint, value: "0", data: calldata("setConfig(address,address,(uint32,uint32,bytes)[])", peerOft, peer.RECEIVE_302, `[(${eid},2,${uln})]`), desc: `endpoint.setConfig(RECEIVE lib, ${eid}, 4-of-4 DVN @ ${ULN_CONFIRMATIONS})`});
 
@@ -300,7 +303,10 @@ function main() {
     const relJson = subdir ? `./queued/${id}/${subdir}/${leaf}.json` : `./queued/${id}/${leaf}.json`;
     mkdirSync(folder, {recursive: true});
     writeFileSync(resolve(folder, `${leaf}.json`), JSON.stringify(bundle, null, 2) + "\n");
-    writeFileSync(resolve(folder, `${leaf}.md`), renderMd(p, id, nonce, multisend, args.chain, relJson));
+    // peer proposals live on the PEER chain, not the new chain — use the peer key
+    // for the verify --network (else it emits the wrong/unknown network).
+    const netKey = type === "peer" ? args.peer : args.chain;
+    writeFileSync(resolve(folder, `${leaf}.md`), renderMd(p, id, nonce, multisend, netKey, relJson));
 
     console.log(`#${id}${subdir ? `/${leaf}` : ""}  ${p.label}`);
     console.log(`      Safe ${p.safe} nonce ${nonce}  (${p.transactions.length} tx)`);
