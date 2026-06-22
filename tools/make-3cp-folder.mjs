@@ -19,7 +19,9 @@
 //   node tools/make-3cp-folder.mjs --type safe-migration --chain <key>            [--out repo]
 //   node tools/make-3cp-folder.mjs --type peer --chain <newKey> --peer <peerKey> --rpc <peerRpc> [--out repo]
 //
-// Defaults: --out $CP3_REPO or ../../3CP-secure ; --multisend 0xA238CB…7761
+// Defaults: --out $CP3_REPO or ../../3CP-secure ; multisend auto-resolved from the Safe's
+// version via --rpc (MultiSendCallOnly, e.g. 0xA1dabEF3… for 1.3.0). Single-tx leaves are
+// hashed as a direct call (operation 0) — no MultiSend. Override with --multisend.
 
 import {readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync} from "node:fs";
 import {dirname, resolve} from "node:path";
@@ -63,14 +65,19 @@ const hasCode = (addr, rpc) => {
     return false;
   }
 };
-// Pick the MultiSendCallOnly that's actually deployed on this chain — that's the one
-// Safe{Wallet} wraps the batch with, so build_multisend.sh produces the hash signers sign.
-// Falls back to the eip155 deployment when no RPC is available to check.
-const resolveMultiSend = (rpc) => {
+// MultiSendCallOnly per Safe version — Safe{Wallet} wraps a batch with the MultiSendCallOnly
+// matching THIS Safe's version, so the generated safeTxHash equals what signers sign. Read
+// VERSION() off the Safe, then pick the candidate that's actually deployed on the chain.
+const MSCO_BY_VERSION = {
+  "1.3.0": ["0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B", "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D"],
+  "1.4.1": ["0x9641d764fc13c8B624c04430C7356C1C7C8102e2"],
+};
+const safeVersion = (safe, rpc) => (callView(safe, "VERSION()(string)", rpc) || "").replace(/"/g, "").trim();
+const resolveMultiSend = (safe, rpc) => {
   if (!rpc) return MULTISEND_CALL_ONLY;
-  if (hasCode(MULTISEND_CALL_ONLY, rpc)) return MULTISEND_CALL_ONLY;
-  if (hasCode(MULTISEND_CALL_ONLY_CANONICAL, rpc)) return MULTISEND_CALL_ONLY_CANONICAL;
-  return MULTISEND_CALL_ONLY;
+  const candidates = MSCO_BY_VERSION[safeVersion(safe, rpc)] || [MULTISEND_CALL_ONLY, MULTISEND_CALL_ONLY_CANONICAL];
+  for (const c of candidates) if (hasCode(c, rpc)) return c;
+  return candidates[0];
 };
 
 function loadRegistry() {
@@ -260,10 +267,21 @@ ${p.lines.join("\n")}
 
 ## Verify
 
+${p.transactions.length === 1
+  ? `> Single transaction → Safe{Wallet} proposes it as a **direct call (operation 0)**, NOT MultiSend-wrapped.
+
+\`\`\`bash
+TO=$(jq -r '.transactions[0].to' ${jsonPath})
+DATA=$(jq -r '.transactions[0].data' ${jsonPath})
+./safe_hashes.sh --offline --network ${chainKey} --address ${p.safe.toLowerCase()} \\
+  --to "$TO" --data "$DATA" --nonce ${nonce} --operation 0 --safe-version 1.3.0
+\`\`\``
+  : `> Multi-call batch → MultiSendCallOnly (operation 1). \`${multisend}\` is the MultiSendCallOnly matching this Safe's version (confirm it's the \`to\` your Safe app calls).
+
 \`\`\`bash
 ./build_multisend.sh ${jsonPath} ${p.safe.toLowerCase()} \\
   --network ${chainKey} --multisend ${multisend} --nonce ${nonce}
-\`\`\`
+\`\`\``}
 `;
 }
 
@@ -303,7 +321,6 @@ function main() {
   const {ids: prIds, prs, ok: ghOk} = openPrFolders();
   const claimed = new Set([...localFolders(outRepo), ...prIds]);
   let id = args.id !== undefined ? Number(args.id) : (claimed.size ? Math.max(...claimed) + 1 : 1);
-  const multisend = args.multisend || resolveMultiSend(args.rpc);
   // Batch mode: --subdir <chain> puts this chain's proposal(s) inside a shared
   // proposal number as a subfolder (queued/<id>/<subdir>/<leaf>.{json,md}), so a
   // multi-chain batch lives under ONE number in ONE PR. Pass the same --id for
@@ -316,6 +333,9 @@ function main() {
     if (!subdir) { while (claimed.has(id)) id++; claimed.add(id); }
     const nonce =
       args.nonce !== undefined ? Number(args.nonce) : args.rpc ? readSafeNonce(p.safe, args.rpc) : 0;
+    // Per-Safe MultiSendCallOnly (version-matched) for multi-call leaves; single-tx leaves
+    // are hashed as a direct call (operation 0) by renderMd regardless.
+    const multisend = args.multisend || resolveMultiSend(p.safe, args.rpc);
     const bundle = {chainId: p.chainId, safeAddress: p.safe.toLowerCase(), meta: {txBuilderVersion: "1.16.5"}, transactions: p.transactions};
     const leaf = subdir
       ? (proposals.length > 1 ? `${subdir}-${leafSuffix(p.label, k)}` : subdir)

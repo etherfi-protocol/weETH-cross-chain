@@ -96,20 +96,38 @@ compute the Safe-1.3.0 EIP-712 hash with `cast` and validate the domain against
 the Safe's on-chain `domainSeparator()`), and append a `## Hashes` table (+ Safe-app
 link where the chain is on the Safe UI) to that leaf's md.
 
-### MultiSend address — must match what Safe{Wallet} uses (or hashes won't match)
-A multi-call batch's `safeTxHash` depends on the **MultiSend `to` address**. Safe{Wallet}
-wraps batches with **MultiSendCallOnly** — and on most chains that's the eip155 /
-Safe-Singleton-Factory deployment **`0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B`**, NOT the
-plain MultiSend `0xA238CBeb…` (which allows sub-call `delegatecall`). Using the wrong one
-yields a hash the signer never sees (same domain hash, different message/safeTx hash).
+### Hashing: single-tx → direct call; multi-tx → the Safe's MultiSendCallOnly
+The `safeTxHash` depends on `to` + `operation`, and these differ by **how many txns** the
+leaf has — get this wrong and the hash won't match what the signer sees (same domain hash,
+different message/safeTx hash):
 
-**Check which MultiSend the Safe actually uses, per chain, and hash against that:**
-`make-3cp-folder.mjs` does this automatically — with `--rpc` it calls `resolveMultiSend()`,
-which picks the MultiSendCallOnly that's **deployed on that chain** (prefers
-`0xA1dabEF3…`, falls back to the canonical `0x40A2aCCb…`) and puts it in the verify command.
-Confirm by reproducing in the Safe **Transaction Builder** / a Tenderly Safe simulation —
-the `to` it calls is the MultiSend to hash against. (Verified: base/op/eth/robinhood all use
-`0xA1dabEF3…`.)
+- **1 transaction** → Safe{Wallet} proposes it as a **direct call (`operation 0`, `to` = the
+  target)** — NOT MultiSend-wrapped. Hash with `safe_hashes.sh --to <to> --data <data>
+  --operation 0`. (The eth `scheduleBatch` / `executeBatch` and single-transfer leaves are this.)
+- **2+ transactions** → wrapped in **MultiSendCallOnly** (`operation 1`, `to` = the MultiSend).
+  Hash with `build_multisend.sh --multisend <addr>`.
+
+**The MultiSend address is per-Safe, keyed to the Safe's version** (read `VERSION()` off the
+Safe). Safe{Wallet} uses the MultiSendCallOnly for that version — for **1.3.0** that's the
+eip155/Singleton-Factory **`0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B`** (fallback canonical
+`0x40A2aCCb…`); for **1.4.1** it's **`0x9641d764…`**. NEVER the plain MultiSend `0xA238CBeb…`
+(allows sub-call `delegatecall`).
+
+`make-3cp-folder.mjs` does all of this automatically with `--rpc`: `resolveMultiSend(safe,rpc)`
+reads the Safe version and picks the deployed MultiSendCallOnly, and the emitted verify command
+is the **direct** form for single-tx leaves and the **MultiSend** form for batches. Always
+confirm against a **Tenderly Safe simulation / Transaction Builder** — the `to`/`operation` it
+shows is what to hash against. (Verified: base/op/eth/robinhood Safes are 1.3.0 → `0xA1dabEF3…`.)
+
+### Chains with no Safe web UI (e.g. Robinhood/4663) — sign on-chain
+If the chain isn't on app.safe.global, owners can't sign in the UI. Document the on-chain
+flow in the leaf md + PR body: (1) each of ≥threshold owners runs
+`cast send <safe> "approveHash(bytes32)" <safeTxHash> --ledger --sender <owner>` from their
+own key; verify with `approvedHashes(address,bytes32)`; (2) anyone runs `execTransaction(...)`
+with `to`/`operation`/`data` = the leaf's tx (MultiSendCallOnly + op 1 for batches, or the
+direct target + op 0 for single-tx) and a `signatures` blob of **pre-approved** entries (one
+per approver, sorted by owner address ascending: `owner` left-padded to 32 bytes ‖ 32 zero
+bytes ‖ `01`). See `queued/574/safe-migration/safe-migration.md` for a worked example.
 
 Batch generation: pass `--id <sharedNum> --subdir <chain>` per chain so they all
 land under one number as subfolders, e.g.
