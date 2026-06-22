@@ -96,6 +96,21 @@ compute the Safe-1.3.0 EIP-712 hash with `cast` and validate the domain against
 the Safe's on-chain `domainSeparator()`), and append a `## Hashes` table (+ Safe-app
 link where the chain is on the Safe UI) to that leaf's md.
 
+### MultiSend address — must match what Safe{Wallet} uses (or hashes won't match)
+A multi-call batch's `safeTxHash` depends on the **MultiSend `to` address**. Safe{Wallet}
+wraps batches with **MultiSendCallOnly** — and on most chains that's the eip155 /
+Safe-Singleton-Factory deployment **`0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B`**, NOT the
+plain MultiSend `0xA238CBeb…` (which allows sub-call `delegatecall`). Using the wrong one
+yields a hash the signer never sees (same domain hash, different message/safeTx hash).
+
+**Check which MultiSend the Safe actually uses, per chain, and hash against that:**
+`make-3cp-folder.mjs` does this automatically — with `--rpc` it calls `resolveMultiSend()`,
+which picks the MultiSendCallOnly that's **deployed on that chain** (prefers
+`0xA1dabEF3…`, falls back to the canonical `0x40A2aCCb…`) and puts it in the verify command.
+Confirm by reproducing in the Safe **Transaction Builder** / a Tenderly Safe simulation —
+the `to` it calls is the MultiSend to hash against. (Verified: base/op/eth/robinhood all use
+`0xA1dabEF3…`.)
+
 Batch generation: pass `--id <sharedNum> --subdir <chain>` per chain so they all
 land under one number as subfolders, e.g.
 `node tools/make-3cp-folder.mjs --type peer --chain robinhood --peer base --rpc <url> --nonce <n> --id 580 --subdir base --out <3CP>`
@@ -118,7 +133,20 @@ node tools/verify-safe-blockscout.mjs --safe <safe> --singleton <singleton> \
 ```
 Verify **all** deployed contracts (4 OFT contracts + the Safe) before considering a deploy done.
 
+## Deprecated chains — skip for mesh-wide operations
+These chains are **deprecated**; exclude them from mesh-wide actions (reverse-peer
+wiring, governance/Safe unification, ownership→timelock migrations) unless explicitly
+told otherwise:
+
+**Scroll, Swell, Berachain, zkSync, Mode, Blast, Morph, Sonic, Stable.**
+
+(zkSync is also structurally special — its canonical timelock address isn't deployed
+under Era's different address derivation.) When onboarding a new chain, wire peers only
+with the **live** peers in the allow-list; never add a deprecated chain as a new peer.
+
 ## Common mistakes
 - Broadcasting from the Ledger account with 0 gas → "insufficient funds". Fund it first.
+- **"Ledger device not found"** → device locked, Ethereum app not open, or Ledger Live /
+  another wallet is holding the USB. Unlock, open the Ethereum app, close other wallet apps.
 - Hardcoding one rate limit for all peers — limits are per-pathway from the registry `peerLimits`/`peerWindows` (same 1000/4h for the current peers, but kept per-chain).
 - `OwnableUnauthorizedAccount` in the dry run → you omitted `--sender <deployer>` (the dry-run script sets it).

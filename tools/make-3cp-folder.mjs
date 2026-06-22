@@ -27,7 +27,12 @@ import {fileURLToPath} from "node:url";
 import {execFileSync} from "node:child_process";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const MULTISEND_CALL_ONLY = "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761";
+// MultiSendCallOnly 1.3.0 — the contract Safe{Wallet} actually wraps batches with, so the
+// generated safeTxHash matches what signers sign. Two canonical deployments exist; the app
+// uses whichever is deployed on the chain (resolveMultiSend picks it from --rpc). Do NOT use
+// the plain MultiSend 0xA238CBeb… — it allows sub-call delegatecall and yields a different hash.
+const MULTISEND_CALL_ONLY = "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B"; // eip155 / Safe Singleton Factory
+const MULTISEND_CALL_ONLY_CANONICAL = "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D"; // Nick-factory variant
 const GH_REPO = process.env.CP3_GH_REPO || "etherfi-protocol/3CP-secure";
 const ZERO32 = "0x" + "0".repeat(64);
 const DEFAULT_DELAY = 172800; // 2 days, fallback if timelock minDelay is unreadable
@@ -50,6 +55,22 @@ const callView = (to, sig, rpc, ...args) => {
   } catch {
     return null;
   }
+};
+const hasCode = (addr, rpc) => {
+  try {
+    return cast(["code", addr, "--rpc-url", rpc]).replace(/^0x/, "").length > 0;
+  } catch {
+    return false;
+  }
+};
+// Pick the MultiSendCallOnly that's actually deployed on this chain — that's the one
+// Safe{Wallet} wraps the batch with, so build_multisend.sh produces the hash signers sign.
+// Falls back to the eip155 deployment when no RPC is available to check.
+const resolveMultiSend = (rpc) => {
+  if (!rpc) return MULTISEND_CALL_ONLY;
+  if (hasCode(MULTISEND_CALL_ONLY, rpc)) return MULTISEND_CALL_ONLY;
+  if (hasCode(MULTISEND_CALL_ONLY_CANONICAL, rpc)) return MULTISEND_CALL_ONLY_CANONICAL;
+  return MULTISEND_CALL_ONLY;
 };
 
 function loadRegistry() {
@@ -282,7 +303,7 @@ function main() {
   const {ids: prIds, prs, ok: ghOk} = openPrFolders();
   const claimed = new Set([...localFolders(outRepo), ...prIds]);
   let id = args.id !== undefined ? Number(args.id) : (claimed.size ? Math.max(...claimed) + 1 : 1);
-  const multisend = args.multisend || MULTISEND_CALL_ONLY;
+  const multisend = args.multisend || resolveMultiSend(args.rpc);
   // Batch mode: --subdir <chain> puts this chain's proposal(s) inside a shared
   // proposal number as a subfolder (queued/<id>/<subdir>/<leaf>.{json,md}), so a
   // multi-chain batch lives under ONE number in ONE PR. Pass the same --id for
