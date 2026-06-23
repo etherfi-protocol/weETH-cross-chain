@@ -181,7 +181,7 @@ function checkAuthority(c, rpc) {
   return {title: "2. Ownership & authority (all config rights → timelock)", rows: r};
 }
 
-function checkTimelock(c, rpc) {
+function checkTimelock(c, rpc, policy) {
   const r = [];
   const safe = c.CONTROLLER_SAFE;
   const delay = word(call(c.TIMELOCK, "getMinDelay()(uint256)", rpc));
@@ -192,6 +192,17 @@ function checkTimelock(c, rpc) {
     r.push(row(`Safe holds ${name}_ROLE`, "true", has, has === "true" ? true : has === "false" ? false : null,
       `cast call ${c.TIMELOCK} 'hasRole(bytes32,address)(bool)' ${id} ${safe} --rpc-url $RPC`));
   }
+  // Backdoor spot-check: the deployer EOA must hold NONE of the timelock roles. (EtherFiTimelock
+  // is plain AccessControl, not Enumerable — `getRoleMember` reverts — so detecting *unknown*
+  // extra holders needs a RoleGranted event scan in the drift monitor; this catches the most
+  // likely leftover: the deployer never renounced.)
+  const deployer = policy.canonical.deployer;
+  let held = false;
+  for (const id of Object.values(ROLES)) if (word(call(c.TIMELOCK, "hasRole(bytes32,address)(bool)", rpc, id, deployer)) === "true") held = true;
+  r.push(row("deployer EOA holds NO timelock role", "false (no backdoor)", held ? "HOLDS A ROLE" : "none", held ? false : true,
+    `cast call ${c.TIMELOCK} 'hasRole(bytes32,address)(bool)' <PROPOSER|EXECUTOR|CANCELLER> ${deployer} --rpc-url $RPC`));
+  r.push(row("full extra-holder audit (RoleGranted scan)", "no unexpected grants", "scan off-chain", null,
+    `# timelock is non-enumerable — scan RoleGranted/RoleRevoked logs in the drift monitor`));
   return {title: "3. Timelock roles (controller Safe = proposer/executor/canceller)", rows: r};
 }
 
@@ -288,7 +299,7 @@ function main() {
   const sections = [
     checkDeployment(c, rpc, policy),
     checkAuthority(c, rpc),
-    checkTimelock(c, rpc),
+    checkTimelock(c, rpc, policy),
     checkSafe(c, rpc, policy),
   ];
   // Target-side pathways

@@ -325,6 +325,47 @@ function leafSuffix(label, idx) {
   return m ? m[1].toLowerCase() : String(idx + 1);
 }
 
+// Canonical-address lint — refuse to emit a proposal whose calls touch a non-canonical
+// address. A wrong/attacker setPeer target, a stray DVN, or an ownership handoff to the
+// wrong timelock reads as plausible calldata to a human reviewer; this fails the build
+// instead. Sources of truth: registry/chains.json (per-chain) + policy.json (canonical).
+const isAddr = (a) => /^0x[0-9a-fA-F]{40}$/.test(a || "");
+function assertCanonical(type, chain, peerC, proposals, policy) {
+  const errs = [];
+  const msco = new Set(Object.values(MSCO_BY_VERSION).flat().map((a) => a.toLowerCase()));
+  const known = new Set();
+  for (const k of [chain, peerC]) {
+    if (!k) continue;
+    for (const a of [k.OFT, k.L2_ENDPOINT, k.TIMELOCK, k.CONTROLLER_SAFE]) if (a) known.add(a.toLowerCase());
+  }
+  for (const p of proposals) for (const t of p.transactions) {
+    const to = (t.to || "").toLowerCase();
+    if (!isAddr(to)) errs.push(`tx.to is not an address: ${t.to}`);
+    else if (!known.has(to) && !msco.has(to)) errs.push(`tx.to ${t.to} is not a known OFT/endpoint/timelock/Safe/MultiSend for this proposal`);
+  }
+  if (type === "handoff" && String(chain.CHAIN_ID) !== "1" &&
+      chain.TIMELOCK.toLowerCase() !== policy.canonical.timelock.toLowerCase()) {
+    errs.push(`handoff target timelock ${chain.TIMELOCK} != canonical ${policy.canonical.timelock}`);
+  }
+  if (type === "safe-migration" && chain.CONTROLLER_SAFE.toLowerCase() !== policy.canonical.controllerSafe.toLowerCase()) {
+    errs.push(`controller Safe ${chain.CONTROLLER_SAFE} != canonical ${policy.canonical.controllerSafe}`);
+  }
+  if (type === "peer") {
+    const dvns = (peerC.LZ_DVN || []).map((d) => (d || "").toLowerCase());
+    if (dvns.length !== policy.requiredDVNCount) errs.push(`${peerC.NAME}: ${dvns.length} DVNs, expected ${policy.requiredDVNCount}`);
+    if (!dvns.every(isAddr)) errs.push(`${peerC.NAME}: a DVN is not an address`);
+    if (new Set(dvns).size !== dvns.length) errs.push(`${peerC.NAME}: DVNs not unique`);
+    if (JSON.stringify(dvns) !== JSON.stringify([...dvns].sort())) errs.push(`${peerC.NAME}: DVNs not sorted ascending`);
+    if (!isAddr(peerC.SEND_302) || !isAddr(peerC.RECEIVE_302)) errs.push(`${peerC.NAME}: missing 302 libraries`);
+    if (!isAddr(chain.OFT)) errs.push(`${chain.NAME}: peer OFT (setPeer target) missing/invalid`);
+  }
+  if (errs.length) {
+    console.error("CANONICAL LINT FAILED — refusing to write non-canonical proposal:");
+    for (const e of errs) console.error(`  - ${e}`);
+    process.exit(1);
+  }
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const type = args.type || "handoff";
@@ -333,6 +374,7 @@ function main() {
   const c = requireChain(reg, args.chain);
 
   let proposals;
+  let peerC = null;
   if (type === "handoff") proposals = buildHandoff(c);
   else if (type === "safe-migration") proposals = buildSafeMigration(c, policy);
   else if (type === "peer") {
@@ -340,11 +382,15 @@ function main() {
       console.error("error: --peer <peerKey> is required for --type peer");
       process.exit(1);
     }
-    proposals = buildPeer(c, requireChain(reg, args.peer), policy, args);
+    peerC = requireChain(reg, args.peer);
+    proposals = buildPeer(c, peerC, policy, args);
   } else {
     console.error(`error: unknown --type "${type}" (handoff | safe-migration | peer)`);
     process.exit(1);
   }
+  // Refuse to write a proposal that touches a non-canonical address (wrong peer, stray DVN,
+  // handoff to a non-canonical timelock, etc.) — a build-time gate, not a reviewer's eyeball.
+  assertCanonical(type, c, peerC, proposals, policy);
 
   const outRepo = args.out || process.env.CP3_REPO || resolve(REPO_ROOT, "../../3CP-secure");
   if (!existsSync(outRepo)) {

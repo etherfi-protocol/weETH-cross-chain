@@ -73,9 +73,9 @@ Pass `rpcUrl` if the chain's RPC isn't in the registry / `.env`.
    → OFT owner, ProxyAdmin owner, **and LZ delegate all → timelock**; pauser = EOA, unpauser = Safe. (The Safe from step 5 must exist — it becomes unpauser + timelock proposer/executor.) `make-3cp-folder --type handoff` is only for migrating chains *already* Safe-owned.
 7. **Verify roles/config on-chain:** `TARGET_CHAIN=<chainKey> forge script scripts/oft-deployment/04_OFTVerification.s.sol:verifyOFT` — owner/proxyAdmin/**delegate all == timelock**, pauser == EOA, unpauser == Safe, DVN 4-of-4@45, limits. (Needs the registry to carry the chain's RPC; for Robinhood the API key is scrubbed, so spot-check with `cast` instead.)
 8. **Verify all deployed contracts on the explorer** (do this for every deploy — see Contract verification below).
-9. **Reverse-peer wiring (3CP):** one proposal per peer chain (Eth/Base/OP) — `setPeer` + rate limit + **4-of-4 DVN@45 + enforced options + pinned message libraries** for the new EID. Without the DVN config the inbound side falls back to the chain's **1-DVN default** — always include it. **Pin the libraries too** (`setSendLibrary` / `setReceiveLibrary` to the 302 libs): a pathway left on the LayerZero **default** lib silently follows a LZ default-library rotation with no governance action on our side. `node tools/make-3cp-folder.mjs --type peer --chain <chainKey> --peer <eth|base|optimism> --rpc <peerRpc> --out <3CP>`. **`--rpc` is required for the lib pin** — the tool reads `isDefaultSendLibrary`/`getReceiveLibrary` off a live fork and emits a pin **only where the pathway is still on the default** (a blind pin reverts `LZ_SameValue`; see gotchas). Routing auto-detected: Safe-owned → direct; timelock-owned (L1) → schedule+execute pair.
+9. **Reverse-peer wiring (3CP):** one proposal per peer chain (Eth/Base/OP) — `setPeer` + rate limit + **4-of-4 DVN@45 + enforced options + pinned message libraries** for the new EID. Without the DVN config the inbound side falls back to the chain's **1-DVN default** — always include it. **Pin the libraries too** (`setSendLibrary` / `setReceiveLibrary` to the 302 libs): a pathway left on the LayerZero **default** lib silently follows a LZ default-library rotation with no governance action on our side. `node tools/make-3cp-folder.mjs --type peer --chain <chainKey> --peer <eth|base|optimism> --rpc <peerRpc> --out <3CP>`. **`--rpc` is required for the lib pin** — the tool reads `isDefaultSendLibrary`/`getReceiveLibrary` off a live fork and emits a pin **only where the pathway is still on the default** (a blind pin reverts `LZ_SameValue`; see gotchas). Routing auto-detected: Safe-owned → direct; timelock-owned (L1) → schedule+execute pair. The tool runs a **canonical-address lint** before writing (see "Further hardening") and refuses to emit a proposal that touches a non-canonical address.
 10. **Safe migration 2-of-5 → 4-of-7 (3CP, last):** `node tools/make-3cp-folder.mjs --type safe-migration --chain <chainKey> --out <3CP>` — signed by the original owners.
-11. **Verification report (reviewer artifact):** `node tools/verify-deployment.mjs --chain <chainKey>` → writes `output/verify-<chainKey>.md`. A point-in-time on-chain snapshot with ✅/❌/⚠️ per check (deployment + canonical addresses, ownership/delegate → timelock, timelock roles, controller Safe composition, per-pathway peers/limits/enforced-options/DVN on the new chain **and** the reverse-peer acceptance on each peer), each with the `cast` command to re-run it and explorer/Safe/doc links. RPCs resolve from `--rpc`/`--peer-rpc key=url`, else `.env` `<KEY>_MAINNET_RPC_URL`, else an Alchemy URL built from `ALCHEMY_API_KEY` (eth/base/op) — the key never enters the report. Run it twice: right after deploy (peer-side + Safe-migration checks read ❌ = **pending** until the 3CPs execute), then again after the proposals land (they should flip to ✅). For pauser/unpauser (role-registry indices, not enumerable via `cast`) it points to the forge verifier in step 7.
+11. **Verification report (reviewer artifact):** `node tools/verify-deployment.mjs --chain <chainKey>` → writes `output/verify-<chainKey>.md`. A point-in-time on-chain snapshot with ✅/❌/⚠️ per check (deployment + canonical addresses, ownership/delegate → timelock, timelock roles, controller Safe composition, per-pathway peers/limits/enforced-options/DVN on the new chain **and** the reverse-peer acceptance on each peer), each with the `cast` command to re-run it and explorer/Safe/doc links. RPCs resolve from `--rpc`/`--peer-rpc key=url`, else `.env` `<KEY>_MAINNET_RPC_URL`, else an Alchemy URL built from `ALCHEMY_API_KEY` (eth/base/op) — the key never enters the report. Run it twice: right after deploy (peer-side + Safe-migration checks read ❌ = **pending** until the 3CPs execute), then again after the proposals land (they should flip to ✅). For pauser/unpauser (role-registry indices, not enumerable via `cast`) it points to the forge verifier in step 7. It also spot-checks that the **deployer EOA holds no timelock role** (backdoor check); full extra-holder detection needs a `RoleGranted` event scan (see "Further hardening").
 
 ## 3CP PRs — ONE PR, ONE number, per-chain subfolders
 A multi-chain batch (reverse-peer for Eth+Base+OP, a schedule+execute pair, etc.)
@@ -191,3 +191,37 @@ hardening/onboarding op. The two that hit cross-chain wiring directly:
 are distinct OApps and are hardened separately; a control applied to one is not applied to the
 other. **Hardening arc / order** (from the playbook): config (DVN) → library pin → quorum (Safe
 4-of-7) → native-mint parity → deprecation/onboarding with the same primitives.
+
+## Further hardening — what's enforced vs pending
+Full backlog + threat mapping: `audit/oft-hardening-backlog.md`.
+
+**Enforced by the tooling now:**
+- **Canonical-address lint (`make-3cp-folder.mjs`).** Before writing any proposal the tool runs
+  `assertCanonical` and **fails the build** if a call touches a non-canonical address — every
+  `tx.to` must be a known OFT/endpoint/timelock/Safe/MultiSend; peer DVNs must be the policy count,
+  unique, sorted, and valid; a handoff target must be the canonical timelock; a safe-migration must
+  target the canonical controller Safe. This is a hard gate, not a reviewer's eyeball — a
+  wrong/attacker `setPeer` target or stray DVN can't be emitted.
+- **Message-library pinning** (step 9) and **deployer-backdoor spot-check** (step 11, below).
+
+**`verify-deployment.mjs` deployer-backdoor check.** The report now asserts the **deployer EOA
+holds none of PROPOSER/EXECUTOR/CANCELLER**. Note: `EtherFiTimelock` is plain `TimelockController`
+(`AccessControl`, **not** `AccessControlEnumerable`) — `getRoleMember` reverts — so detecting
+*unknown* extra role holders requires a **`RoleGranted`/`RoleRevoked` event scan**, which belongs
+in the drift monitor, not a view call.
+
+**Pending (tracked in the backlog) — do these as the mesh matures:**
+- **Executor config (ULN type 1).** We pin DVNs (type 2) + libraries but never the **executor**;
+  every pathway rides the LZ default executor (liveness/censorship + `maxMessageSize` exposure, not
+  authenticity). Pinning needs (a) a per-chain canonical executor in the registry — `resolve-chain`
+  should populate `EXECUTOR` for every chain, today only some carry it — and (b) a call to LZ on
+  whether pinning the executor fits our profile. Until then, treat executor as a **documented
+  known-default**, not a silent gap.
+- **Drift monitor (cron)** + **cross-chain supply invariant** (`Σ L2 totalSupply == L1 locked`) —
+  the point-in-time `verify-deployment` report is the seed; make it `--all` + JSON and schedule it.
+- **Onboarding unprotected-window invariant:** the new chain's *own* receive DVN is set at deploy
+  (`01_OFTConfigure`) but its libraries/executor are **not** pinned there yet — wire no peer to a
+  new chain before its receive side is on the 4-DVN config, and pin its own libs in a follow-up.
+- **Emergency runbook:** pauser-EOA liveness/drill; canceller (Safe) can cancel a malicious
+  scheduled op inside the 48h window; document `endpoint.skip/nilify/burn/clear` for a stuck or
+  poisoned inbound message.
