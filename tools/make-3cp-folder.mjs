@@ -136,7 +136,21 @@ function buildSafeMigration(c, policy) {
 // enforced options) target the OFT; delegate-gated DVN config targets the
 // endpoint. On every current peer owner == delegate, so they share one bundle.
 // The L1 adapter has no pairwise rate limiter, so it skips the limit calls.
-function peerInnerCalls(nc, peer) {
+// True only while the pathway still rides LayerZero's DEFAULT lib. A pin on an
+// already-pinned pathway reverts with LZ_SameValue (bit the 474 ETHFI/EURC batch),
+// so pins MUST be generated from a live fork — never a static list.
+function isDefaultSendLib(endpoint, oapp, eid, rpc) {
+  return callView(endpoint, "isDefaultSendLibrary(address,uint32)(bool)", rpc, oapp, eid) === "true";
+}
+function isDefaultReceiveLib(endpoint, oapp, eid, rpc) {
+  try {
+    return /\btrue\b/.test(cast(["call", endpoint, "getReceiveLibrary(address,uint32)(address,bool)", oapp, eid, "--rpc-url", rpc]));
+  } catch {
+    return false;
+  }
+}
+
+function peerInnerCalls(nc, peer, rpc) {
   const peerOft = peer.OFT.toLowerCase();
   const endpoint = peer.L2_ENDPOINT.toLowerCase();
   const eid = String(nc.L2_EID);
@@ -158,6 +172,26 @@ function peerInnerCalls(nc, peer) {
   const eo = `[(${eid},1,${ENFORCED_OPTS}),(${eid},2,${ENFORCED_OPTS})]`;
   calls.push({to: peerOft, value: "0", data: calldata("setEnforcedOptions((uint32,uint16,bytes)[])", eo), desc: `setEnforcedOptions(${eid}, msgType 1&2, 170k)`});
 
+  // Pin the message libraries for this pathway (delegate). Without this the new EID stays on
+  // LayerZero's DEFAULT 302 lib, so if LZ ever rotates its default the pathway silently follows
+  // it — i.e. the lib under our weETH pathway could change with no governance action on our side.
+  // Emit a pin ONLY where the pathway is still on the default (else setSendLibrary reverts
+  // LZ_SameValue). Requires a live fork; without --rpc skip + warn rather than emit a blind pin.
+  if (!rpc) {
+    console.error(`WARN: no --rpc — skipping message-library pin for ${peer.NAME} eid ${eid}. Pins must be generated from a live fork (a blind pin reverts LZ_SameValue if already pinned). Re-run with --rpc to include them.`);
+  } else {
+    if (isDefaultSendLib(endpoint, peerOft, eid, rpc)) {
+      calls.push({to: endpoint, value: "0", data: calldata("setSendLibrary(address,uint32,address)", peerOft, eid, peer.SEND_302), desc: `endpoint.setSendLibrary(${eid}, SEND_302)`});
+    } else {
+      console.error(`WARN: ${peer.NAME} eid ${eid} send lib already pinned — omitting setSendLibrary (would revert LZ_SameValue).`);
+    }
+    if (isDefaultReceiveLib(endpoint, peerOft, eid, rpc)) {
+      calls.push({to: endpoint, value: "0", data: calldata("setReceiveLibrary(address,uint32,address,uint256)", peerOft, eid, peer.RECEIVE_302, "0"), desc: `endpoint.setReceiveLibrary(${eid}, RECEIVE_302, grace 0)`});
+    } else {
+      console.error(`WARN: ${peer.NAME} eid ${eid} receive lib already pinned — omitting setReceiveLibrary (would revert LZ_SameValue).`);
+    }
+  }
+
   // 4-of-4 DVN ULN config (delegate) on send + receive libs — uses this chain's own DVN set
   const dvns = `[${peer.LZ_DVN.join(",")}]`;
   // UlnConfig is a dynamic struct -> the lib does abi.decode(config,(UlnConfig)),
@@ -171,7 +205,7 @@ function peerInnerCalls(nc, peer) {
 }
 
 function buildPeer(nc, peer, policy, args) {
-  const inner = peerInnerCalls(nc, peer);
+  const inner = peerInnerCalls(nc, peer, args.rpc);
   const owner = args.rpc ? callView(peer.OFT, "owner()(address)", args.rpc) : null;
   const timelockOwned = owner && owner.toLowerCase() === peer.TIMELOCK.toLowerCase();
 

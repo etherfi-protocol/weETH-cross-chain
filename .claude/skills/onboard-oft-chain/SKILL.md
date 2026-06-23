@@ -73,8 +73,9 @@ Pass `rpcUrl` if the chain's RPC isn't in the registry / `.env`.
    → OFT owner, ProxyAdmin owner, **and LZ delegate all → timelock**; pauser = EOA, unpauser = Safe. (The Safe from step 5 must exist — it becomes unpauser + timelock proposer/executor.) `make-3cp-folder --type handoff` is only for migrating chains *already* Safe-owned.
 7. **Verify roles/config on-chain:** `TARGET_CHAIN=<chainKey> forge script scripts/oft-deployment/04_OFTVerification.s.sol:verifyOFT` — owner/proxyAdmin/**delegate all == timelock**, pauser == EOA, unpauser == Safe, DVN 4-of-4@45, limits. (Needs the registry to carry the chain's RPC; for Robinhood the API key is scrubbed, so spot-check with `cast` instead.)
 8. **Verify all deployed contracts on the explorer** (do this for every deploy — see Contract verification below).
-9. **Reverse-peer wiring (3CP):** one proposal per peer chain (Eth/Base/OP) — `setPeer` + rate limit + **4-of-4 DVN@45 + enforced options** for the new EID. Without the DVN config the inbound side falls back to the chain's **1-DVN default** — always include it. `node tools/make-3cp-folder.mjs --type peer --chain <chainKey> --peer <eth|base|optimism> --rpc <peerRpc> --out <3CP>`. Routing auto-detected: Safe-owned → direct; timelock-owned (L1) → schedule+execute pair.
+9. **Reverse-peer wiring (3CP):** one proposal per peer chain (Eth/Base/OP) — `setPeer` + rate limit + **4-of-4 DVN@45 + enforced options + pinned message libraries** for the new EID. Without the DVN config the inbound side falls back to the chain's **1-DVN default** — always include it. **Pin the libraries too** (`setSendLibrary` / `setReceiveLibrary` to the 302 libs): a pathway left on the LayerZero **default** lib silently follows a LZ default-library rotation with no governance action on our side. `node tools/make-3cp-folder.mjs --type peer --chain <chainKey> --peer <eth|base|optimism> --rpc <peerRpc> --out <3CP>`. **`--rpc` is required for the lib pin** — the tool reads `isDefaultSendLibrary`/`getReceiveLibrary` off a live fork and emits a pin **only where the pathway is still on the default** (a blind pin reverts `LZ_SameValue`; see gotchas). Routing auto-detected: Safe-owned → direct; timelock-owned (L1) → schedule+execute pair.
 10. **Safe migration 2-of-5 → 4-of-7 (3CP, last):** `node tools/make-3cp-folder.mjs --type safe-migration --chain <chainKey> --out <3CP>` — signed by the original owners.
+11. **Verification report (reviewer artifact):** `node tools/verify-deployment.mjs --chain <chainKey>` → writes `output/verify-<chainKey>.md`. A point-in-time on-chain snapshot with ✅/❌/⚠️ per check (deployment + canonical addresses, ownership/delegate → timelock, timelock roles, controller Safe composition, per-pathway peers/limits/enforced-options/DVN on the new chain **and** the reverse-peer acceptance on each peer), each with the `cast` command to re-run it and explorer/Safe/doc links. RPCs resolve from `--rpc`/`--peer-rpc key=url`, else `.env` `<KEY>_MAINNET_RPC_URL`, else an Alchemy URL built from `ALCHEMY_API_KEY` (eth/base/op) — the key never enters the report. Run it twice: right after deploy (peer-side + Safe-migration checks read ❌ = **pending** until the 3CPs execute), then again after the proposals land (they should flip to ✅). For pauser/unpauser (role-registry indices, not enumerable via `cast`) it points to the forge verifier in step 7.
 
 ## 3CP PRs — ONE PR, ONE number, per-chain subfolders
 A multi-chain batch (reverse-peer for Eth+Base+OP, a schedule+execute pair, etc.)
@@ -168,3 +169,25 @@ with the **live** peers in the allow-list; never add a deprecated chain as a new
   another wallet is holding the USB. Unlock, open the Ethereum app, close other wallet apps.
 - Hardcoding one rate limit for all peers — limits are per-pathway from the registry `peerLimits`/`peerWindows` (same 1000/4h for the current peers, but kept per-chain).
 - `OwnableUnauthorizedAccount` in the dry run → you omitted `--sender <deployer>` (the dry-run script sets it).
+
+## Recurring gotchas (re-read before queuing any wiring 3CP)
+These have bitten the bridge ops repeatedly — the source-of-truth playbook is
+**protocol-ops `docs/oft-bridge-security-hardening.md`** (PR #55); read it before any new
+hardening/onboarding op. The two that hit cross-chain wiring directly:
+
+1. **DVN `setConfig` ABI offset word.** The `ulnBytes` blob is a *dynamically-encoded*
+   struct — it must lead with the `0x20` offset word (correct blob is **416 B**, the flat-tuple
+   mis-encoding is 384 B). The flat form **hashes cleanly but reverts on decode at execution**.
+   Bit us in 3CP-521 and again in 574. The tool encodes it correctly (`abi-encode
+   "f((uint64,uint8,uint8,uint8,address[],address[]))"`); to verify, decode with an extra paren
+   so `cast` treats it as dynamic: `cast --abi-decode "x()((uint64,uint8,uint8,uint8,address[],address[]))" 0x<inner>`.
+2. **Library pins revert `LZ_SameValue` if already pinned.** Pinning send/receive libs is a
+   real control (T2 — stops the LZ endpoint owner swapping the default lib out from under us),
+   but most live pathways are already pinned. **Always generate pin calls from a live fork and
+   emit only where `isDefaultSendLibrary == true`** — never from a static list. The tool does
+   this (requires `--rpc`); bit the 474 ETHFI/EURC batch when pinned blindly.
+
+**Two separate OApps — don't conflate.** The OFT mesh (this skill) and the native-mint SyncPool
+are distinct OApps and are hardened separately; a control applied to one is not applied to the
+other. **Hardening arc / order** (from the playbook): config (DVN) → library pin → quorum (Safe
+4-of-7) → native-mint parity → deprecation/onboarding with the same primitives.
