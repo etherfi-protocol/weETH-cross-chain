@@ -153,6 +153,91 @@ contract RobinhoodRoundTrip is Test {
     }
 
     // ------------------------------------------------------------------
+    // END-TO-END: replay the EXACT proposed 3CP Safe transactions (schedule -> warp past the
+    // timelock delay -> execute, or direct Safe calls), THEN bridge on the same post-execution
+    // fork. This proves the literal bytes signers approve make every configured pathway work.
+    //
+    // Point PROPOSAL_DIR at the queued/<N> folder (per-chain subfolders):
+    //   PROPOSAL_DIR=/abs/path/3CP-secure/queued/574 \
+    //   ETH_MAINNET_RPC_URL=… BASE_MAINNET_RPC_URL=… OP_MAINNET_RPC_URL=… \
+    //   forge test --match-test testProposalEndToEnd -vv
+    // ------------------------------------------------------------------
+
+    uint256 constant TIMELOCK_DELAY = 172800; // L1 operating timelock minDelay (2 days)
+
+    function testProposalEndToEnd_AllChains() public {
+        string memory dir = vm.envOr("PROPOSAL_DIR", string(""));
+        if (bytes(dir).length == 0) {
+            console.log("SKIP testProposalEndToEnd: set PROPOSAL_DIR to the queued/<N> folder");
+            return;
+        }
+
+        // Base — direct Safe call (OFT owned by the controller Safe).
+        ChainCfg memory b = _base();
+        vm.createSelectFork(b.rpc);
+        _applyDirectProposal(string.concat(dir, "/base/base.json"));
+        _assertBridges(b, "base");
+
+        // Optimism — direct Safe call.
+        ChainCfg memory o = _op();
+        vm.createSelectFork(o.rpc);
+        _applyDirectProposal(string.concat(dir, "/optimism/optimism.json"));
+        _assertBridges(o, "optimism");
+
+        // Ethereum — timelock: scheduleBatch -> warp past delay -> executeBatch.
+        ChainCfg memory e = _eth();
+        vm.createSelectFork(e.rpc);
+        _applyTimelockProposal(
+            string.concat(dir, "/ethereum/ethereum-schedule.json"),
+            string.concat(dir, "/ethereum/ethereum-execute.json")
+        );
+        _assertBridges(e, "ethereum");
+    }
+
+    // Replay every transaction in a Safe-tx-builder JSON, sent by its declared safeAddress.
+    function _applyProposalFile(string memory path) internal {
+        string memory json = vm.readFile(path);
+        address safe = vm.parseJsonAddress(json, ".safeAddress");
+        uint256 i = 0;
+        while (vm.keyExistsJson(json, string.concat(".transactions[", vm.toString(i), "].to"))) {
+            address to = vm.parseJsonAddress(json, string.concat(".transactions[", vm.toString(i), "].to"));
+            bytes memory data = vm.parseJsonBytes(json, string.concat(".transactions[", vm.toString(i), "].data"));
+            vm.prank(safe);
+            (bool ok, bytes memory ret) = to.call(data);
+            if (!ok) {
+                console.log("proposal tx %d reverted in %s", i, path);
+                assembly { revert(add(ret, 0x20), mload(ret)) }
+            }
+            i++;
+        }
+        console.log("   applied %d proposal txns (safe %s)", i, safe);
+    }
+
+    function _applyDirectProposal(string memory path) internal {
+        _applyProposalFile(path);
+    }
+
+    function _applyTimelockProposal(string memory schedulePath, string memory executePath) internal {
+        _applyProposalFile(schedulePath);          // Safe -> timelock.scheduleBatch
+        vm.warp(block.timestamp + TIMELOCK_DELAY + 1);
+        _applyProposalFile(executePath);           // Safe -> timelock.executeBatch (after delay)
+    }
+
+    // After the real proposal executed on this fork: limits are non-zero and the bridge works both ways.
+    function _assertBridges(ChainCfg memory c, string memory label) internal {
+        (,, uint256 inLim,) = PairwiseRateLimiter(c.oft).inboundRateLimits(RH_EID);
+        (,, uint256 outLim,) = PairwiseRateLimiter(c.oft).outboundRateLimits(RH_EID);
+        assertGt(inLim, 0, "inbound limit unset after proposal");
+        assertGt(outLim, 0, "outbound limit unset after proposal");
+
+        _send(c.oft, c.weeth, RH_EID, 1 ether, false);
+        _send(c.oft, c.weeth, RH_EID, inLim + 1 ether, true);
+        _deliver(c.oft, c.weeth, c.endpoint, RH_EID, RH_OFT, 1 ether, false);
+        _deliver(c.oft, c.weeth, c.endpoint, RH_EID, RH_OFT, inLim + 1 ether, true);
+        console.log("   ok (post-proposal): %s <-> Robinhood both ways; over-limit reverts", label);
+    }
+
+    // ------------------------------------------------------------------
     // Core round-trip on an existing chain's fork
     // ------------------------------------------------------------------
 

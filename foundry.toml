@@ -4,7 +4,12 @@ evm_version = "shanghai"
 out = "out"
 libs = ["node_modules", "lib"]
 test = "test"
-fs_permissions = [{ access = "read-write", path = "./"}]
+fs_permissions = [
+    { access = "read-write", path = "./" },
+    # read-only access to sibling repos so tests can replay the exact 3CP proposal JSONs
+    # (PROPOSAL_DIR points at 3CP-secure/queued/<N>); only used when that env var is set.
+    { access = "read", path = "../.." },
+]
 
 optimizer = true
 optimizer_runs = 200
