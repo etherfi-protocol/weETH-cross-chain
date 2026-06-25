@@ -156,7 +156,19 @@ OZ contracts (proxy, ProxyAdmin) must use the **bare name** (`TransparentUpgrade
 node tools/verify-safe-blockscout.mjs --safe <safe> --singleton <singleton> \
   --explorer https://8crv4vmq6tiu1yqr.blockscout.com/api/ --apikey "$ROBINHOOD_API_KEY"
 ```
-Verify **all** deployed contracts (4 OFT contracts + the Safe) before considering a deploy done.
+**Safe singleton / master copy** (`GnosisSafeL2` 1.3.0 `0xfb1bffC9…`): the proxy is a thin
+delegatecall to this — **verifying the proxy alone is NOT enough**; until the singleton is
+verified Blockscout won't surface the Safe's `approveHash`/`execTransaction` under "Write as
+Proxy", which blocks on-chain signing via the explorer. It's multi-file solc 0.7.6, so rebuild
+the exact standard-json from Sourcify (perfect-match source set) and submit:
+```bash
+ROBINHOOD_API_KEY=… node tools/verify-safe-singleton-blockscout.mjs \
+  --singleton 0xfb1bffC9d739B8D520DaF37dF666da4C687191EA \
+  --explorer https://8crv4vmq6tiu1yqr.blockscout.com/api/
+```
+Verify **all** deployed contracts before considering a deploy done: the 4 OFT contracts, the
+controller Safe **proxy**, *and* the Safe **singleton** (6 total). Signing via `cast approveHash`
+works without any of this — explorer verification is for the UI + transparency.
 
 ## Deprecated chains — skip for mesh-wide operations
 These chains are **deprecated**; exclude them from mesh-wide actions (reverse-peer
