@@ -159,14 +159,16 @@ function peerInnerCalls(nc, peer, rpc) {
   // setPeer (owner)
   calls.push({to: peerOft, value: "0", data: calldata("setPeer(uint32,bytes32)", eid, toBytes32(nc.OFT)), desc: `setPeer(${eid}, ${nc.OFT})`});
 
-  // per-pathway rate limits (owner) — mirrors the new chain's own limit; L1 adapter has none
-  if (String(peer.CHAIN_ID) !== "1") {
-    const limit = String(nc.peerLimits[0]);
-    const window = String(nc.peerWindows[0]);
-    const cfg = `[(${eid},${limit},${window})]`;
-    calls.push({to: peerOft, value: "0", data: calldata("setInboundRateLimits((uint32,uint256,uint256)[])", cfg), desc: `setInboundRateLimits(${eid}, ${limit}, ${window})`});
-    calls.push({to: peerOft, value: "0", data: calldata("setOutboundRateLimits((uint32,uint256,uint256)[])", cfg), desc: `setOutboundRateLimits(${eid}, ${limit}, ${window})`});
-  }
+  // per-pathway rate limits (owner) — mirrors the new chain's own limit. Applies to EVERY peer
+  // including the L1 adapter: EtherFiOFTAdapterUpgradeable inherits PairwiseRateLimiter and its
+  // _debit/_credit enforce the checks, and an UNSET pathway has limit 0 -> amountCanBeSent == 0
+  // -> every bridge in/out of that pathway reverts (Out/InboundRateLimitExceeded). Skipping L1
+  // here is the regression that left mainnet<->new-chain bridges dead on arrival.
+  const limit = String(nc.peerLimits[0]);
+  const window = String(nc.peerWindows[0]);
+  const cfg = `[(${eid},${limit},${window})]`;
+  calls.push({to: peerOft, value: "0", data: calldata("setInboundRateLimits((uint32,uint256,uint256)[])", cfg), desc: `setInboundRateLimits(${eid}, ${limit}, ${window})`});
+  calls.push({to: peerOft, value: "0", data: calldata("setOutboundRateLimits((uint32,uint256,uint256)[])", cfg), desc: `setOutboundRateLimits(${eid}, ${limit}, ${window})`});
 
   // enforced options (owner) — 170k lzReceive, msgType 1 & 2
   const eo = `[(${eid},1,${ENFORCED_OPTS}),(${eid},2,${ENFORCED_OPTS})]`;
