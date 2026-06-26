@@ -17,7 +17,7 @@ contract DeployL1SyncPoolImpl is Script, L2Constants {
         vm.startBroadcast(DEPLOYER_ADDRESS);
 
         address impl = address(
-            new EtherfiL1SyncPoolETH{salt: keccak256("EtherfiL1SyncPoolETHImpl")}(L1_ENDPOINT, ROLE_REGISTRY)
+            new EtherfiL1SyncPoolETH{salt: bytes32(bytes20(hex"3a90e505b140accd42c6d3e220a18289ec693c6f"))}(L1_ENDPOINT, ROLE_REGISTRY)
         );
 
         console.log("EtherfiL1SyncPoolETH implementation deployed at:", impl);
