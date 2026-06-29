@@ -60,6 +60,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
      */
     constructor(address endpoint, address roleRegistry) L1BaseSyncPoolUpgradeable(endpoint) {
         _roleRegistry = IRoleRegistry(roleRegistry);
+        _disableInitializers();
     }
 
     /**
