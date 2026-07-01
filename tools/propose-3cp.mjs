@@ -22,9 +22,6 @@ const DRY = argv.includes("--dry-run");
 const PRS = argv.filter(a => /^\d+$/.test(a));
 const ZERO = "0x0000000000000000000000000000000000000000", Z = "0".repeat(64);
 
-// Safe transaction-service network slugs (chainId -> slug). Chains absent here have no hosted service.
-const TXSVC = {1: "mainnet", 10: "optimism", 8453: "base", 56: "bsc", 59144: "linea", 534352: "scroll",
-  81457: "blast", 43114: "avalanche", 324: "zksync", 130: "unichain", 80094: "berachain", 146: "sonic"};
 const DTH = cast("keccak", "EIP712Domain(uint256 chainId,address verifyingContract)");
 const STH = cast("keccak", "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)");
 const enc = (t, v) => cast("abi-encode", `f(${t.join(",")})`, ...v.map(String));
@@ -49,7 +46,7 @@ function buildLeaf(dir, name) {
   if (op === 1) { to = field(md, /MultiSendCallOnly `(0x[0-9a-fA-F]+)`/); value = "0"; data = multiSend(leaf.transactions); }
   else { to = leaf.transactions[0].to; value = leaf.transactions[0].value || "0"; data = leaf.transactions[0].data; }
   const nonce = nonceRaw === "TBD" ? null : Number(nonceRaw);
-  return {name, safe, chainId, to, value, data, op, nonce, expected, net: TXSVC[chainId]};
+  return {name, safe, chainId, to, value, data, op, nonce, expected};
 }
 function safeTxHash(L) {
   const domain = cast("keccak", enc(["bytes32", "uint256", "address"], [DTH, L.chainId, L.safe]));
@@ -103,14 +100,14 @@ for (const L of leaves) {
   const tf = typedFile(L);
   console.log("  → confirm on Ledger (hash above must match the device)…");
   const sig = cast("wallet", "sign", "--ledger", "--mnemonic-derivation-path", HD, "--data", "--from-file", tf);
-  if (!L.net) { console.log(`  no Safe tx service for chainId ${L.chainId} — signature (propose offline / Eternalsafe):\n  ${sig}`); continue; }
-  const body = JSON.stringify({to: L.to, value: L.value, data: L.data, operation: L.op, safeTxGas: "0", baseGas: "0",
-    gasPrice: "0", gasToken: null, refundReceiver: null, nonce: L.nonce, contractTransactionHash: h.safeTxHash,
-    sender: PROPOSER, signature: sig, origin: `3CP-${L.pr}`});
-  const url = `https://safe-transaction-${L.net}.safe.global/api/v1/safes/${L.safe}/multisig-transactions/`;
+  // Propose via the Safe Client Gateway — keyed by chainId, so it covers every chain the Safe UI supports.
+  const body = JSON.stringify({to: L.to, value: L.value, data: L.data, nonce: String(L.nonce), operation: L.op,
+    safeTxGas: "0", baseGas: "0", gasPrice: "0", gasToken: ZERO, refundReceiver: ZERO,
+    safeTxHash: h.safeTxHash, sender: PROPOSER, signature: sig, origin: `3CP-${L.pr}`});
+  const url = `https://safe-client.safe.global/v1/chains/${L.chainId}/transactions/${L.safe}/propose`;
   try {
-    execFileSync("curl", ["-sS", "-X", "POST", url, "-H", "content-type: application/json", "-d", body], {encoding: "utf8"});
-    console.log(`  ✅ proposed to ${L.net} tx service`);
-  } catch (e) { console.log(`  ⚠️ propose POST failed (${String(e).split("\n")[0]}); signature:\n  ${sig}`); }
+    execFileSync("curl", ["-fsS", "-X", "POST", url, "-H", "content-type: application/json", "-d", body], {encoding: "utf8"});
+    console.log(`  ✅ proposed via Safe Client Gateway (chain ${L.chainId})`);
+  } catch (e) { console.log(`  ⚠️ propose failed for chain ${L.chainId} (${String(e).split("\n")[0].slice(0, 90)}) — sign offline with:\n  ${sig}`); }
 }
 console.log("\nDone. Open each Safe in the UI to confirm the queued proposals, then collect the remaining owner signatures.");
