@@ -15,6 +15,7 @@ import {readFileSync, writeFileSync, readdirSync, existsSync} from "node:fs";
 import {resolve} from "node:path";
 const CP3 = process.env.CP3_REPO || resolve(process.env.HOME, "etherfi/3CP-secure");
 const cast = (...a) => execFileSync("cast", a, {encoding: "utf8"}).trim();
+const git = (...a) => execFileSync("git", ["-C", CP3, ...a], {encoding: "utf8"}).trim();
 const argv = process.argv.slice(2);
 const PROPOSER = "0x1B7Fd9679B2678F7e01897E0A3BA9aF18dF4f71e";
 const HD = (argv[argv.indexOf("--hd-path") + 1] && argv.includes("--hd-path")) ? argv[argv.indexOf("--hd-path") + 1] : "m/44'/60'/0'/0/0";
@@ -35,9 +36,10 @@ function multiSend(txs) {                       // wrap inner txs as MultiSendCa
 function field(md, re) { const m = md.match(re); return m && m[1]; }
 
 // build the (to, value, data, operation, nonce, safe, chainId, version, expectedHash, net) for a leaf
-function buildLeaf(dir, name) {
-  const leaf = JSON.parse(readFileSync(resolve(dir, `${name}.json`), "utf8"));
-  const md = readFileSync(resolve(dir, `${name}.md`), "utf8");
+function buildLeaf(branch, jsonPath) {
+  const name = jsonPath.split("/").pop().replace(/\.json$/, "");
+  const leaf = JSON.parse(git("show", `${branch}:${jsonPath}`));
+  const md = git("show", `${branch}:${jsonPath.replace(/\.json$/, ".md")}`);
   const op = Number(field(md, /\| operation \| (\d)/));
   const nonceRaw = field(md, /\| nonce \| ([^|]+?) \|/).trim();
   const safe = leaf.safeAddress, chainId = Number(leaf.chainId);
@@ -65,19 +67,26 @@ function typedFile(L) {
   const f = `/tmp/safetx-${L.safe.slice(2, 10)}-${L.name}.json`; writeFileSync(f, JSON.stringify(t)); return f;
 }
 
-// collect leaves for the requested PRs, ordered chain -> nonce
+// Each PR's folder lives on its own branch — read leaves straight from git so the script works from
+// any checkout and can propose multiple PRs at once. Find the ref that contains queued/<N>/<N>.md.
+function branchForPR(n) {
+  const refs = git("for-each-ref", "--format=%(refname:short)", "refs/heads", "refs/remotes/origin").split("\n").map(s => s.trim()).filter(Boolean);
+  const has = r => { try { execFileSync("git", ["-C", CP3, "cat-file", "-e", `${r}:queued/${n}/${n}.md`], {stdio: "ignore"}); return true; } catch { return false; } };
+  return refs.filter(has).sort((a, b) => {
+    const score = r => (r.startsWith("origin/") ? 0 : 2) + (r.includes(`/${n}/`) ? 1 : 0);
+    return score(b) - score(a);
+  })[0];
+}
+const leafPaths = (branch, n) => git("ls-tree", "-r", "--name-only", branch, "--", `queued/${n}`).split("\n")
+  .filter(f => f.endsWith(".json") && !f.split("/").pop().startsWith("_") && !f.includes("/stable-canonical/"));
+
 const jobs = [];
 for (const pr of PRS) {
-  const root = resolve(CP3, "queued", pr);
-  if (!existsSync(root)) { console.log(`queued/${pr} not found, skipping`); continue; }
-  for (const sub of readdirSync(root, {withFileTypes: true}).filter(d => d.isDirectory() && d.name !== "stable-canonical")) {
-    const d = resolve(root, sub.name);
-    for (const f of readdirSync(d).filter(x => x.endsWith(".json") && !x.startsWith("_"))) {
-      jobs.push({pr, dir: d, sub: sub.name, name: f.replace(/\.json$/, "")});
-    }
-  }
+  const branch = branchForPR(pr);
+  if (!branch) { console.log(`no branch contains queued/${pr}, skipping`); continue; }
+  for (const jp of leafPaths(branch, pr)) jobs.push({pr, branch, jsonPath: jp, sub: jp.split("/")[2]});
 }
-const leaves = jobs.map(j => ({...j, ...buildLeaf(j.dir, j.name)}))
+const leaves = jobs.map(j => ({...j, ...buildLeaf(j.branch, j.jsonPath)}))
   .sort((a, b) => a.pr !== b.pr ? PRS.indexOf(a.pr) - PRS.indexOf(b.pr) : a.sub !== b.sub ? a.sub.localeCompare(b.sub) : (a.nonce ?? 1e9) - (b.nonce ?? 1e9));
 
 console.log(`Proposer ${PROPOSER} (Ledger ${HD}). ${leaves.length} leaves across PRs ${PRS.join(", ")}.\n`);
