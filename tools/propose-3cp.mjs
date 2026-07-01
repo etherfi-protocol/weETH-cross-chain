@@ -20,6 +20,10 @@ const argv = process.argv.slice(2);
 const PROPOSER = "0x1B7Fd9679B2678F7e01897E0A3BA9aF18dF4f71e";
 const HD = (argv[argv.indexOf("--hd-path") + 1] && argv.includes("--hd-path")) ? argv[argv.indexOf("--hd-path") + 1] : "m/44'/60'/0'/0/0";
 const DRY = argv.includes("--dry-run");
+// --no-sign: propose as a DELEGATE (signature=null) — no Ledger. Makes txns visible in the UI without
+// re-signing; owners confirm separately (e.g. the on-chain approveHash you already did). Requires the
+// proposer to be a registered delegate on each Safe.
+const NO_SIGN = argv.includes("--no-sign");
 const PRS = argv.filter(a => /^\d+$/.test(a));
 const ZERO = "0x0000000000000000000000000000000000000000", Z = "0".repeat(64);
 
@@ -90,7 +94,7 @@ const leaves = jobs.map(j => ({...j, ...buildLeaf(j.branch, j.jsonPath)}))
   .sort((a, b) => a.pr !== b.pr ? PRS.indexOf(a.pr) - PRS.indexOf(b.pr) : a.sub !== b.sub ? a.sub.localeCompare(b.sub) : (a.nonce ?? 1e9) - (b.nonce ?? 1e9));
 
 console.log(`Proposer ${PROPOSER} (Ledger ${HD}). ${leaves.length} leaves across PRs ${PRS.join(", ")}.\n`);
-if (!DRY) {  // fail fast if the Ledger's derived account isn't the proposer
+if (!DRY && !NO_SIGN) {  // fail fast if the Ledger's derived account isn't the proposer
   const addr = cast("wallet", "address", "--ledger", "--mnemonic-derivation-path", HD);
   if (addr.toLowerCase() !== PROPOSER.toLowerCase()) {
     console.log(`Ledger at ${HD} = ${addr}, expected ${PROPOSER}. Fix --hd-path and retry.`); process.exit(1);
@@ -106,9 +110,12 @@ for (const L of leaves) {
   }
   console.log(`\n=== ${tag} ===\n  safe ${L.safe}  chainId ${L.chainId}  safeTxHash ${h.safeTxHash}`);
   if (DRY) { console.log("  (dry-run: verified, not signing)"); continue; }
-  const tf = typedFile(L);
-  console.log("  → confirm on Ledger (hash above must match the device)…");
-  const sig = cast("wallet", "sign", "--ledger", "--mnemonic-derivation-path", HD, "--data", "--from-file", tf);
+  let sig = null;
+  if (!NO_SIGN) {
+    const tf = typedFile(L);
+    console.log("  → confirm on Ledger (hash above must match the device)…");
+    sig = cast("wallet", "sign", "--ledger", "--mnemonic-derivation-path", HD, "--data", "--from-file", tf);
+  }
   // Propose via the Safe Client Gateway — keyed by chainId, so it covers every chain the Safe UI supports.
   const body = JSON.stringify({to: L.to, value: L.value, data: L.data, nonce: String(L.nonce), operation: L.op,
     safeTxGas: "0", baseGas: "0", gasPrice: "0", gasToken: ZERO, refundReceiver: ZERO,
@@ -117,6 +124,11 @@ for (const L of leaves) {
   try {
     execFileSync("curl", ["-fsS", "-X", "POST", url, "-H", "content-type: application/json", "-d", body], {encoding: "utf8"});
     console.log(`  ✅ proposed via Safe Client Gateway (chain ${L.chainId})`);
-  } catch (e) { console.log(`  ⚠️ propose failed for chain ${L.chainId} (${String(e).split("\n")[0].slice(0, 90)}) — sign offline with:\n  ${sig}`); }
+  } catch (e) {
+    const why = String(e).split("\n")[0].slice(0, 90);
+    console.log(`  ⚠️ propose failed for chain ${L.chainId} (${why})`);
+    console.log(sig ? `     signature (propose offline): ${sig}`
+      : `     (--no-sign needs ${PROPOSER} to be a registered delegate on this Safe; else drop --no-sign to sign as owner)`);
+  }
 }
 console.log("\nDone. Open each Safe in the UI to confirm the queued proposals, then collect the remaining owner signatures.");
