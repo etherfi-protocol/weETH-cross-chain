@@ -5,28 +5,63 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {IDummyToken} from "../../interfaces/IDummyToken.sol";
 import {L1BaseSyncPoolUpgradeable, Constants} from "./layerzero-base/L1BaseSyncPoolUpgradeable.sol";
+import {PausableUntil} from "../PausableUntil.sol";
 import {ILiquifier} from "../../interfaces/ILiquifier.sol";
 import {IWeEth} from "../../interfaces/IWeEth.sol";
+import {IRoleRegistry} from "../../interfaces/IRoleRegistry.sol";
 
-contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
+contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable, PausableUntil {
     error EtherfiL1SyncPoolETH__OnlyETH();
     error EtherfiL1SyncPoolETH__InvalidAmountIn();
     error EtherfiL1SyncPoolETH__UnsetDummyToken();
+    error EtherfiL1SyncPoolETH__Paused();
+    error EtherfiL1SyncPoolETH__AlreadyPaused();
+    error EtherfiL1SyncPoolETH__NotPaused();
 
     ILiquifier private _liquifier;
     IERC20 private _eEth;
 
     mapping(uint32 => IDummyToken) private _dummyTokens;
+    bool private _paused;
 
+    IRoleRegistry public immutable _roleRegistry;
+
+    event Paused();
+    event Unpaused();
     event LiquifierSet(address liquifier);
     event EEthSet(address eEth);
     event DummyTokenSet(uint32 originEid, address dummyToken);
+    error IncorrectCaller();
+
+    modifier whenNotPaused() {
+        _requireNotPaused();
+        _requireNotPausedUntil();
+        _;
+    }
+
+    modifier onlyAdmin() {
+        _roleRegistry.onlyOperatingTimelock(msg.sender);
+        _;
+    }
+
+    modifier onlyOperations() {
+        _roleRegistry.onlyOperatingMultisig(msg.sender);
+        _;
+    }
+
+    modifier onlyGuardian() {
+        _roleRegistry.onlyGuardian(msg.sender);
+        _;
+    }
 
     /**
      * @dev Constructor for Etherfi L1 Sync Pool ETH
      * @param endpoint Address of the LayerZero endpoint
      */
-    constructor(address endpoint) L1BaseSyncPoolUpgradeable(endpoint) {}
+    constructor(address endpoint, address roleRegistry) L1BaseSyncPoolUpgradeable(endpoint) {
+        _roleRegistry = IRoleRegistry(roleRegistry);
+        _disableInitializers();
+    }
 
     /**
      * @dev Initialize the contract
@@ -98,6 +133,36 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
     }
 
     /**
+     * @dev Pause the contract
+     */
+    function pause() public onlyOperations {
+        if (_paused) revert EtherfiL1SyncPoolETH__AlreadyPaused();
+        _paused = true;
+        emit Paused();
+    }
+
+    /**
+     * @dev Unpause the contract
+     */
+    function unpause() public onlyOperations {
+        if (!_paused) revert EtherfiL1SyncPoolETH__NotPaused();
+        _paused = false;
+        emit Unpaused();
+    }
+
+    function pauseUntil() public onlyGuardian {
+        _pauseUntil();
+    }
+
+    function unpauseUntil() public onlyOperations {
+        _unpauseUntil();
+    }
+
+    function setPauseUntilDuration(uint256 pauseUntilDuration) public onlyAdmin {
+        _setPauseUntilDuration(pauseUntilDuration);
+    }
+
+    /**
      * @dev Internal function to set the liquifier address
      * @param liquifier The liquifier address
      */
@@ -143,6 +208,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
         internal
         virtual
         override
+        whenNotPaused()
         returns (uint256 actualAmountOut)
     {
         if (tokenIn != Constants.ETH_ADDRESS) revert EtherfiL1SyncPoolETH__OnlyETH();
@@ -159,7 +225,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
         dummyToken.mint(address(this), amountIn);
         dummyToken.approve(address(liquifier), amountIn);
 
-        liquifier.depositWithERC20(address(dummyToken), amountIn, address(0));
+        liquifier.depositWithERC20(address(dummyToken), amountIn, 0, address(0));
 
         uint256 eEthBalance = _eEth.balanceOf(address(this));
 
@@ -184,6 +250,7 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
         internal
         virtual
         override
+        whenNotPaused()
     {
         if (tokenIn != Constants.ETH_ADDRESS) revert EtherfiL1SyncPoolETH__OnlyETH();
         if (amountIn != msg.value) revert EtherfiL1SyncPoolETH__InvalidAmountIn();
@@ -201,5 +268,9 @@ contract EtherfiL1SyncPoolETH is L1BaseSyncPoolUpgradeable {
         liquifier.unwrapL2Eth{value: swapAmount}(address(dummyToken));
 
         dummyToken.burn(swapAmount);
+    }
+
+    function _requireNotPaused() internal view {
+        if (_paused) revert EtherfiL1SyncPoolETH__Paused();
     }
 }
