@@ -31,7 +31,7 @@ const RPC = {op: `https://opt-mainnet.g.alchemy.com/v2/${K}`, bnb: `https://bnb-
   bera: `https://berachain-mainnet.g.alchemy.com/v2/${K}`, mode: `https://mode-mainnet.g.alchemy.com/v2/${K}`,
   blast: `https://blast-mainnet.g.alchemy.com/v2/${K}`, sonic: `https://sonic-mainnet.g.alchemy.com/v2/${K}`,
   ethereum: `https://eth-mainnet.g.alchemy.com/v2/${K}`, zksync: `https://zksync-mainnet.g.alchemy.com/v2/${K}`,
-  swell: "https://swell-mainnet.alt.technology", morph: "https://rpc.morphl2.io", hyperEVM: "https://rpc.hyperliquid.xyz/evm"};
+  swell: "https://rpc.ankr.com/swell", morph: "https://rpc.morphl2.io", hyperEVM: "https://rpc.hyperliquid.xyz/evm"};
 // #585 sever set (deprecated chain -> the peers it severs). Sonic full-sever includes ethereum.
 const SEVER_DEP = {scroll: ["base", "op", "bnb", "linea", "unichain", "hyperEVM"], swell: ["base", "op", "bnb", "linea", "unichain"],
   bera: ["base", "op", "bnb", "linea", "unichain", "hyperEVM"], zksync: ["base", "op", "bnb", "linea", "unichain"],

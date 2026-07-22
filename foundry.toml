@@ -13,13 +13,26 @@ fs_permissions = [
 
 optimizer = true
 optimizer_runs = 200
-solc_version = "0.8.22"
+solc_version = "0.8.20"
 
 # remove the hash of the metadata for more deterministic code 
 bytecode_hash = 'none'
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
+# zkSync Era source-verification profile: zksolc cannot compile some test/script files
+# (e.g. test/L1SyncPoolUpgrade.t.sol uses EXTCODECOPY, unsupported on EraVM). verify-contract has
+# no --skip flag, so the skip must live in config. EtherFiTimelock itself compiles cleanly.
+#   FOUNDRY_PROFILE=zkverify forge verify-contract … --zksync --verifier zksync …
+[profile.zkverify]
+src = "contracts"
+test = "contracts"
+script = "contracts"
+skip = ["test/**", "script/**", "*.t.sol", "*.s.sol"]
+optimizer = true
+optimizer_runs = 200
+solc_version = "0.8.22"
+bytecode_hash = 'none'
 
 [etherscan]
 base = { key = "${MAINNET_ETHERSCAN_KEY}" }
