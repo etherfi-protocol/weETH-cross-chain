@@ -1,0 +1,135 @@
+{
+  "robinhood": {
+    "created": "2026-05-16T01:01:00.000Z",
+    "updated": "2026-06-09T22:10:41.000Z",
+    "tableName": "layerzero-chain_metadata",
+    "environment": "mainnet",
+    "deployments": [
+      {
+        "eid": "416",
+        "chainKey": "robinhood",
+        "treasuryV2": {
+          "address": "0x980205D352F198748B626f6f7C38A8a5663Ec981"
+        },
+        "ultraLightNodeV2": {
+          "address": "0x38dE71124f7a447a01D67945a51eDcE9FF491251"
+        },
+        "version": 1,
+        "nonceContract": {
+          "address": "0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675"
+        },
+        "endpoint": {
+          "address": "0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7"
+        },
+        "stage": "mainnet",
+        "relayerV2": {
+          "address": "0xA658742d33ebd2ce2F0bdFf73515Aa797Fd161D9"
+        },
+        "fPValidator": {
+          "address": "0xC1b15d3B262bEeC0e3565C11C9e0F6134BdaCB36"
+        },
+        "mPTValidator01": {
+          "address": "0x2D61DCDD36F10b22176E0433B86F74567d529aAa"
+        },
+        "sendUln301": {
+          "address": "0x37aaaf95887624a363effB7762D489E3C05c2a02"
+        },
+        "receiveUln301": {
+          "address": "0x15e51701F245F6D5bd0FEE87bCAf55B0841451B3"
+        }
+      },
+      {
+        "eid": "30416",
+        "endpointV2View": {
+          "address": "0xAaB5A48CFC03Efa9cC34A2C1aAcCCB84b4b770e4"
+        },
+        "chainKey": "robinhood",
+        "stage": "mainnet",
+        "executor": {
+          "address": "0x4208D6E27538189bB48E603D6123A94b8Abe0A0b"
+        },
+        "deadDVN": {
+          "address": "0x6788f52439ACA6BFF597d3eeC2DC9a44B8FEE842"
+        },
+        "endpointV2": {
+          "address": "0x6F475642a6e85809B1c36Fa62763669b1b48DD5B"
+        },
+        "sendUln302": {
+          "address": "0xC39161c743D0307EB9BCc9FEF03eeb9Dc4802de7"
+        },
+        "lzExecutor": {
+          "address": "0x41Bdb4aa4A63a5b2Efc531858d3118392B1A1C3d"
+        },
+        "blockedMessageLib": {
+          "address": "0xc1ce56b2099ca68720592583c7984cab4b6d7e7a"
+        },
+        "version": 2,
+        "receiveUln302": {
+          "address": "0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043"
+        }
+      }
+    ],
+    "chainDetails": {
+      "chainStatus": "ACTIVE",
+      "chainKey": "robinhood",
+      "nativeChainId": 4663,
+      "chainStack": "ARB_STACK",
+      "chainLayer": "L2",
+      "nativeCurrency": {
+        "symbol": "ETH",
+        "cmcId": 1027,
+        "decimals": 18
+      },
+      "chainType": "evm",
+      "averageBlockTime": 366400
+    },
+    "dvns": {
+      "0x2832b240200c13d02250ec39bd0c20c199757891": {
+        "version": 2,
+        "canonicalName": "Paxos",
+        "id": "paxos"
+      },
+      "0x0ffe02df012299a370d5dd69298a5826eacafdf8": {
+        "version": 2,
+        "canonicalName": "Nethermind",
+        "id": "nethermind"
+      },
+      "0x1258a278519c7f4bd997a9c3bfd4aa802a028d89": {
+        "version": 2,
+        "canonicalName": "Horizen",
+        "id": "horizen-labs"
+      },
+      "0xd01ae6905d48315f7be10c7330aecf8360ef5b12": {
+        "version": 2,
+        "canonicalName": "LayerZero Labs",
+        "id": "layerzero-labs"
+      },
+      "0x6788f52439aca6bff597d3eec2dc9a44b8fee842": {
+        "id": "lz-dead-dvn",
+        "version": 2,
+        "canonicalName": "LZDeadDVN",
+        "deprecated": true
+      },
+      "0x8d77d35604a9f37f488e41d1d916b2a0088f82dd": {
+        "version": 2,
+        "canonicalName": "Canary",
+        "id": "canary"
+      }
+    },
+    "chainName": "robinhood",
+    "tokens": {
+      "0x0000000000000000000000000000000000000000": {
+        "peggedTo": {
+          "symbol": "ETH",
+          "chainName": "ethereum",
+          "address": "0x0000000000000000000000000000000000000000",
+          "programaticallyPegged": true
+        },
+        "symbol": "ETH",
+        "type": "NativeToken",
+        "decimals": 18
+      }
+    },
+    "chainKey": "robinhood"
+  }
+}

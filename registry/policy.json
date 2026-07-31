@@ -1,0 +1,40 @@
+{
+  "dvnProviders": ["LayerZero Labs", "Nethermind", "Horizen", "Canary"],
+  "requiredDVNCount": 4,
+  "optionalDVNCount": 0,
+  "optionalDVNThreshold": 0,
+  "confirmations": 45,
+  "rateLimit": { "limitWei": "5000000000000000000000", "windowSeconds": 14400 },
+  "canonical": {
+    "oft": "0xA3D68b74bF0528fdD07263c60d6488749044914b",
+    "oftImpl": "0x08DB0DB9b5F2dcbBFDc26FF411FB2026e81DA748",
+    "proxyAdmin": "0x373ea3AEC25eB652ACa38504254eCD5459da6d19",
+    "timelock": "0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6",
+    "controllerSafe": "0x7a00657a45420044bc526B90Ad667aFfaee0A868",
+    "deployer": "0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150",
+    "create3Factory": "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed"
+  },
+  "controllerSafe": {
+    "factory": "0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC",
+    "singleton": "0xfb1bffC9d739B8D520DaF37dF666da4C687191EA",
+    "saltNonce": 0,
+    "initialThreshold": 2,
+    "initialOwners": [
+      "0x5c8c76F2e990F194462dC5f8a8c76Ba16966Ed42",
+      "0x4507cfB4B077d5DBdDd520c701E30173d5b59Fad",
+      "0x0e706A98F414F49A412107641c0820b0153Ff5Dc",
+      "0xD31074937B28f65db4eeB243916883E335261650",
+      "0x566E58ac0F2c4BCaF6De63760C56cC3f825C48f5"
+    ],
+    "finalThreshold": 4,
+    "finalOwners": [
+      "0xE63794CF405678382764A4dEc1e56C43B45605C9",
+      "0xDE3bf1FA3B3829342bC4356592Bb7CF3BAAD8264",
+      "0x5c8c76F2e990F194462dC5f8a8c76Ba16966Ed42",
+      "0x4507cfB4B077d5DBdDd520c701E30173d5b59Fad",
+      "0x0e706A98F414F49A412107641c0820b0153Ff5Dc",
+      "0xD31074937B28f65db4eeB243916883E335261650",
+      "0x566E58ac0F2c4BCaF6De63760C56cC3f825C48f5"
+    ]
+  }
+}

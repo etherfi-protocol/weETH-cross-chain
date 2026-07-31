@@ -54,12 +54,13 @@ contract DeployMigrationOFT is Script, L2Constants {
         address[] memory requiredDVNs = new address[](2);
 
         // sorting the DVNs to prevent LZ_ULN_Unsorted() errors
-        if (DEPLOYMENT_LZ_DVN > DEPLOYMENT_NETHERMIND_DVN) {
-            requiredDVNs[0] = DEPLOYMENT_NETHERMIND_DVN;
-            requiredDVNs[1] = DEPLOYMENT_LZ_DVN;
+        // Uses legacy Monad 2-DVN constants (adapter-migration is Monad-specific).
+        if (DEPLOYMENT_LZ_DVN_MONAD > DEPLOYMENT_NETHERMIND_DVN_MONAD) {
+            requiredDVNs[0] = DEPLOYMENT_NETHERMIND_DVN_MONAD;
+            requiredDVNs[1] = DEPLOYMENT_LZ_DVN_MONAD;
         } else {
-            requiredDVNs[0] = DEPLOYMENT_LZ_DVN;
-            requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN;
+            requiredDVNs[0] = DEPLOYMENT_LZ_DVN_MONAD;
+            requiredDVNs[1] = DEPLOYMENT_NETHERMIND_DVN_MONAD;
         }
         UlnConfig memory ulnConfig = UlnConfig({
             confirmations: 15,

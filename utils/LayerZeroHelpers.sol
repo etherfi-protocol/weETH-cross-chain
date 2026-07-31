@@ -52,6 +52,27 @@ library LayerZeroHelpers {
         return abi.encode(ulnConfig);
     }
 
+    // Encodes a UlnConfig for a 4-of-4 DVN policy (confirmations=45).
+    // DVNs must already be sorted ascending — LZ reverts if not.
+    function _getExpectedUln4(address[4] memory dvns) public pure returns (bytes memory) {
+        address[] memory requiredDVNs = new address[](4);
+        requiredDVNs[0] = dvns[0];
+        requiredDVNs[1] = dvns[1];
+        requiredDVNs[2] = dvns[2];
+        requiredDVNs[3] = dvns[3];
+
+        UlnConfig memory ulnConfig = UlnConfig({
+            confirmations: 45,
+            requiredDVNCount: 4,
+            optionalDVNCount: 0,
+            optionalDVNThreshold: 0,
+            requiredDVNs: requiredDVNs,
+            optionalDVNs: new address[](0)
+        });
+
+        return abi.encode(ulnConfig);
+    }
+
     // get a dead ULN (unreachable path)
     function _getDeadUln() public pure returns (bytes memory) {
         address[] memory requiredDVNs = new address[](1);
