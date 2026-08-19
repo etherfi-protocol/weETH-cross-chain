@@ -28,6 +28,12 @@ contract L1SyncPoolUpgradeTest is Test {
     address constant SYNC_POOL = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
     address constant PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
     address constant LZ_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
+    // EtherfiL1SyncPoolETH takes (endpoint, roleRegistry) and stores the registry as an
+    // immutable, so it is baked into the runtime bytecode. This is the value the deployed
+    // implementation 0x5d310451… actually carries — verified with
+    //   cast call 0xD789870beA40D056A4d26055d0bEFcC8755DA146 "_roleRegistry()(address)"
+    // Passing anything else would make the rebuilt bytecode diverge from the live one.
+    address constant ROLE_REGISTRY = 0x62247D29B4B9BECf4BB73E0c722cf6445cfC7cE9;
     // The timelock that owns the sync pool today (owner()); 10-day delay.
     address constant OWNER_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
     // Governance Safe (6-of-10) holding PROPOSER + EXECUTOR on OWNER_TIMELOCK.
@@ -61,7 +67,7 @@ contract L1SyncPoolUpgradeTest is Test {
         emit log_named_address("current implementation", oldImpl);
 
         // rebuild the current implementation
-        EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT);
+        EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT, ROLE_REGISTRY);
         assertTrue(address(newImpl) != oldImpl, "fresh impl collided with old");
 
         // a non-owner must not be able to upgrade
@@ -90,20 +96,24 @@ contract L1SyncPoolUpgradeTest is Test {
     // Safe to the owner timelock, then show the Safe can no longer upgrade while
     // the timelock can (schedule -> wait minDelay -> execute), state preserved.
     function test_transfer_admin_to_timelock_then_upgrade_via_timelock() public {
-        address safe = proxyAdmin.owner();
-        assertTrue(safe != OWNER_TIMELOCK, "admin already the timelock");
+        address admin = proxyAdmin.owner();
 
-        // 1. Safe transfers ProxyAdmin ownership to the timelock (the 3CP tx).
-        vm.prank(safe);
-        proxyAdmin.transferOwnership(OWNER_TIMELOCK);
-        assertEq(proxyAdmin.owner(), OWNER_TIMELOCK, "admin not moved to timelock");
+        // 1. Move ProxyAdmin ownership to the timelock (the 3CP tx), if it has not already
+        //    happened. On mainnet today it has: owner() is already OWNER_TIMELOCK. Keeping this
+        //    conditional lets the test assert the same end state whether it runs against a fork
+        //    from before or after that migration.
+        if (admin != OWNER_TIMELOCK) {
+            vm.prank(admin);
+            proxyAdmin.transferOwnership(OWNER_TIMELOCK);
+        }
+        assertEq(proxyAdmin.owner(), OWNER_TIMELOCK, "admin not on the timelock");
 
-        // 2. The Safe can no longer upgrade.
-        EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT);
-        vm.prank(safe);
+        // 2. A non-timelock caller cannot upgrade.
+        EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT, ROLE_REGISTRY);
+        vm.prank(GOV_GNOSIS); // proposer on the timelock, but not the ProxyAdmin owner
         vm.expectRevert();
         proxyAdmin.upgradeAndCall(SYNC_POOL, address(newImpl), "");
-        assertTrue(_impl() != address(newImpl), "Safe upgrade should have reverted");
+        assertTrue(_impl() != address(newImpl), "non-owner upgrade should have reverted");
 
         // 3. The timelock can upgrade, driven by the governance Safe.
         address owner_ = pool.owner();
@@ -129,7 +139,7 @@ contract L1SyncPoolUpgradeTest is Test {
     // an earlier divergence means real source/compiler drift.
     function test_diagnostic_rebuilt_vs_onchain_bytecode() public {
         bytes memory onchain = _impl().code;
-        bytes memory rebuilt = address(new EtherfiL1SyncPoolETH(LZ_ENDPOINT)).code;
+        bytes memory rebuilt = address(new EtherfiL1SyncPoolETH(LZ_ENDPOINT, ROLE_REGISTRY)).code;
         emit log_named_uint("on-chain impl code length", onchain.length);
         emit log_named_uint("rebuilt  impl code length", rebuilt.length);
 
