@@ -92,30 +92,24 @@ contract L1SyncPoolUpgradeTest is Test {
         assertEq(pool.getTotalUnbackedTokens(), unbacked, "unbacked tokens changed");
     }
 
-    // Proves the requested change: move upgrade authority from the controller
-    // Safe to the owner timelock, then show the Safe can no longer upgrade while
-    // the timelock can (schedule -> wait minDelay -> execute), state preserved.
-    function test_transfer_admin_to_timelock_then_upgrade_via_timelock() public {
-        address admin = proxyAdmin.owner();
+    // The owner timelock is the sole upgrade authority for the L1 sync pool: nobody else can
+    // upgrade, and the timelock can only do it through schedule -> wait minDelay -> execute.
+    //
+    // This test used to perform the Safe -> timelock ProxyAdmin handover first. That migration
+    // has landed (owner() is OWNER_TIMELOCK on mainnet), so the handover is asserted as live
+    // state rather than re-simulated.
+    function test_timelock_is_sole_upgrade_authority() public {
+        assertEq(proxyAdmin.owner(), OWNER_TIMELOCK, "ProxyAdmin owner is not the timelock");
 
-        // 1. Move ProxyAdmin ownership to the timelock (the 3CP tx), if it has not already
-        //    happened. On mainnet today it has: owner() is already OWNER_TIMELOCK. Keeping this
-        //    conditional lets the test assert the same end state whether it runs against a fork
-        //    from before or after that migration.
-        if (admin != OWNER_TIMELOCK) {
-            vm.prank(admin);
-            proxyAdmin.transferOwnership(OWNER_TIMELOCK);
-        }
-        assertEq(proxyAdmin.owner(), OWNER_TIMELOCK, "admin not on the timelock");
-
-        // 2. A non-timelock caller cannot upgrade.
+        // 1. A non-owner cannot upgrade. GOV_GNOSIS is the strongest negative case available:
+        //    it holds PROPOSER + EXECUTOR on the timelock, yet is not the ProxyAdmin owner.
         EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT, ROLE_REGISTRY);
-        vm.prank(GOV_GNOSIS); // proposer on the timelock, but not the ProxyAdmin owner
+        vm.prank(GOV_GNOSIS);
         vm.expectRevert();
         proxyAdmin.upgradeAndCall(SYNC_POOL, address(newImpl), "");
         assertTrue(_impl() != address(newImpl), "non-owner upgrade should have reverted");
 
-        // 3. The timelock can upgrade, driven by the governance Safe.
+        // 2. The timelock can upgrade, driven by the governance Safe.
         address owner_ = pool.owner();
         uint256 unbacked = pool.getTotalUnbackedTokens();
         bytes memory up = abi.encodeWithSignature(
