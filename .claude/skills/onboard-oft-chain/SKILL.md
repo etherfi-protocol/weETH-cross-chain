@@ -126,8 +126,15 @@ is the **direct** form for single-tx leaves and the **MultiSend** form for batch
 confirm against a **Tenderly Safe simulation / Transaction Builder** — the `to`/`operation` it
 shows is what to hash against. (Verified: base/op/eth/robinhood Safes are 1.3.0 → `0xA1dabEF3…`.)
 
-### Chains with no Safe web UI (e.g. Robinhood/4663) — sign on-chain
-If the chain isn't on app.safe.global, owners can't sign in the UI. Document the on-chain
+### Chains with no Safe web UI — sign on-chain
+**Check before you assume.** Fetch `https://safe-config.safe.global/api/v1/chains/?limit=200`
+and look the chainId up; that list is the source of truth for both support and the EIP-3770
+short name used in signing links. As of 2026-08-19 **every live mesh chain is supported**,
+Robinhood (4663), Monad (143), Ink (57073), Plasma (9745) and HyperEVM (999) included — an
+earlier version of this doc named those as UI-less, which was wrong and pushed signers toward a
+manual flow they did not need.
+
+Only when the live chain list genuinely omits a chain, document the on-chain
 flow in the leaf md + PR body: (1) each of ≥threshold owners runs
 `cast send <safe> "approveHash(bytes32)" <safeTxHash> --ledger --sender <owner>` from their
 own key; verify with `approvedHashes(address,bytes32)`; (2) anyone runs `execTransaction(...)`

@@ -28,6 +28,12 @@ contract L1SyncPoolUpgradeTest is Test {
     address constant SYNC_POOL = 0xD789870beA40D056A4d26055d0bEFcC8755DA146;
     address constant PROXY_ADMIN = 0xDBf6bE120D4dc72f01534673a1223182D9F6261D;
     address constant LZ_ENDPOINT = 0x1a44076050125825900e736c501f859c50fE728c;
+    // EtherfiL1SyncPoolETH takes (endpoint, roleRegistry) and stores the registry as an
+    // immutable, so it is baked into the runtime bytecode. This is the value the deployed
+    // implementation 0x5d310451… actually carries — verified with
+    //   cast call 0xD789870beA40D056A4d26055d0bEFcC8755DA146 "_roleRegistry()(address)"
+    // Passing anything else would make the rebuilt bytecode diverge from the live one.
+    address constant ROLE_REGISTRY = 0x62247D29B4B9BECf4BB73E0c722cf6445cfC7cE9;
     // The timelock that owns the sync pool today (owner()); 10-day delay.
     address constant OWNER_TIMELOCK = 0x9f26d4C958fD811A1F59B01B86Be7dFFc9d20761;
     // Governance Safe (6-of-10) holding PROPOSER + EXECUTOR on OWNER_TIMELOCK.
@@ -61,7 +67,7 @@ contract L1SyncPoolUpgradeTest is Test {
         emit log_named_address("current implementation", oldImpl);
 
         // rebuild the current implementation
-        EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT);
+        EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT, ROLE_REGISTRY);
         assertTrue(address(newImpl) != oldImpl, "fresh impl collided with old");
 
         // a non-owner must not be able to upgrade
@@ -86,26 +92,24 @@ contract L1SyncPoolUpgradeTest is Test {
         assertEq(pool.getTotalUnbackedTokens(), unbacked, "unbacked tokens changed");
     }
 
-    // Proves the requested change: move upgrade authority from the controller
-    // Safe to the owner timelock, then show the Safe can no longer upgrade while
-    // the timelock can (schedule -> wait minDelay -> execute), state preserved.
-    function test_transfer_admin_to_timelock_then_upgrade_via_timelock() public {
-        address safe = proxyAdmin.owner();
-        assertTrue(safe != OWNER_TIMELOCK, "admin already the timelock");
+    // The owner timelock is the sole upgrade authority for the L1 sync pool: nobody else can
+    // upgrade, and the timelock can only do it through schedule -> wait minDelay -> execute.
+    //
+    // This test used to perform the Safe -> timelock ProxyAdmin handover first. That migration
+    // has landed (owner() is OWNER_TIMELOCK on mainnet), so the handover is asserted as live
+    // state rather than re-simulated.
+    function test_timelock_is_sole_upgrade_authority() public {
+        assertEq(proxyAdmin.owner(), OWNER_TIMELOCK, "ProxyAdmin owner is not the timelock");
 
-        // 1. Safe transfers ProxyAdmin ownership to the timelock (the 3CP tx).
-        vm.prank(safe);
-        proxyAdmin.transferOwnership(OWNER_TIMELOCK);
-        assertEq(proxyAdmin.owner(), OWNER_TIMELOCK, "admin not moved to timelock");
-
-        // 2. The Safe can no longer upgrade.
-        EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT);
-        vm.prank(safe);
+        // 1. A non-owner cannot upgrade. GOV_GNOSIS is the strongest negative case available:
+        //    it holds PROPOSER + EXECUTOR on the timelock, yet is not the ProxyAdmin owner.
+        EtherfiL1SyncPoolETH newImpl = new EtherfiL1SyncPoolETH(LZ_ENDPOINT, ROLE_REGISTRY);
+        vm.prank(GOV_GNOSIS);
         vm.expectRevert();
         proxyAdmin.upgradeAndCall(SYNC_POOL, address(newImpl), "");
-        assertTrue(_impl() != address(newImpl), "Safe upgrade should have reverted");
+        assertTrue(_impl() != address(newImpl), "non-owner upgrade should have reverted");
 
-        // 3. The timelock can upgrade, driven by the governance Safe.
+        // 2. The timelock can upgrade, driven by the governance Safe.
         address owner_ = pool.owner();
         uint256 unbacked = pool.getTotalUnbackedTokens();
         bytes memory up = abi.encodeWithSignature(
@@ -129,7 +133,7 @@ contract L1SyncPoolUpgradeTest is Test {
     // an earlier divergence means real source/compiler drift.
     function test_diagnostic_rebuilt_vs_onchain_bytecode() public {
         bytes memory onchain = _impl().code;
-        bytes memory rebuilt = address(new EtherfiL1SyncPoolETH(LZ_ENDPOINT)).code;
+        bytes memory rebuilt = address(new EtherfiL1SyncPoolETH(LZ_ENDPOINT, ROLE_REGISTRY)).code;
         emit log_named_uint("on-chain impl code length", onchain.length);
         emit log_named_uint("rebuilt  impl code length", rebuilt.length);
 
