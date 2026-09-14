@@ -227,6 +227,28 @@ function buildPeer(nc, peer, policy, args) {
 
   // timelock-owned: schedule + execute, submitted by the controlling Safe.
   const tl = peer.TIMELOCK.toLowerCase();
+
+  // The registry's CONTROLLER_SAFE can lag a Safe migration — op still named the legacy
+  // 0x764682c7 Safe long after the timelock roles moved to the canonical one. A proposal signed
+  // by a Safe without PROPOSER reverts at scheduleBatch, and nothing earlier catches it: the
+  // JSON is well formed, the calldata is right and the Safe tx hash is valid. Fail closed.
+  if (args.rpc) {
+    const proposer = callView(peer.TIMELOCK, "PROPOSER_ROLE()(bytes32)", args.rpc);
+    const executor = callView(peer.TIMELOCK, "EXECUTOR_ROLE()(bytes32)", args.rpc);
+    for (const [role, hash] of [["PROPOSER", proposer], ["EXECUTOR", executor]]) {
+      if (!hash) continue;
+      const held = callView(peer.TIMELOCK, "hasRole(bytes32,address)(bool)", args.rpc, hash, peer.CONTROLLER_SAFE);
+      if (held !== "true") {
+        console.error(
+          `error: ${peer.NAME} CONTROLLER_SAFE ${peer.CONTROLLER_SAFE} does not hold ${role} on timelock ${peer.TIMELOCK}.\n` +
+          `       A proposal from this Safe would revert at ${role === "PROPOSER" ? "scheduleBatch" : "executeBatch"}.\n` +
+          `       Fix registry/chains.json ${peer.NAME}.CONTROLLER_SAFE to the Safe that actually holds the role.`
+        );
+        process.exit(1);
+      }
+    }
+  }
+
   const delay = (args.rpc && Number(callView(peer.TIMELOCK, "getMinDelay()(uint256)", args.rpc))) || DEFAULT_DELAY;
   const targets = `[${inner.map((c) => c.to).join(",")}]`;
   const values = `[${inner.map(() => "0").join(",")}]`;
@@ -419,10 +441,19 @@ function main() {
   const subdir = args.subdir;
   if (subdir) while (claimed.has(id) && args.id === undefined) id++;
 
+  // A schedule+execute pair executes as two sequential Safe txns, so the second must sit one
+  // nonce above the first. Reading nonce() per proposal gives both the SAME nonce, and since the
+  // nonce is a signed field, that yields two txns competing for one slot: executing either voids
+  // the other, and the published execute hash can never be signed. Count uses per Safe instead.
+  const nonceOffset = new Map();
   proposals.forEach((p, k) => {
     if (!subdir) { while (claimed.has(id)) id++; claimed.add(id); }
-    const nonce =
+    const safeKey = p.safe.toLowerCase();
+    const base =
       args.nonce !== undefined ? Number(args.nonce) : args.rpc ? readSafeNonce(p.safe, args.rpc) : 0;
+    const used = nonceOffset.get(safeKey) || 0;
+    const nonce = base + used;
+    nonceOffset.set(safeKey, used + 1);
     // Per-Safe MultiSendCallOnly (version-matched) for multi-call leaves; single-tx leaves
     // are hashed as a direct call (operation 0) by renderMd regardless.
     const multisend = args.multisend || resolveMultiSend(p.safe, args.rpc);

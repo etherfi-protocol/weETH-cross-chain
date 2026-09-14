@@ -56,9 +56,10 @@
     "OFT": "0x5A7fACB970D094B6C7FF1df0eA68D99E6e73CBFF",
     "OFT_IMPL": "0x70d7E0C93D8443325550Ba3F71576F5f346b8aA9",
     "PROXY_ADMIN": "0x632304Edc891Afed1a7bDe9A40b19F1c393ad5F3",
-    "CONTROLLER_SAFE": "0x764682c769CcB119349d92f1B63ee1c03d6AECFf",
+    "CONTROLLER_SAFE": "0x7a00657a45420044bc526B90Ad667aFfaee0A868",
     "TIMELOCK": "0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6",
-    "RPC_URL": "https://optimism-rpc.publicnode.com"
+    "RPC_URL": "https://optimism-rpc.publicnode.com",
+    "_controllerSafeNote": "Canonical Safe holds PROPOSER/EXECUTOR on the op timelock. The legacy 0x764682c769CcB119349d92f1B63ee1c03d6AECFf holds neither and is still the native-minting Safe; do not reuse it for OFT-mesh proposals."
   },
   "bnb": {
     "NAME": "bnb",
