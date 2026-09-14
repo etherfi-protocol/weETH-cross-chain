@@ -45,6 +45,17 @@ LEDGER_ARGS=(--ledger)
 
 lower() { tr '[:upper:]' '[:lower:]'; }
 
+# ---- gate 0: toolchain, so a fresh machine fails here and not 3 minutes into a fork ---------
+missing=""
+for bin in forge cast node git; do
+  command -v "$bin" >/dev/null 2>&1 || missing="$missing $bin"
+done
+[ -z "$missing" ] || { echo "ERROR: not on PATH:$missing" >&2; exit 1; }
+# foundry.toml sets libs = ["node_modules", "lib"], so both must be populated before forge build
+[ -d "$ROOT/node_modules" ] || { echo "ERROR: node_modules missing — run 'yarn install'" >&2; exit 1; }
+[ -f "$ROOT/lib/forge-std/src/Test.sol" ] || {
+  echo "ERROR: lib/forge-std missing — run 'git submodule update --init --recursive'" >&2; exit 1; }
+
 echo "== weETH OFT deploy: $CHAIN =="
 echo "chainId  : $(cast chain-id --rpc-url "$RPC")"
 echo "deployer : $DEPLOYER"
