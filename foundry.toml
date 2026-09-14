@@ -13,7 +13,7 @@ fs_permissions = [
 
 optimizer = true
 optimizer_runs = 200
-solc_version = "0.8.20"
+solc_version = "0.8.22"
 
 # remove the hash of the metadata for more deterministic code 
 bytecode_hash = 'none'

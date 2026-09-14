@@ -358,6 +358,14 @@ function assertCanonical(type, chain, peerC, proposals, policy) {
     if (!dvns.every(isAddr)) errs.push(`${peerC.NAME}: a DVN is not an address`);
     if (new Set(dvns).size !== dvns.length) errs.push(`${peerC.NAME}: DVNs not unique`);
     if (JSON.stringify(dvns) !== JSON.stringify([...dvns].sort())) errs.push(`${peerC.NAME}: DVNs not sorted ascending`);
+    // The peer's DVN set is copied verbatim into setConfig, so a stale registry entry silently
+    // re-onboards a retired DVN on a brand-new pathway. Compare against THIS peer's retired
+    // address only — operators reuse one address across chains, so a flat denylist would reject
+    // a legitimate DVN (base's P2P is the same address as op's Canary).
+    const retiredHere = ((policy.retiredDvns || {})[peerC.NAME] || "").toLowerCase();
+    if (retiredHere && dvns.includes(retiredHere)) {
+      errs.push(`${peerC.NAME}: DVN set contains retired DVN ${retiredHere} — registry/chains.json is stale, refresh LZ_DVN from live config`);
+    }
     if (!isAddr(peerC.SEND_302) || !isAddr(peerC.RECEIVE_302)) errs.push(`${peerC.NAME}: missing 302 libraries`);
     if (!isAddr(chain.OFT)) errs.push(`${chain.NAME}: peer OFT (setPeer target) missing/invalid`);
   }

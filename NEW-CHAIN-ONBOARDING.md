@@ -8,7 +8,9 @@ the controller Safe, and the peer allow-list.
 
 Prerequisites: a funded deployer (Ledger), the new chain's RPC in `.env`, and
 the chain present in LayerZero's deployment metadata (endpoint + 4 policy DVNs
-must already exist on it — that is the gating check).
+must already exist on it — that is the gating check). The 4 policy DVNs are
+**LayerZero Labs, Nethermind, Horizen, P2P** at 45 confirmations; Canary is
+retired mesh-wide and must not be reintroduced (see step 1).
 
 ## Inputs you provide
 
@@ -31,7 +33,7 @@ node tools/resolve-chain.mjs <chainKey> --rpc "$NEW_CHAIN_RPC_URL"
 ```
 
 Resolves the endpoint, send/receive 302 libraries, and the 4 policy DVNs
-(LayerZero Labs, Nethermind, Horizen, Canary — sorted ascending) from LayerZero
+(LayerZero Labs, Nethermind, Horizen, **P2P** — sorted ascending) from LayerZero
 metadata and writes them into `registry/chains.json`. Then hand-add the peer
 allow-list fields (`peerEids`, `peerOfts`, `peerLimits`, `peerWindows`) and set
 `CONTROLLER_SAFE` to the canonical `0x7a00657a…` (same on every chain — from
@@ -39,6 +41,23 @@ allow-list fields (`peerEids`, `peerOfts`, `peerLimits`, `peerWindows`) and set
 
 If a DVN provider is missing on the chain, the resolver throws — **do not
 deploy** until all four are live (this is the hard security gate).
+
+> **DVN policy: P2P, never Canary.** The mesh was migrated Canary → P2P on every
+> live pathway, so **every new chain onboards onto P2P**. The provider list is
+> `registry/policy.json` → `dvnProviders`; Canary is listed under
+> `retiredDvnProviders` and `tools/resolve-chain.mjs` throws if anything asks for
+> it. Do not hand-edit a DVN back in.
+>
+> The same applies to the **reverse-peer proposals** in step 5: they copy the
+> peer's `LZ_DVN` out of `registry/chains.json` verbatim into `setConfig`, so a
+> stale registry entry would silently put Canary back on a brand-new pathway.
+> `make-3cp-folder.mjs` now refuses to emit a proposal containing a retired DVN,
+> and `node --test "tools/*.test.mjs"` pins the invariant across the registry.
+>
+> `retiredDvns` in `policy.json` is keyed **per chain**, not a flat address list:
+> DVN operators reuse one address across chains via CREATE2, so the same address
+> is Canary on one chain and a policy DVN on another (base's P2P is byte-identical
+> to op's Canary). Only ever compare an address against its own chain's entry.
 
 ### 2. Load-check the entry
 

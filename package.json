@@ -21,6 +21,7 @@
     "scripts": {
 
       "build": "yarn install && forge install && forge build",
-      "test": "forge test"
+      "test": "node --test \"tools/*.test.mjs\" && forge test",
+      "test:policy": "node --test \"tools/*.test.mjs\""
     }
   }

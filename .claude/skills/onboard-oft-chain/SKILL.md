@@ -40,6 +40,7 @@ When the user says "deploy weETH to <chain>" (or similar), do this **before any 
 - **Never `--broadcast` before the dry-run passes** (`Script ran successfully`).
 - **Broadcast only via `--ledger`** (deployer `0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150`); no hot keys.
 - **4-DVN gate:** all 4 policy DVNs must be live on the chain (dry-run / resolver fails otherwise). Do not deploy without them.
+- **DVN set is P2P, never Canary.** The policy 4 are **LayerZero Labs, Nethermind, Horizen, P2P** @45 confirmations (`registry/policy.json` → `dvnProviders`). The mesh was migrated Canary → P2P on every live pathway, so a new chain onboards onto **P2P**; Canary sits in `retiredDvnProviders` and `resolve-chain.mjs` throws if asked for it. **This also governs the reverse-peer 3CPs in step 9** — they copy the peer's `LZ_DVN` straight from `registry/chains.json` into `setConfig`, so a stale registry entry silently re-onboards Canary on a brand-new pathway and creates a one-sided pathway that stalls (one end requiring Canary, the other P2P, verifies nothing). `make-3cp-folder.mjs` refuses to emit a proposal containing a retired DVN; run `npm run test:policy` before generating one. Note `retiredDvns` is keyed **per chain** — operators reuse one address across chains, so base's P2P is byte-identical to op's Canary and a flat denylist would reject a legitimate DVN.
 - **Do not change `solc_version`** (0.8.22 is required by OZ v5.4.0).
 - Rate limits are **per-pathway**, one config per peer, from the registry (`peerLimits`/`peerWindows`). Current peers are all **1000 weETH / 4h**, but values can differ per chain.
 - **Authority model:** OFT owner, ProxyAdmin owner, **and the LZ delegate** all go to the **timelock** (so DVN/library/enforced-option changes are timelock-gated, not just upgrades). Pauser = EOA (instant emergency stop), unpauser = Safe. The Safe holds proposer/executor/canceller on the timelock.
@@ -126,8 +127,15 @@ is the **direct** form for single-tx leaves and the **MultiSend** form for batch
 confirm against a **Tenderly Safe simulation / Transaction Builder** — the `to`/`operation` it
 shows is what to hash against. (Verified: base/op/eth/robinhood Safes are 1.3.0 → `0xA1dabEF3…`.)
 
-### Chains with no Safe web UI (e.g. Robinhood/4663) — sign on-chain
-If the chain isn't on app.safe.global, owners can't sign in the UI. Document the on-chain
+### Chains with no Safe web UI — sign on-chain
+**Check before you assume.** Fetch `https://safe-config.safe.global/api/v1/chains/?limit=200`
+and look the chainId up; that list is the source of truth for both support and the EIP-3770
+short name used in signing links. As of 2026-08-19 **every live mesh chain is supported**,
+Robinhood (4663), Monad (143), Ink (57073), Plasma (9745) and HyperEVM (999) included — an
+earlier version of this doc named those as UI-less, which was wrong and pushed signers toward a
+manual flow they did not need.
+
+Only when the live chain list genuinely omits a chain, document the on-chain
 flow in the leaf md + PR body: (1) each of ≥threshold owners runs
 `cast send <safe> "approveHash(bytes32)" <safeTxHash> --ledger --sender <owner>` from their
 own key; verify with `approvedHashes(address,bytes32)`; (2) anyone runs `execTransaction(...)`
