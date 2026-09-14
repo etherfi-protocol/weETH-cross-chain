@@ -50,14 +50,31 @@ fi
 echo "auth OK"
 echo
 
+RESULTS=()
 ok=0; fail=0
+
+# Blockscout answers a submission with "OK" + a GUID and then verifies asynchronously, so a
+# successful POST says nothing about the outcome. --watch polls the GUID, and reading the
+# contract back afterwards is what actually proves it landed.
+is_verified() { # address
+  curl -s --max-time 25 "http://127.0.0.1:$PORT/api?module=contract&action=getsourcecode&address=$1" \
+    | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);const r=Array.isArray(j.result)?j.result[0]:j.result;process.exit(r&&r.SourceCode&&r.SourceCode.length>0?0:1)}catch{process.exit(1)}})'
+}
+
 verify() { # label address contract ctor-args...
   local label="$1" addr="$2" contract="$3"; shift 3
   echo "== $label  $addr"
-  if forge verify-contract "$addr" "$contract" "${V[@]}" "$@" 2>&1 | tail -4; then
-    ok=$((ok+1))
+  if is_verified "$addr"; then
+    echo "  already verified — skipping"
+    RESULTS+=("OK       $label (was already verified)"); ok=$((ok+1)); echo; return
+  fi
+  forge verify-contract "$addr" "$contract" "${V[@]}" --watch "$@" 2>&1 | tail -8
+  if is_verified "$addr"; then
+    RESULTS+=("OK       $label"); ok=$((ok+1))
   else
-    fail=$((fail+1)); echo "  ^ FAILED"
+    RESULTS+=("FAILED   $label  ($contract @ $addr)"); fail=$((fail+1))
+    echo "  ^ submitted but the explorer still reports it unverified."
+    echo "    Usual cause: constructor args or compiler settings do not match the deployed bytecode."
   fi
   echo
 }
@@ -84,6 +101,15 @@ node tools/verify-safe-blockscout.mjs --safe "$SAFE" --singleton "$SINGLETON" \
 node tools/verify-safe-singleton-blockscout.mjs --singleton "$SINGLETON" \
   --explorer "http://127.0.0.1:$PORT/api/" || echo "  Safe singleton verification failed"
 
+for a in "Safe proxy:$SAFE" "Safe singleton:$SINGLETON"; do
+  if is_verified "${a#*:}"; then RESULTS+=("OK       ${a%%:*}"); ok=$((ok+1))
+  else RESULTS+=("FAILED   ${a%%:*}  (${a#*:})"); fail=$((fail+1)); fi
+done
+
 echo
-echo "== done: $ok forge contracts verified, $fail failed =="
-echo "Check: $EXPLORER/address/$OFT"
+echo "================ result ================"
+for r in "${RESULTS[@]}"; do echo "  $r"; done
+echo "  $ok verified, $fail failed"
+echo
+echo "Confirm in a browser: $EXPLORER/address/$OFT"
+[ "$fail" -eq 0 ]

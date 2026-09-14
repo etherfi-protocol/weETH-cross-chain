@@ -56,6 +56,28 @@ done
 [ -f "$ROOT/lib/forge-std/src/Test.sol" ] || {
   echo "ERROR: lib/forge-std missing — run 'git submodule update --init --recursive'" >&2; exit 1; }
 
+# CREATE3 addresses come from the salt, not the code, so building against the wrong dependency
+# version puts DIFFERENT bytecode at the canonical address and nothing downstream notices —
+# the dry run passes, the addresses assert clean, only explorer verification later disagrees.
+# shellcheck disable=SC2016  # "+name+" is JS string concatenation, not shell expansion
+node -e '
+const fs=require("fs"), pkg=require("'"$ROOT"'/package.json");
+const pinned={...(pkg.resolutions||{}), ...(pkg.overrides||{})};
+let bad=[];
+for (const [name, want] of Object.entries(pinned)) {
+  let got;
+  try { got=JSON.parse(fs.readFileSync("'"$ROOT"'/node_modules/"+name+"/package.json","utf8")).version; }
+  catch { bad.push(name+": not installed (want "+want+")"); continue; }
+  if (got!==want) bad.push(name+": installed "+got+", pinned "+want);
+}
+if (bad.length) {
+  console.error("ERROR: dependency versions do not match the pin:\n  "+bad.join("\n  "));
+  console.error("\nnpm ignores yarn `resolutions`. Install with yarn, or npm respecting `overrides`:");
+  console.error("  yarn install --frozen-lockfile     # preferred, matches yarn.lock");
+  console.error("  npm ci                             # honours the overrides block");
+  process.exit(1);
+}' || exit 1
+
 echo "== weETH OFT deploy: $CHAIN =="
 echo "chainId  : $(cast chain-id --rpc-url "$RPC")"
 echo "deployer : $DEPLOYER"
