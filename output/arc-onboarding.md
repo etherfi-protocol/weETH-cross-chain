@@ -70,31 +70,45 @@ Simulated calldata asserted to contain all four live DVNs, all three peer EIDs, 
 the deprecated LZ Labs DVN nor Canary. Only contracts touched: CreateX, the CREATE2 factory,
 the OFT, and the LZ endpoint.
 
-## What you need to run (Ledger — I cannot sign these)
-
-Ledger unlocked, Ethereum app open, **blind signing on**, Ledger Live closed, derivation path
-resolving to `0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150`.
+## Deploy — one command
 
 ```bash
 cd /Users/pankajjagtap/etherfi/Stake/weETH-cross-chain
-set -a; . ./.env; set +a
-D=0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150
-
-# 1. OFT deploy + config  (~16 txns)
-TARGET_CHAIN=arc forge script scripts/oft-deployment/01_OFTConfigure.s.sol:DeployOFTScript \
-  --rpc-url "$ARC_MAINNET_RPC_URL" --ledger --sender $D --broadcast --slow
-
-# 2. Controller Safe  (1 tx, deterministic 2-of-5 at 0x7a00657a…)
-forge script scripts/oft-deployment/DeployControllerSafe.s.sol:DeployControllerSafe \
-  --rpc-url "$ARC_MAINNET_RPC_URL" --ledger --sender $D --broadcast
-
-# 3. Ownership handoff  (~5 txns — owner, proxyAdmin, delegate all -> timelock)
-TARGET_CHAIN=arc forge script scripts/oft-deployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer \
-  --rpc-url "$ARC_MAINNET_RPC_URL" --ledger --sender $D --broadcast --slow
+.claude/skills/onboard-oft-chain/deploy.sh arc
 ```
 
-The RPC is rate-limited — `--slow` already serialises, but if you see timeouts, rerun; both
-scripts are idempotent on already-deployed addresses.
+Re-runs the dry run, verifies the connected Ledger, checks gas, prompts once, then broadcasts
+all three steps. Every step is idempotent, so a run that dies mid-way can just be re-run.
+
+### Who can run it
+
+**Only the holder of the deployer Ledger `0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150`.**
+Handing this to a colleague works only if they have that physical device.
+
+`01_OFTConfigure.s.sol:40` sets `scriptDeployer = DEPLOYER_ADDRESS` — a hardcoded constant, not
+`msg.sender` — and initializes the proxy with it as OFT owner and ProxyAdmin owner (line 62).
+The rate-limit, peer, enforced-option and DVN calls then run in the same broadcast and are
+owner-gated.
+
+From any other signer the CREATE3 deploys still succeed (the salts carry no sender, so the
+addresses are right) and then every config call reverts. Verified by simulating step 1 from
+`0x…dEaD`:
+
+```
+[Revert] OwnableUnauthorizedAccount(0x000000000000000000000000000000000000dEaD)
+Error: script failed
+```
+
+That leaves Arc **deployed, unconfigured, and owned by an address nobody in the room controls** —
+recoverable only from the real deployer key. `deploy.sh` gate 2 refuses before signing anything.
+
+Step 2 (controller Safe) is the exception: its address depends only on (factory, singleton,
+initializer, saltNonce), so any funded signer can deploy it. Simulated clean from a non-deployer.
+
+If the device holds the deployer on a non-default path:
+`LEDGER_DERIVATION_PATH="m/44'/60'/1'/0/0" .claude/skills/onboard-oft-chain/deploy.sh arc`
+
+The RPC is rate-limited — `--slow` serialises already; on a timeout, re-run.
 
 ## After the broadcasts land, I pick back up with
 

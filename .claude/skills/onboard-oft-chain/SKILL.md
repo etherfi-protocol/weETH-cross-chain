@@ -56,6 +56,25 @@ Runs pre-flight (CreateX present, OFT address free, deployer gas) + the full
 `01` deploy+config simulation against a fork — no signing, no gas, nothing sent.
 Pass `rpcUrl` if the chain's RPC isn't in the registry / `.env`.
 
+## Deploy (steps 4-6 in one gated command)
+```bash
+.claude/skills/onboard-oft-chain/deploy.sh <chainKey> [rpcUrl]
+```
+Re-runs the dry run, **checks the connected Ledger actually resolves to the canonical deployer**,
+checks gas, prompts once, then broadcasts steps 4, 5 and 6 in order. Each step is idempotent, so
+a failed run can be re-run. Use it instead of the three raw `forge script` commands.
+
+**Only the deployer key can run this — delegating to a colleague does not work unless they hold
+that device.** `01_OFTConfigure` sets `scriptDeployer = DEPLOYER_ADDRESS` (a hardcoded constant,
+not `msg.sender`) and initializes the proxy with it as OFT owner and ProxyAdmin owner, then makes
+the rate-limit/peer/option/DVN calls in the same broadcast. From any other signer the CREATE3
+deploys still succeed — the salts carry no sender — and then every config call reverts
+`OwnableUnauthorizedAccount`, leaving the chain **deployed but unconfigured and owned by an
+address nobody present controls**. `03_OFTOwnershipTransfer` is owner-gated the same way. Step 5
+(controller Safe) is the one exception: its address depends only on (factory, singleton,
+initializer, saltNonce), so anyone funded can deploy it. The `deploy.sh` Ledger gate exists
+precisely to turn that mid-broadcast failure into a refusal before anything is signed.
+
 ## Full flow (each step; pause for the human at signing/funding)
 1. **Registry entry:** `node tools/resolve-chain.mjs <chainKey> --rpc <url>` → resolves endpoint, 302 libs, 4 sorted DVNs into `registry/chains.json`. Then hand-add the peer allow-list (`peerEids`/`peerOfts`/`peerLimits`/`peerWindows`). Set `CONTROLLER_SAFE` to the canonical `0x7a00657a…` (same on every chain — copy from `policy.json` → `canonical.controllerSafe`); set `OFT`/`OFT_IMPL`/`PROXY_ADMIN`/`TIMELOCK` to the canonical CREATE3 addresses. Policy in `registry/policy.json`.
 2. **Load check:** `TARGET_CHAIN=<chainKey> forge test --match-contract TargetLoaderTest -vvv`.
