@@ -6,6 +6,7 @@
 // Types (--type):
 //   handoff         (default) new chain: setDelegate + transferOwnership -> timelock
 //   safe-migration  new chain's controller Safe: 2-of-5 -> 4-of-7 (self-calls)
+//   lib-pin         new chain's OWN send/receive libs -> the 302 libs (timelock-routed)
 //   peer            existing peer chain accepts the new chain: setPeer (+ rate
 //                   limits on L2s). Routed automatically: direct-Safe when the
 //                   peer OFT is Safe-owned, timelock schedule+execute when it is
@@ -161,6 +162,68 @@ function isDefaultReceiveLib(endpoint, oapp, eid, rpc) {
   } catch {
     return false;
   }
+}
+
+// A new chain's OWN send/receive libraries stay on the LayerZero default after deploy —
+// 01_OFTConfigure sets its DVNs but never pins its libs, and the reverse-peer 3CP only pins the
+// peer side. DVN config is stored per library, so a LZ default-library rotation moves the
+// outbound pathway to a library that carries none of it. Pins the new chain's own side.
+function buildLibPin(c, args) {
+  const endpoint = c.L2_ENDPOINT.toLowerCase();
+  const oft = c.OFT.toLowerCase();
+  const eids = c.peerEids || [];
+  if (!eids.length) {
+    console.error(`error: ${c.NAME} has no peerEids in the registry — nothing to pin`);
+    process.exit(1);
+  }
+  if (!args.rpc) {
+    console.error("error: --rpc is required; pins must be generated from live state or they revert LZ_SameValue");
+    process.exit(1);
+  }
+
+  const calls = [];
+  for (const eid of eids) {
+    if (isDefaultSendLib(endpoint, oft, String(eid), args.rpc)) {
+      calls.push({to: endpoint, value: "0", data: calldata("setSendLibrary(address,uint32,address)", oft, String(eid), c.SEND_302), desc: `setSendLibrary(${eid}, SEND_302)`});
+    }
+    if (isDefaultReceiveLib(endpoint, oft, String(eid), args.rpc)) {
+      calls.push({to: endpoint, value: "0", data: calldata("setReceiveLibrary(address,uint32,address,uint256)", oft, String(eid), c.RECEIVE_302, "0"), desc: `setReceiveLibrary(${eid}, RECEIVE_302, grace 0)`});
+    }
+  }
+  if (!calls.length) {
+    console.error(`error: every ${c.NAME} pathway is already pinned — nothing to emit`);
+    process.exit(1);
+  }
+  return wrapTimelock(c, calls, `${c.NAME}: pin own message libraries`, args);
+}
+
+// Wrap owner/delegate-gated calls in the chain's timelock schedule+execute pair, submitted by its
+// controller Safe. Shared by the peer and lib-pin builders.
+function wrapTimelock(c, inner, label, args) {
+  const tl = c.TIMELOCK.toLowerCase();
+  const delay = (args.rpc && Number(callView(c.TIMELOCK, "getMinDelay()(uint256)", args.rpc))) || DEFAULT_DELAY;
+  const targets = `[${inner.map((x) => x.to).join(",")}]`;
+  const values = `[${inner.map(() => "0").join(",")}]`;
+  const datas = `[${inner.map((x) => x.data).join(",")}]`;
+  const lines = inner.map((x, i) => `   - ${i + 1}. ${x.desc}`);
+  return [
+    {
+      label: `${label} (schedule, delay ${delay}s)`,
+      safe: c.CONTROLLER_SAFE,
+      chainId: String(c.CHAIN_ID),
+      transactions: [{to: tl, value: "0", data: calldata("scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)", targets, values, datas, ZERO32, ZERO32, String(delay))}],
+      lines: [`1. scheduleBatch(delay=${delay}s) on timelock ${tl}, batching:`, ...lines],
+      note: `Execute after the ${delay}s delay with the matching execute proposal.`,
+    },
+    {
+      label: `${label} (execute)`,
+      safe: c.CONTROLLER_SAFE,
+      chainId: String(c.CHAIN_ID),
+      transactions: [{to: tl, value: "0", data: calldata("executeBatch(address[],uint256[],bytes[],bytes32,bytes32)", targets, values, datas, ZERO32, ZERO32)}],
+      lines: [`1. executeBatch() on timelock ${tl}, batching:`, ...lines],
+      note: "Submit only after the schedule proposal has cleared the timelock delay.",
+    },
+  ];
 }
 
 function peerInnerCalls(nc, peer, rpc) {
@@ -422,6 +485,7 @@ async function main() {
   let peerC = null;
   if (type === "handoff") proposals = buildHandoff(c);
   else if (type === "safe-migration") proposals = buildSafeMigration(c, policy);
+  else if (type === "lib-pin") proposals = buildLibPin(c, args);
   else if (type === "peer") {
     if (!args.peer) {
       console.error("error: --peer <peerKey> is required for --type peer");
@@ -430,7 +494,7 @@ async function main() {
     peerC = requireChain(reg, args.peer);
     proposals = buildPeer(c, peerC, policy, args);
   } else {
-    console.error(`error: unknown --type "${type}" (handoff | safe-migration | peer)`);
+    console.error(`error: unknown --type "${type}" (handoff | safe-migration | peer | lib-pin)`);
     process.exit(1);
   }
   // Refuse to write a proposal that touches a non-canonical address (wrong peer, stray DVN,
@@ -462,10 +526,17 @@ async function main() {
   for (const [k, p] of proposals.entries()) {
     if (!subdir) { while (claimed.has(id)) id++; claimed.add(id); }
     const safeKey = p.safe.toLowerCase();
+    const used = nonceOffset.get(safeKey) || 0;
+    // --nonces 0,2 assigns explicit, possibly non-consecutive slots — needed when another
+    // proposal on the same Safe has to execute between a schedule and its execute.
+    const explicit = args.nonces ? args.nonces.split(",").map(Number) : null;
+    if (explicit && explicit.length <= used) {
+      console.error(`error: --nonces has ${explicit.length} entries but this run emits more proposals`);
+      process.exit(1);
+    }
     const base =
       args.nonce !== undefined ? Number(args.nonce) : args.rpc ? readSafeNonce(p.safe, args.rpc) : 0;
-    const used = nonceOffset.get(safeKey) || 0;
-    const nonce = base + used;
+    const nonce = explicit ? explicit[used] : base + used;
     nonceOffset.set(safeKey, used + 1);
     // Per-Safe MultiSendCallOnly (version-matched) for multi-call leaves; single-tx leaves
     // are hashed as a direct call (operation 0) by renderMd regardless.

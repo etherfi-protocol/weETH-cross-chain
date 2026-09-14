@@ -91,6 +91,18 @@ precisely to turn that mid-broadcast failure into a refusal before anything is s
      --rpc-url <url> --ledger --sender <deployer> --broadcast
    ```
    Deterministic 2-of-5 at `0x7a00657a…` from the recovered initializer; idempotent (skips if already deployed); asserts the canonical address. Migrate to 4-of-7 in step 10.
+5b. **The new chain's own message libraries are pinned in step 4, before the handoff.**
+   `01_OFTConfigure` now calls `configureLibraries()` (send + receive → the 302 libs, per peer EID,
+   skipping anything already pinned) while the **deployer still holds owner and delegate**. Do this
+   before step 6, never after: once ownership is on the timelock the same two calls cost a
+   schedule+execute 3CP per chain and a full delay cycle. **This was missed on Robinhood and Arc** —
+   step 9 pins the *peer* side, and the new chain's own side was listed only as a "pending"
+   hardening item, so every onboarded chain shipped with its outbound pathways on the LayerZero
+   default library. DVN config is stored **per library**, so a default-library rotation moves the
+   pathway to a library carrying none of the 4-of-4 config. Arc's retrofit is 3CP 683.
+   Verify before handing off: `isDefaultSendLibrary` and `getReceiveLibrary(...).isDefault` must
+   both read **false** for every peer EID.
+
 6. **Ownership handoff (deployer Ledger, NOT a 3CP for a fresh deploy):**
    `forge script scripts/oft-deployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url <url> --sender <deployer> --ledger --broadcast --slow`
    → OFT owner, ProxyAdmin owner, **and LZ delegate all → timelock**; pauser = EOA, unpauser = Safe. (The Safe from step 5 must exist — it becomes unpauser + timelock proposer/executor.) `make-3cp-folder --type handoff` is only for migrating chains *already* Safe-owned.
@@ -281,9 +293,13 @@ in the drift monitor, not a view call.
   known-default**, not a silent gap.
 - **Drift monitor (cron)** + **cross-chain supply invariant** (`Σ L2 totalSupply == L1 locked`) —
   the point-in-time `verify-deployment` report is the seed; make it `--all` + JSON and schedule it.
-- **Onboarding unprotected-window invariant:** the new chain's *own* receive DVN is set at deploy
-  (`01_OFTConfigure`) but its libraries/executor are **not** pinned there yet — wire no peer to a
-  new chain before its receive side is on the 4-DVN config, and pin its own libs in a follow-up.
+- ~~**Onboarding unprotected-window invariant:** pin the new chain's own libs in a follow-up.~~
+  **Done — libraries are now pinned in `01_OFTConfigure` (step 5b), before the handoff.** The
+  lesson worth keeping: this sat in *this* pending list for two onboardings while step 9 pinned
+  only the peer side, so it read as a future improvement rather than a missing step. **A control
+  that belongs in the flow goes in the flow.** Anything left here should be something genuinely
+  not yet decided, not a known gap waiting for someone to notice. Retrofit for an already-deployed
+  chain: `make-3cp-folder.mjs --type lib-pin --chain <key> --rpc <url>` (timelock-routed).
 - **Emergency runbook:** pauser-EOA liveness/drill; canceller (Safe) can cancel a malicious
   scheduled op inside the 48h window; document `endpoint.skip/nilify/burn/clear` for a stuck or
   poisoned inbound message.
