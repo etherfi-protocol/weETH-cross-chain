@@ -11,9 +11,11 @@ const policy = require("../registry/policy.json");
 import { resolveDvns } from "./resolve-chain.mjs";
 import { buildEntry } from "./resolve-chain.mjs";
 
+// Read providers from policy rather than restating them, so the test cannot drift from the
+// policy it is meant to enforce.
 test("resolveDvns returns 4 policy DVNs sorted ascending", () => {
-  const dvns = resolveDvns(fixture.robinhood, ["LayerZero Labs", "Nethermind", "Horizen", "Canary"]);
-  assert.equal(dvns.length, 4);
+  const dvns = resolveDvns(fixture.robinhood, policy.dvnProviders, policy.retiredDvnProviders);
+  assert.equal(dvns.length, policy.requiredDVNCount);
   const sorted = [...dvns].sort((a, b) => (BigInt(a) < BigInt(b) ? -1 : 1));
   assert.deepEqual(dvns, sorted);
 });
@@ -23,6 +25,36 @@ test("resolveDvns throws on missing provider", () => {
     () => resolveDvns(fixture.robinhood, ["Nonexistent DVN"]),
     /missing DVN provider/
   );
+});
+
+// --- Canary -> P2P policy: a new chain must be onboarded onto P2P, never back onto Canary.
+
+test("policy requires P2P and retires Canary", () => {
+  assert.ok(policy.dvnProviders.includes("P2P"), "P2P must be a policy DVN provider");
+  assert.ok(!policy.dvnProviders.includes("Canary"), "Canary must not be a policy DVN provider");
+  assert.ok(policy.retiredDvnProviders.includes("Canary"), "Canary must be listed as retired");
+});
+
+test("resolveDvns refuses a retired provider even if callers ask for it", () => {
+  assert.throws(
+    () => resolveDvns(fixture.robinhood, ["Canary"], policy.retiredDvnProviders),
+    /retired DVN provider requested/
+  );
+});
+
+test("a resolved chain entry contains P2P and not that chain's Canary", () => {
+  const dvns = resolveDvns(fixture.robinhood, policy.dvnProviders, policy.retiredDvnProviders);
+  // robinhood's P2P and Canary addresses, as verified against live on-chain config
+  assert.ok(dvns.includes("0x8ed0a851964604bb1b6b1a703f4c8234ee684d76"), "P2P missing");
+  assert.ok(!dvns.includes(policy.retiredDvns.robinhood.toLowerCase()), "Canary still present");
+});
+
+test("retiredDvns is keyed per chain, not a flat list", () => {
+  // DVN operators reuse one address across chains, so an address is only meaningful with its
+  // chain: base's P2P is byte-identical to op's Canary. A flat denylist would reject base.
+  assert.equal(typeof policy.retiredDvns, "object");
+  assert.ok(!Array.isArray(policy.retiredDvns));
+  assert.notEqual(policy.retiredDvns.base, policy.retiredDvns.op);
 });
 
 test("buildEntry maps Robinhood v2 deployment", () => {

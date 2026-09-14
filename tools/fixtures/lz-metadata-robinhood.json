@@ -114,6 +114,11 @@
         "version": 2,
         "canonicalName": "Canary",
         "id": "canary"
+      },
+      "0x8ed0a851964604bb1b6b1a703f4c8234ee684d76": {
+        "version": 2,
+        "canonicalName": "P2P",
+        "id": "p2p"
       }
     },
     "chainName": "robinhood",

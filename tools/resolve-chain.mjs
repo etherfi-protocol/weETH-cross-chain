@@ -9,13 +9,21 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
  * @param {string[]} providers - Ordered list of provider canonical names from policy
  * @returns {string[]} DVN addresses sorted ascending
  */
-export function resolveDvns(chain, providers) {
+export function resolveDvns(chain, providers, retiredProviders = []) {
   const dvns = chain.dvns || {};
+  const nameOf = (v) => v.canonicalName || v.name || v.providerName;
+
+  // Canary was removed from every live pathway mesh-wide (Canary -> P2P swap). Asking for it
+  // again is a policy regression, not a config choice — fail closed rather than re-onboard it.
+  const retired = retiredProviders.map((n) => n.toLowerCase());
+  const asked = providers.filter((n) => retired.includes(n.toLowerCase()));
+  if (asked.length) {
+    throw new Error(`retired DVN provider requested: ${asked.join(", ")} — policy is P2P, not Canary`);
+  }
+
   // DVN addresses are keys; metadata values hold canonicalName/name
   const addresses = providers.map((name) => {
-    const pair = Object.entries(dvns).find(
-      ([, v]) => (v.canonicalName || v.name || v.providerName) === name
-    );
+    const pair = Object.entries(dvns).find(([, v]) => nameOf(v) === name);
     if (!pair) throw new Error(`missing DVN provider: ${name}`);
     return pair[0].toLowerCase();
   });
@@ -43,7 +51,7 @@ export function buildEntry(chain, policy) {
     SEND_302: dep.sendUln302.address,
     RECEIVE_302: dep.receiveUln302.address,
     EXECUTOR: dep.executor.address,
-    LZ_DVN: resolveDvns(chain, policy.dvnProviders),
+    LZ_DVN: resolveDvns(chain, policy.dvnProviders, policy.retiredDvnProviders),
     LIMIT: policy.rateLimit.limitWei,
     WINDOW: policy.rateLimit.windowSeconds,
   };

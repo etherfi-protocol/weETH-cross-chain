@@ -39,10 +39,20 @@ struct UlnConfig {
     address[] optionalDVNs;
 }
 
-// Replays the exact queued 3CP bytes (timelock scheduleBatch -> delay -> executeBatch) on a fork
-// of every chain in the swap, then asserts the resulting ULN config on BOTH the send and receive
-// library of every in-scope pathway is a clean 4-of-4 at 45 confirmations, containing P2P and
-// no longer containing Canary.
+// Post-execution verification of the Canary->P2P DVN swap, on a live fork of every chain in the
+// mesh. The swap has landed on-chain, so there is nothing left to replay: this asserts the
+// end state instead.
+//
+// Per chain:
+//   1. the exact queued batch is Done on the timelock — the config came from governance, and the
+//      bytes that executed are the bytes the 3CP proposed;
+//   2. every in-scope pathway is a clean 4-of-4 at 45 confirmations on BOTH the send and the
+//      receive library, containing P2P and no longer containing Canary;
+//   3. peers are untouched — a DVN swap must not sever a pathway;
+//   4. the bridge still works: weETH sends out, the send bills the NEW DVN set, weETH credits in.
+//
+// In-flight drainage is a cross-chain nonce comparison and cannot be asserted from a single fork;
+// `node tools/inflight-check.mjs --dvn` covers it.
 contract DvnCanaryToP2PTest is Test {
     using stdJson for string;
 
@@ -56,7 +66,7 @@ contract DvnCanaryToP2PTest is Test {
         json = vm.readFile("test/fixtures/dvn-canary-to-p2p.json");
     }
 
-    // One test per chain: a single test body replaying all 12 forks exhausts EVM memory.
+    // One test per chain: a single test body forking all 12 chains exhausts EVM memory.
     function test_01_ethereum() public { _check(0); }
     function test_02_base() public { _check(1); }
     function test_03_op() public { _check(2); }
@@ -126,18 +136,14 @@ contract DvnCanaryToP2PTest is Test {
 
         Cfg memory c = _load(i);
 
-        // --- pre-state: every pathway must currently carry Canary, on both libs
-        for (uint256 k = 0; k < c.eids.length; k++) {
-            _assertContains(c, c.sendLib, uint32(c.eids[k]), c.canary, true, "pre send");
-            _assertContains(c, c.recvLib, uint32(c.eids[k]), c.canary, true, "pre recv");
-        }
+        // --- the swap reached chain through governance, as the exact bytes that were proposed
+        _assertExecutedViaTimelock(c, p);
 
-        _replay(c, p);
-
-        // --- post-state: clean 4-of-4, P2P in, Canary out, sorted, on both libs
+        // --- end state: clean 4-of-4, P2P in, Canary out, sorted, on both libs
         for (uint256 k = 0; k < c.eids.length; k++) {
             _assertFinal(c, c.sendLib, uint32(c.eids[k]), "send");
             _assertFinal(c, c.recvLib, uint32(c.eids[k]), "recv");
+            _assertPeerIntact(c, uint32(c.eids[k]));
             asserted += 2;
         }
 
@@ -147,9 +153,97 @@ contract DvnCanaryToP2PTest is Test {
         emit log_named_string("OK", c.name);
     }
 
-    /// Post-swap: send weETH out and receive weETH in on a real fork, then prove from the
-    /// `DVNFeePaid` event that the send paid the new DVN set. Config reads alone cannot show
-    /// that LayerZero actually assigns and pays P2P at send time.
+    /// The queued `executeBatch` bytes hash to a timelock operation that is DONE on-chain.
+    /// This is what distinguishes "the config happens to look right" from "the 3CP we reviewed is
+    /// what landed": a hand-rolled setConfig from some other sender would leave this operation
+    /// unscheduled, and a still-pending operation means the swap has not actually executed.
+    function _assertExecutedViaTimelock(Cfg memory c, string memory p) internal {
+        bytes memory executeData = json.readBytes(string.concat(p, ".executeData"));
+
+        // strip the 4-byte executeBatch selector to recover the operation arguments
+        bytes memory args = new bytes(executeData.length - 4);
+        for (uint256 i = 0; i < args.length; i++) {
+            args[i] = executeData[i + 4];
+        }
+        (
+            address[] memory targets,
+            uint256[] memory values,
+            bytes[] memory payloads,
+            bytes32 predecessor,
+            bytes32 salt
+        ) = abi.decode(args, (address[], uint256[], bytes[], bytes32, bytes32));
+
+        assertGt(targets.length, 0, string.concat(c.name, ": queued batch has no targets"));
+
+        bytes32 id = _timelockBytes32(
+            c,
+            abi.encodeWithSignature(
+                "hashOperationBatch(address[],uint256[],bytes[],bytes32,bytes32)",
+                targets,
+                values,
+                payloads,
+                predecessor,
+                salt
+            ),
+            "hashOperationBatch"
+        );
+
+        assertTrue(
+            _timelockBool(c, abi.encodeWithSignature("isOperationDone(bytes32)", id), "isOperationDone"),
+            string.concat(c.name, ": queued batch is not Done on the timelock - the swap did not execute")
+        );
+        assertFalse(
+            _timelockBool(c, abi.encodeWithSignature("isOperationPending(bytes32)", id), "isOperationPending"),
+            string.concat(c.name, ": queued batch is still Pending on the timelock")
+        );
+
+        // Negative control: an id this timelock never saw must read as not-Done. Without it, a
+        // timelock that returned true for everything would make the assertions above vacuous.
+        assertFalse(
+            _timelockBool(
+                c,
+                abi.encodeWithSignature("isOperationDone(bytes32)", keccak256(abi.encode(id, "never-queued"))),
+                "isOperationDone(control)"
+            ),
+            string.concat(c.name, ": timelock reports an unqueued operation as Done")
+        );
+    }
+
+    function _timelockCall(Cfg memory c, bytes memory data, string memory what)
+        private
+        view
+        returns (bytes memory ret)
+    {
+        bool ok;
+        (ok, ret) = c.timelock.staticcall(data);
+        require(ok, string.concat(c.name, ": timelock ", what, " call failed"));
+        require(ret.length >= 32, string.concat(c.name, ": timelock ", what, " returned no word"));
+    }
+
+    function _timelockBytes32(Cfg memory c, bytes memory data, string memory what)
+        private
+        view
+        returns (bytes32)
+    {
+        return abi.decode(_timelockCall(c, data, what), (bytes32));
+    }
+
+    function _timelockBool(Cfg memory c, bytes memory data, string memory what) private view returns (bool) {
+        return abi.decode(_timelockCall(c, data, what), (bool));
+    }
+
+    /// A DVN swap reconfigures verification, not routing. A zeroed peer here would mean the swap
+    /// severed a pathway as a side effect and every message on it would strand.
+    function _assertPeerIntact(Cfg memory c, uint32 eid) internal view {
+        assertTrue(
+            IOFTPeers(c.oft).peers(eid) != bytes32(0),
+            string.concat(c.name, ": peer for eid ", vm.toString(uint256(eid)), " is zero")
+        );
+    }
+
+    /// Send weETH out and receive weETH in on a live fork, then prove from the `DVNFeePaid` event
+    /// that the send paid the new DVN set. Config reads alone cannot show that LayerZero actually
+    /// assigns and pays P2P at send time.
     function _assertBridgeWorks(Cfg memory c, uint32 dstEid) internal {
         address token = IOFT(c.oft).token();
         address sender = vm.addr(0x5e7d);
@@ -236,25 +330,6 @@ contract DvnCanaryToP2PTest is Test {
         assertTrue(found, string.concat(c.name, ": no DVNFeePaid event in the send transaction"));
     }
 
-    /// Replays the literal queued bytes as the real proposer Safe.
-    function _replay(Cfg memory c, string memory p) internal {
-        bytes memory scheduleData = json.readBytes(string.concat(p, ".scheduleData"));
-        bytes memory executeData = json.readBytes(string.concat(p, ".executeData"));
-
-        vm.startPrank(c.safe);
-        (bool okS,) = c.timelock.call(scheduleData);
-        require(okS, string.concat(c.name, ": scheduleBatch reverted"));
-
-        // execute must not be possible before the delay elapses
-        (bool early,) = c.timelock.call(executeData);
-        require(!early, string.concat(c.name, ": executeBatch succeeded before delay"));
-
-        vm.warp(block.timestamp + c.delaySec + 1);
-        (bool okE,) = c.timelock.call(executeData);
-        require(okE, string.concat(c.name, ": executeBatch reverted"));
-        vm.stopPrank();
-    }
-
     function _read(address endpoint, address oft, address lib, uint32 eid)
         internal
         view
@@ -262,18 +337,6 @@ contract DvnCanaryToP2PTest is Test {
     {
         bytes memory raw = IEndpointConfig(endpoint).getConfig(oft, lib, eid, CONFIG_TYPE_ULN);
         u = abi.decode(raw, (UlnConfig));
-    }
-
-    function _assertContains(Cfg memory c, address lib, uint32 eid, address dvn, bool want, string memory tag)
-        internal
-        view
-    {
-        UlnConfig memory u = _read(c.endpoint, c.oft, lib, eid);
-        bool found;
-        for (uint256 j = 0; j < u.requiredDVNs.length; j++) {
-            if (u.requiredDVNs[j] == dvn) found = true;
-        }
-        require(found == want, string.concat(c.name, " ", tag, ": DVN presence mismatch"));
     }
 
     function _assertFinal(Cfg memory c, address lib, uint32 eid, string memory tag) internal view {

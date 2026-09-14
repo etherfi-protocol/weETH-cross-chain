@@ -1,10 +1,36 @@
 {
-  "dvnProviders": ["LayerZero Labs", "Nethermind", "Horizen", "Canary"],
+  "dvnProviders": [
+    "LayerZero Labs",
+    "Nethermind",
+    "Horizen",
+    "P2P"
+  ],
+  "retiredDvnProviders": [
+    "Canary"
+  ],
+  "_retiredDvnsNote": "Per-chain, NOT a flat list: DVN operators reuse one address across chains via CREATE2, so the same address can be Canary on one chain and a policy DVN on another (base's P2P == op's Canary). Only ever compare a DVN address against its own chain's entry.",
+  "retiredDvns": {
+    "ethereum": "0xa4fe5a5b9a846458a70cd0748228aed3bf65c2cd",
+    "base": "0x554833698ae0fb22ecc90b01222903fd62ca4b47",
+    "op": "0x5b6735c66d97479ccd18294fc96b3084ecb2fa3f",
+    "bnb": "0xfa9ba83c102283958b997adc8b44ed3a3cdb5dda",
+    "linea": "0xda63525a0fc42bcc2cad1dd28708d5ed11849347",
+    "unichain": "0x00a979a5d306e9c5f8cf473659e75f8002e06fc8",
+    "avax": "0xcc49e6fca014c77e1eb604351cc1e08c84511760",
+    "hyperEVM": "0x83342ec538df0460e730a8f543fe63063e2d44c4",
+    "plasma": "0x2465ee263149a18d61c9224244c61a5871dc0473",
+    "ink": "0x1e4ce74ccf5498b19900649d9196e64bab592451",
+    "monad": "0x493626c5d852b9b187a9eb709d0b0978a3877238",
+    "robinhood": "0x8d77d35604a9f37f488e41d1d916b2a0088f82dd"
+  },
   "requiredDVNCount": 4,
   "optionalDVNCount": 0,
   "optionalDVNThreshold": 0,
   "confirmations": 45,
-  "rateLimit": { "limitWei": "5000000000000000000000", "windowSeconds": 14400 },
+  "rateLimit": {
+    "limitWei": "5000000000000000000000",
+    "windowSeconds": 14400
+  },
   "canonical": {
     "oft": "0xA3D68b74bF0528fdD07263c60d6488749044914b",
     "oftImpl": "0x08DB0DB9b5F2dcbBFDc26FF411FB2026e81DA748",
@@ -36,5 +62,18 @@
       "0xD31074937B28f65db4eeB243916883E335261650",
       "0x566E58ac0F2c4BCaF6De63760C56cC3f825C48f5"
     ]
-  }
+  },
+  "chainKeyAliases": {
+    "optimism": "op",
+    "ethereum": "ethereum",
+    "mainnet": "ethereum",
+    "eth": "ethereum",
+    "bsc": "bnb",
+    "binance": "bnb",
+    "avalanche": "avax",
+    "berachain": "bera",
+    "hyperliquid": "hyperEVM",
+    "hyperevm": "hyperEVM"
+  },
+  "_chainKeyAliasesNote": "TARGET_CHAIN accepts these aliases so LayerZero/explorer spellings resolve to registry keys (LZ calls it optimism, the registry key is op)."
 }
