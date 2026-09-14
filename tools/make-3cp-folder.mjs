@@ -20,7 +20,7 @@
 //   node tools/make-3cp-folder.mjs --type peer --chain <newKey> --peer <peerKey> --rpc <peerRpc> [--out repo]
 //
 // Defaults: --out $CP3_REPO or ../../3CP-secure ; multisend auto-resolved from the Safe's
-// version via --rpc (MultiSendCallOnly, e.g. 0xA1dabEF3… for 1.3.0). Single-tx leaves are
+// version via --rpc (read from safe-deployments). Single-tx leaves are
 // hashed as a direct call (operation 0) — no MultiSend. Override with --multisend.
 
 import {readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync} from "node:fs";
@@ -29,12 +29,6 @@ import {fileURLToPath} from "node:url";
 import {execFileSync} from "node:child_process";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-// MultiSendCallOnly 1.3.0 — the contract Safe{Wallet} actually wraps batches with, so the
-// generated safeTxHash matches what signers sign. Two canonical deployments exist; the app
-// uses whichever is deployed on the chain (resolveMultiSend picks it from --rpc). Do NOT use
-// the plain MultiSend 0xA238CBeb… — it allows sub-call delegatecall and yields a different hash.
-const MULTISEND_CALL_ONLY = "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B"; // eip155 / Safe Singleton Factory
-const MULTISEND_CALL_ONLY_CANONICAL = "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D"; // Nick-factory variant
 const GH_REPO = process.env.CP3_GH_REPO || "etherfi-protocol/3CP-secure";
 const ZERO32 = "0x" + "0".repeat(64);
 const DEFAULT_DELAY = 172800; // 2 days, fallback if timelock minDelay is unreadable
@@ -65,20 +59,39 @@ const hasCode = (addr, rpc) => {
     return false;
   }
 };
-// MultiSendCallOnly per Safe version — Safe{Wallet} wraps a batch with the MultiSendCallOnly
-// matching THIS Safe's version, so the generated safeTxHash equals what signers sign. Read
-// VERSION() off the Safe, then pick the candidate that's actually deployed on the chain.
-const MSCO_BY_VERSION = {
-  "1.3.0": ["0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B", "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D"],
-  "1.4.1": ["0x9641d764fc13c8B624c04430C7356C1C7C8102e2"],
-};
+const SAFE_DEPLOYMENTS = "https://raw.githubusercontent.com/safe-global/safe-deployments/main/src/assets";
 const safeVersion = (safe, rpc) => (callView(safe, "VERSION()(string)", rpc) || "").replace(/"/g, "").trim();
-const resolveMultiSend = (safe, rpc) => {
-  if (!rpc) return MULTISEND_CALL_ONLY;
-  const candidates = MSCO_BY_VERSION[safeVersion(safe, rpc)] || [MULTISEND_CALL_ONLY, MULTISEND_CALL_ONLY_CANONICAL];
-  for (const c of candidates) if (hasCode(c, rpc)) return c;
-  return candidates[0];
-};
+
+// Version off the Safe, address from safe-deployments networkAddresses[chainId] first entry —
+// what Safe{Wallet} uses. Never probe for code: both 1.3.0 variants are deployed on most chains
+// and the order differs per chain, so a probe silently picks a MultiSend no signer's hash matches.
+const mscoCache = new Map();
+async function resolveMultiSend(safe, rpc, chainId) {
+  if (!rpc) throw new Error("--rpc is required to resolve MultiSend (Safe VERSION() is read on-chain)");
+  const version = safeVersion(safe, rpc);
+  if (!version) throw new Error(`could not read VERSION() from Safe ${safe}`);
+  const key = `${version}:${chainId}`;
+  if (mscoCache.has(key)) return mscoCache.get(key);
+  const r = await fetch(`${SAFE_DEPLOYMENTS}/v${version}/multi_send_call_only.json`);
+  if (!r.ok) throw new Error(`safe-deployments has no multi_send_call_only for Safe v${version} (HTTP ${r.status})`);
+  const j = await r.json();
+  const entry = j.networkAddresses?.[String(chainId)];
+  const type = Array.isArray(entry) ? entry[0] : entry;
+  const addr = j.deployments?.[type]?.address;
+  if (!addr) throw new Error(`no MultiSendCallOnly for chainId ${chainId} at Safe v${version}`);
+  mscoCache.set(key, addr);
+  return addr;
+}
+
+// safe_hashes.sh keys its domain data on its own network names, not our registry keys. Read them
+// out of the script itself so the emitted verify command cannot drift from the tool that runs it.
+function safeHashesNetwork(outRepo, chainId) {
+  let src;
+  try { src = readFileSync(resolve(outRepo, "safe_hashes.sh"), "utf8"); } catch { return null; }
+  const block = src.match(/declare -A -r CHAIN_IDS=\(([\s\S]*?)\n\)/)?.[1] || "";
+  for (const m of block.matchAll(/\["([a-z0-9-]+)"\]="(\d+)"/g)) if (m[2] === String(chainId)) return m[1];
+  return null;
+}
 
 function loadRegistry() {
   return JSON.parse(readFileSync(resolve(REPO_ROOT, "registry/chains.json"), "utf8"));
@@ -308,20 +321,6 @@ function readSafeNonce(safe, rpc) {
   return n === null ? 0 : Number(n);
 }
 
-// safe_hashes.sh keys its domain data on its OWN network names, which are not our registry keys
-// (op -> optimism, bnb -> bsc, avax -> avalanche, swell -> swellchain). Emitting the registry key
-// makes the verify command print nothing at all, so the signer gets no hash rather than a wrong
-// one. Resolve on chainId, which both sides agree on. A chain absent here has no safe_hashes
-// entry (arc 5042, robinhood 4663) and needs the cast-based EIP-712 route instead.
-const SAFE_HASHES_NETWORK = {
-  1: "ethereum", 10: "optimism", 56: "bsc", 100: "gnosis", 130: "unichain", 137: "polygon",
-  143: "monad", 146: "sonic", 196: "xlayer", 324: "zksync", 480: "worldchain", 988: "stable",
-  1101: "polygon-zkevm", 1923: "swellchain", 2818: "morph", 5000: "mantle", 8453: "base",
-  34443: "mode", 42161: "arbitrum", 42220: "celo", 43114: "avalanche", 57073: "ink",
-  59144: "linea", 80094: "berachain", 81457: "blast", 9745: "plasma", 534352: "scroll",
-  1313161554: "aurora",
-};
-
 function renderMd(p, id, nonce, multisend, chainKey, jsonPath) {
   const noteBlock = p.note ? `\n> ${p.note}\n` : "";
   return `# ${p.label}
@@ -368,9 +367,9 @@ function leafSuffix(label, idx) {
 // wrong timelock reads as plausible calldata to a human reviewer; this fails the build
 // instead. Sources of truth: registry/chains.json (per-chain) + policy.json (canonical).
 const isAddr = (a) => /^0x[0-9a-fA-F]{40}$/.test(a || "");
-function assertCanonical(type, chain, peerC, proposals, policy) {
+function assertCanonical(type, chain, peerC, proposals, policy, knownMultiSends = []) {
   const errs = [];
-  const msco = new Set(Object.values(MSCO_BY_VERSION).flat().map((a) => a.toLowerCase()));
+  const msco = new Set(knownMultiSends.map((a) => a.toLowerCase()));
   const known = new Set();
   for (const k of [chain, peerC]) {
     if (!k) continue;
@@ -412,7 +411,7 @@ function assertCanonical(type, chain, peerC, proposals, policy) {
   }
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2));
   const type = args.type || "handoff";
   const reg = loadRegistry();
@@ -460,7 +459,7 @@ function main() {
   // nonce is a signed field, that yields two txns competing for one slot: executing either voids
   // the other, and the published execute hash can never be signed. Count uses per Safe instead.
   const nonceOffset = new Map();
-  proposals.forEach((p, k) => {
+  for (const [k, p] of proposals.entries()) {
     if (!subdir) { while (claimed.has(id)) id++; claimed.add(id); }
     const safeKey = p.safe.toLowerCase();
     const base =
@@ -470,7 +469,7 @@ function main() {
     nonceOffset.set(safeKey, used + 1);
     // Per-Safe MultiSendCallOnly (version-matched) for multi-call leaves; single-tx leaves
     // are hashed as a direct call (operation 0) by renderMd regardless.
-    const multisend = args.multisend || resolveMultiSend(p.safe, args.rpc);
+    const multisend = args.multisend || (await resolveMultiSend(p.safe, args.rpc, p.chainId));
     const bundle = {chainId: p.chainId, safeAddress: p.safe.toLowerCase(), meta: {txBuilderVersion: "1.16.5"}, transactions: p.transactions};
     const leaf = subdir
       ? (proposals.length > 1 ? `${subdir}-${leafSuffix(p.label, k)}` : subdir)
@@ -481,7 +480,7 @@ function main() {
     writeFileSync(resolve(folder, `${leaf}.json`), JSON.stringify(bundle, null, 2) + "\n");
     // peer proposals live on the PEER chain, not the new chain — use the peer key
     // for the verify --network (else it emits the wrong/unknown network).
-    const netKey = SAFE_HASHES_NETWORK[Number(p.chainId)] || (type === "peer" ? args.peer : args.chain);
+    const netKey = safeHashesNetwork(outRepo, p.chainId) || (type === "peer" ? args.peer : args.chain);
     writeFileSync(resolve(folder, `${leaf}.md`), renderMd(p, id, nonce, multisend, netKey, relJson));
 
     console.log(`#${id}${subdir ? `/${leaf}` : ""}  ${p.label}`);
@@ -492,8 +491,8 @@ function main() {
       for (const t of conflicts) console.log(`        - ${t}`);
     }
     if (!subdir) id++;
-  });
+  }
   if (!ghOk) console.log("WARN: gh unavailable — folder ids from local queued/ only; check open PRs manually.");
 }
 
-main();
+main().catch((e) => { console.error(`error: ${e.message}`); process.exit(1); });
