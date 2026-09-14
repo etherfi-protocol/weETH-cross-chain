@@ -31,10 +31,41 @@ if (!COOKIE && !(CID && CSECRET)) {
   process.exit(1);
 }
 
+const MIN_GAP_MS = Number(arg("min-gap", "400"));
+const MAX_RETRIES = Number(arg("max-retries", "6"));
+
 /** Access credentials for the upstream request. A service token takes precedence over a cookie. */
 function authHeaders() {
   if (CID && CSECRET) return { "CF-Access-Client-Id": CID, "CF-Access-Client-Secret": CSECRET };
   return { cookie: `CF_Authorization=${COOKIE}` };
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Blockscout rate-limits per IP and answers 429 with a plain-text body. forge surfaces that as
+// "Response result is unexpectedly empty", which points nowhere. Serialise upstream calls and
+// back off here so a burst of verifications degrades into waiting rather than failing.
+let chain = Promise.resolve();
+let lastAt = 0;
+function serialize(fn) {
+  const run = chain.then(async () => {
+    const gap = Date.now() - lastAt;
+    if (gap < MIN_GAP_MS) await sleep(MIN_GAP_MS - gap);
+    try { return await fn(); } finally { lastAt = Date.now(); }
+  });
+  chain = run.catch(() => {});
+  return run;
+}
+
+async function fetchWithBackoff(url, init) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, init);
+    if (res.status !== 429 || attempt >= MAX_RETRIES) return res;
+    const retryAfter = Number(res.headers.get("retry-after"));
+    const wait = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : Math.min(2 ** attempt * 1000, 30000);
+    console.error(`  429 from upstream, retrying in ${wait}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
+    await sleep(wait);
+  }
 }
 
 const server = http.createServer((req, res) => {
@@ -50,12 +81,14 @@ const server = http.createServer((req, res) => {
     delete headers["content-length"];
 
     try {
-      const upstream = await fetch(url, {
-        method: req.method,
-        headers,
-        body: ["GET", "HEAD"].includes(req.method) ? undefined : body,
-        redirect: "manual",
-      });
+      const upstream = await serialize(() =>
+        fetchWithBackoff(url, {
+          method: req.method,
+          headers,
+          body: ["GET", "HEAD"].includes(req.method) ? undefined : body,
+          redirect: "manual",
+        })
+      );
 
       // A 302 to cloudflareaccess.com means the credential was rejected. Say so loudly rather
       // than handing forge an HTML login page it will report as an opaque verification failure.
@@ -68,6 +101,9 @@ const server = http.createServer((req, res) => {
       }
 
       const buf = Buffer.from(await upstream.arrayBuffer());
+      if (upstream.status === 429) {
+        console.error(`STILL 429 after ${MAX_RETRIES} retries — raise --min-gap or wait for the window to reset`);
+      }
       console.log(`${req.method} ${req.url} -> ${upstream.status} (${buf.length}b)`);
       res.writeHead(upstream.status, {
         "content-type": upstream.headers.get("content-type") || "application/json",

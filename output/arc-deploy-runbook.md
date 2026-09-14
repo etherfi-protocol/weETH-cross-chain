@@ -32,12 +32,20 @@ git clone https://github.com/etherfi-protocol/weETH-cross-chain.git
 cd weETH-cross-chain
 git checkout feat/arc-onboarding
 git submodule update --init --recursive
-yarn install
+npx --yes yarn@1 install --frozen-lockfile
 forge build
 ```
 
-`foundry.toml` sets `libs = ["node_modules", "lib"]`, so both `yarn install` and the submodule
-are required. `forge build` should finish with warnings but no errors.
+`foundry.toml` sets `libs = ["node_modules", "lib"]`, so both the install and the submodule are
+required. `forge build` should finish with warnings but no errors.
+
+**Install with yarn, not `npm install`.** The OpenZeppelin version is pinned through yarn
+`resolutions`, and npm ignores that field — a plain `npm install` resolves `^5.0.1` to the latest
+5.x and produces different bytecode. Since CREATE3 takes the address from the salt rather than
+the code, that would deploy **different contracts to the canonical addresses** with nothing
+failing along the way. `npm ci` is not an option here: there is no `package-lock.json`, only
+`yarn.lock`. `deploy.sh` checks the installed versions against the pin and refuses to run on a
+mismatch.
 
 ## 2. Create `.env`
 
