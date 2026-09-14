@@ -22,8 +22,8 @@ cd "$ROOT"
 
 EXPLORER="${EXPLORER_URL:-https://explorer.arc.io}"
 PORT="${PROXY_PORT:-8555}"
-CHAIN_ID="$(node -e "process.stdout.write(require('./registry/chains.json')['$CHAIN'].CHAIN_ID)")"
-SOLC=0.8.22
+POLL_MS="${POLL_MS:-10000}"
+MIN_GAP="${MIN_GAP_MS:-1500}"
 
 read -r OFT IMPL PA TL SAFE <<EOF
 $(node -e "const c=require('./registry/chains.json')['$CHAIN'];console.log([c.OFT,c.OFT_IMPL,c.PROXY_ADMIN,c.TIMELOCK,c.CONTROLLER_SAFE].join(' '))")
@@ -34,14 +34,13 @@ DEPLOYER=0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150
 SINGLETON=0xfb1bffC9d739B8D520DaF37dF666da4C687191EA
 
 echo "== starting Cloudflare Access proxy -> $EXPLORER =="
-node tools/cf-access-proxy.mjs --upstream "$EXPLORER" --port "$PORT" &
+node tools/cf-access-proxy.mjs --upstream "$EXPLORER" --port "$PORT" --min-gap "$MIN_GAP" &
 PROXY_PID=$!
 trap 'kill $PROXY_PID 2>/dev/null || true' EXIT
 sleep 2
 
-V=(--verifier blockscout --verifier-url "http://127.0.0.1:$PORT/api/" --chain "$CHAIN_ID" --compiler-version "$SOLC")
 
-# Reject a stale credential before burning four verification attempts on it.
+# Reject a stale credential before spending verification attempts on it.
 echo "== auth preflight =="
 if ! curl -sf --max-time 20 "http://127.0.0.1:$PORT/api/v2/stats" >/dev/null; then
   echo "ERROR: the explorer rejected the credential. Grab a fresh CF_Authorization cookie." >&2
@@ -54,44 +53,41 @@ RESULTS=()
 ok=0; fail=0
 
 # Blockscout answers a submission with "OK" + a GUID and then verifies asynchronously, so a
-# successful POST says nothing about the outcome. --watch polls the GUID, and reading the
+# successful POST says nothing about the outcome. verify-direct polls the GUID, and reading the
 # contract back afterwards is what actually proves it landed.
 is_verified() { # address
   curl -s --max-time 25 "http://127.0.0.1:$PORT/api?module=contract&action=getsourcecode&address=$1" \
     | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);const r=Array.isArray(j.result)?j.result[0]:j.result;process.exit(r&&r.SourceCode&&r.SourceCode.length>0?0:1)}catch{process.exit(1)}})'
 }
 
-verify() { # label address contract ctor-args...
-  local label="$1" addr="$2" contract="$3"; shift 3
+# verify-direct builds the standard-json offline and makes one POST plus polls. forge would spend
+# three GETs per contract before submitting, which a rate-limited explorer refuses outright.
+verify() { # label address contract ctor-args-hex
+  local label="$1" addr="$2" contract="$3" ctor="${4:-}"
   echo "== $label  $addr"
   if is_verified "$addr"; then
     echo "  already verified — skipping"
     RESULTS+=("OK       $label (was already verified)"); ok=$((ok+1)); echo; return
   fi
-  forge verify-contract "$addr" "$contract" "${V[@]}" --watch "$@" 2>&1 | tail -8
-  if is_verified "$addr"; then
+  if node tools/verify-direct.mjs --address "$addr" --contract "$contract" \
+       --explorer "http://127.0.0.1:$PORT/api/" --constructor-args "$ctor" \
+       --poll-ms "$POLL_MS" 2>&1 | sed 's/^/  /'; then
     RESULTS+=("OK       $label"); ok=$((ok+1))
   else
     RESULTS+=("FAILED   $label  ($contract @ $addr)"); fail=$((fail+1))
-    echo "  ^ submitted but the explorer still reports it unverified."
-    echo "    Usual cause: constructor args or compiler settings do not match the deployed bytecode."
   fi
   echo
 }
 
 INIT_DATA="$(cast calldata "initialize(string,string,address)" "Wrapped eETH" "weETH" "$DEPLOYER")"
 
-verify "OFT implementation" "$IMPL" EtherfiOFTUpgradeable \
-  --constructor-args "$(cast abi-encode 'f(address)' "$ENDPOINT")"
+verify "OFT implementation" "$IMPL" EtherfiOFTUpgradeable "$(cast abi-encode 'f(address)' "$ENDPOINT")"
 
-verify "ProxyAdmin" "$PA" ProxyAdmin \
-  --constructor-args "$(cast abi-encode 'f(address)' "$DEPLOYER")"
+verify "ProxyAdmin" "$PA" ProxyAdmin "$(cast abi-encode 'f(address)' "$DEPLOYER")"
 
-verify "OFT proxy" "$OFT" TransparentUpgradeableProxy \
-  --constructor-args "$(cast abi-encode 'f(address,address,bytes)' "$IMPL" "$DEPLOYER" "$INIT_DATA")"
+verify "OFT proxy" "$OFT" TransparentUpgradeableProxy "$(cast abi-encode 'f(address,address,bytes)' "$IMPL" "$DEPLOYER" "$INIT_DATA")"
 
-verify "Timelock" "$TL" EtherFiTimelock \
-  --constructor-args "$(cast abi-encode 'f(uint256,address[],address[],address)' 259200 "[$SAFE]" "[$SAFE]" 0x0000000000000000000000000000000000000000)"
+verify "Timelock" "$TL" EtherFiTimelock "$(cast abi-encode 'f(uint256,address[],address[],address)' 259200 "[$SAFE]" "[$SAFE]" 0x0000000000000000000000000000000000000000)"
 
 # The Safe proxy and singleton are solc 0.7.6 with a different build config, so forge cannot match
 # them. Dedicated tools post the canonical Safe sources and try the known Safe build configs.
