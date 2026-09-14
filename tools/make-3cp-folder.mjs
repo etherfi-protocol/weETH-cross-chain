@@ -308,6 +308,20 @@ function readSafeNonce(safe, rpc) {
   return n === null ? 0 : Number(n);
 }
 
+// safe_hashes.sh keys its domain data on its OWN network names, which are not our registry keys
+// (op -> optimism, bnb -> bsc, avax -> avalanche, swell -> swellchain). Emitting the registry key
+// makes the verify command print nothing at all, so the signer gets no hash rather than a wrong
+// one. Resolve on chainId, which both sides agree on. A chain absent here has no safe_hashes
+// entry (arc 5042, robinhood 4663) and needs the cast-based EIP-712 route instead.
+const SAFE_HASHES_NETWORK = {
+  1: "ethereum", 10: "optimism", 56: "bsc", 100: "gnosis", 130: "unichain", 137: "polygon",
+  143: "monad", 146: "sonic", 196: "xlayer", 324: "zksync", 480: "worldchain", 988: "stable",
+  1101: "polygon-zkevm", 1923: "swellchain", 2818: "morph", 5000: "mantle", 8453: "base",
+  34443: "mode", 42161: "arbitrum", 42220: "celo", 43114: "avalanche", 57073: "ink",
+  59144: "linea", 80094: "berachain", 81457: "blast", 9745: "plasma", 534352: "scroll",
+  1313161554: "aurora",
+};
+
 function renderMd(p, id, nonce, multisend, chainKey, jsonPath) {
   const noteBlock = p.note ? `\n> ${p.note}\n` : "";
   return `# ${p.label}
@@ -467,7 +481,7 @@ function main() {
     writeFileSync(resolve(folder, `${leaf}.json`), JSON.stringify(bundle, null, 2) + "\n");
     // peer proposals live on the PEER chain, not the new chain — use the peer key
     // for the verify --network (else it emits the wrong/unknown network).
-    const netKey = type === "peer" ? args.peer : args.chain;
+    const netKey = SAFE_HASHES_NETWORK[Number(p.chainId)] || (type === "peer" ? args.peer : args.chain);
     writeFileSync(resolve(folder, `${leaf}.md`), renderMd(p, id, nonce, multisend, netKey, relJson));
 
     console.log(`#${id}${subdir ? `/${leaf}` : ""}  ${p.label}`);
