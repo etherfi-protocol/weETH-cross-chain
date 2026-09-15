@@ -19,7 +19,8 @@ When the user says "deploy weETH to <chain>" (or similar), do this **before any 
 
 **1. Collect the inputs — ask the user, or have them set in `.env`. If any is missing, STOP and ask; never guess:**
 - **Chain key** (e.g. `robinhood`) → becomes `TARGET_CHAIN`.
-- **RPC** in `.env` as `<CHAIN>_MAINNET_RPC_URL` (API keys stay out of git).
+- **RPC** in `.env` as `<CHAIN>_MAINNET_RPC_URL` (API keys stay out of git). Run `resolve-chain.mjs` **without** `--rpc` for a private or keyed endpoint — `--rpc` writes the URL into `registry/chains.json` and therefore into git. Give the entry `RPC_ENV: "<CHAIN>_MAINNET_RPC_URL"` instead; `L2Constants` reads the env var at load time.
+- **Native gas token — do not assume ETH.** Arc pays gas in **USDC at 18 decimals**, so a raw balance reads like ether but is dollars; `cast balance` output means nothing until you know the chain's `nativeCurrency`. Check `metadata.layerzero-api.com/v1/metadata` → `chainDetails.nativeCurrency` and size funding from the dry run's own estimate, not the ~0.005 ETH rule of thumb.
 - **Explorer + API key** for verification — Blockscout base URL + `<CHAIN>_API_KEY`.
 - **Peer allow-list** — which existing chains it bridges with (e.g. Eth/Base/OP) and the per-pathway rate limit (default **1000 weETH / 4h**). Hand-added to `registry/chains.json`.
 - **Controller Safe** — **always** the canonical `0x7a00657a45420044bc526B90Ad667aFfaee0A868` (deployed deterministically on each chain via `DeployControllerSafe`; do **not** vary it per chain). **Deployer** — recommended Ledger `0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150` (`policy.json` → `canonical.deployer`). Both live in `registry/policy.json` → `canonical`.
@@ -41,6 +42,7 @@ When the user says "deploy weETH to <chain>" (or similar), do this **before any 
 - **Broadcast only via `--ledger`** (deployer `0x8D5AAc5d3d5cda4c404fA7ee31B0822B648Bb150`); no hot keys.
 - **4-DVN gate:** all 4 policy DVNs must be live on the chain (dry-run / resolver fails otherwise). Do not deploy without them.
 - **DVN set is P2P, never Canary.** The policy 4 are **LayerZero Labs, Nethermind, Horizen, P2P** @45 confirmations (`registry/policy.json` → `dvnProviders`). The mesh was migrated Canary → P2P on every live pathway, so a new chain onboards onto **P2P**; Canary sits in `retiredDvnProviders` and `resolve-chain.mjs` throws if asked for it. **This also governs the reverse-peer 3CPs in step 9** — they copy the peer's `LZ_DVN` straight from `registry/chains.json` into `setConfig`, so a stale registry entry silently re-onboards Canary on a brand-new pathway and creates a one-sided pathway that stalls (one end requiring Canary, the other P2P, verifies nothing). `make-3cp-folder.mjs` refuses to emit a proposal containing a retired DVN; run `npm run test:policy` before generating one. Note `retiredDvns` is keyed **per chain** — operators reuse one address across chains, so base's P2P is byte-identical to op's Canary and a flat denylist would reject a legitimate DVN.
+- **A DVN name can resolve to a dead address — metadata order is not liveness order.** LayerZero keeps retired DVNs in the metadata behind a `deprecated` flag, and a provider can hold several addresses on one chain. On **arc** the deprecated LayerZero Labs DVN (`0x282b3386…`) enumerates *before* the live one (`0xa2447e5b…`), so the old first-match resolver pinned it — a 4-of-4 required set containing a DVN that never attests, i.e. a pathway that can never verify, with nothing in the safe-tx hash to show it. `resolveDvns` now filters `deprecated` and throws if a provider has no live address. **Always diff the resolver's output against the addresses the DVN operators gave you**, and re-check whenever a chain's metadata is refreshed. Arc was the only mesh chain where order and liveness disagreed; that is luck, not a property.
 - **Do not change `solc_version`** (0.8.22 is required by OZ v5.4.0).
 - Rate limits are **per-pathway**, one config per peer, from the registry (`peerLimits`/`peerWindows`). Current peers are all **1000 weETH / 4h**, but values can differ per chain.
 - **Authority model:** OFT owner, ProxyAdmin owner, **and the LZ delegate** all go to the **timelock** (so DVN/library/enforced-option changes are timelock-gated, not just upgrades). Pauser = EOA (instant emergency stop), unpauser = Safe. The Safe holds proposer/executor/canceller on the timelock.
@@ -53,6 +55,25 @@ When the user says "deploy weETH to <chain>" (or similar), do this **before any 
 Runs pre-flight (CreateX present, OFT address free, deployer gas) + the full
 `01` deploy+config simulation against a fork — no signing, no gas, nothing sent.
 Pass `rpcUrl` if the chain's RPC isn't in the registry / `.env`.
+
+## Deploy (steps 4-6 in one gated command)
+```bash
+.claude/skills/onboard-oft-chain/deploy.sh <chainKey> [rpcUrl]
+```
+Re-runs the dry run, **checks the connected Ledger actually resolves to the canonical deployer**,
+checks gas, prompts once, then broadcasts steps 4, 5 and 6 in order. Each step is idempotent, so
+a failed run can be re-run. Use it instead of the three raw `forge script` commands.
+
+**Only the deployer key can run this — delegating to a colleague does not work unless they hold
+that device.** `01_OFTConfigure` sets `scriptDeployer = DEPLOYER_ADDRESS` (a hardcoded constant,
+not `msg.sender`) and initializes the proxy with it as OFT owner and ProxyAdmin owner, then makes
+the rate-limit/peer/option/DVN calls in the same broadcast. From any other signer the CREATE3
+deploys still succeed — the salts carry no sender — and then every config call reverts
+`OwnableUnauthorizedAccount`, leaving the chain **deployed but unconfigured and owned by an
+address nobody present controls**. `03_OFTOwnershipTransfer` is owner-gated the same way. Step 5
+(controller Safe) is the one exception: its address depends only on (factory, singleton,
+initializer, saltNonce), so anyone funded can deploy it. The `deploy.sh` Ledger gate exists
+precisely to turn that mid-broadcast failure into a refusal before anything is signed.
 
 ## Full flow (each step; pause for the human at signing/funding)
 1. **Registry entry:** `node tools/resolve-chain.mjs <chainKey> --rpc <url>` → resolves endpoint, 302 libs, 4 sorted DVNs into `registry/chains.json`. Then hand-add the peer allow-list (`peerEids`/`peerOfts`/`peerLimits`/`peerWindows`). Set `CONTROLLER_SAFE` to the canonical `0x7a00657a…` (same on every chain — copy from `policy.json` → `canonical.controllerSafe`); set `OFT`/`OFT_IMPL`/`PROXY_ADMIN`/`TIMELOCK` to the canonical CREATE3 addresses. Policy in `registry/policy.json`.
@@ -70,12 +91,31 @@ Pass `rpcUrl` if the chain's RPC isn't in the registry / `.env`.
      --rpc-url <url> --ledger --sender <deployer> --broadcast
    ```
    Deterministic 2-of-5 at `0x7a00657a…` from the recovered initializer; idempotent (skips if already deployed); asserts the canonical address. Migrate to 4-of-7 in step 10.
+5b. **The new chain's own message libraries are pinned in step 4, before the handoff.**
+   `01_OFTConfigure` now calls `configureLibraries()` (send + receive → the 302 libs, per peer EID,
+   skipping anything already pinned) while the **deployer still holds owner and delegate**. Do this
+   before step 6, never after: once ownership is on the timelock the same two calls cost a
+   schedule+execute 3CP per chain and a full delay cycle. **This was missed on Robinhood and Arc** —
+   step 9 pins the *peer* side, and the new chain's own side was listed only as a "pending"
+   hardening item, so every onboarded chain shipped with its outbound pathways on the LayerZero
+   default library. DVN config is stored **per library**, so a default-library rotation moves the
+   pathway to a library carrying none of the 4-of-4 config. Arc's retrofit is 3CP 683.
+   Verify before handing off: `isDefaultSendLibrary` and `getReceiveLibrary(...).isDefault` must
+   both read **false** for every peer EID.
+
 6. **Ownership handoff (deployer Ledger, NOT a 3CP for a fresh deploy):**
    `forge script scripts/oft-deployment/03_OFTOwnershipTransfer.s.sol:OFTOwnershipTransfer --rpc-url <url> --sender <deployer> --ledger --broadcast --slow`
    → OFT owner, ProxyAdmin owner, **and LZ delegate all → timelock**; pauser = EOA, unpauser = Safe. (The Safe from step 5 must exist — it becomes unpauser + timelock proposer/executor.) `make-3cp-folder --type handoff` is only for migrating chains *already* Safe-owned.
 7. **Verify roles/config on-chain:** `TARGET_CHAIN=<chainKey> forge script scripts/oft-deployment/04_OFTVerification.s.sol:verifyOFT` — owner/proxyAdmin/**delegate all == timelock**, pauser == EOA, unpauser == Safe, DVN 4-of-4@45, limits. (Needs the registry to carry the chain's RPC; for Robinhood the API key is scrubbed, so spot-check with `cast` instead.)
 8. **Verify all deployed contracts on the explorer** (do this for every deploy — see Contract verification below).
-9. **Reverse-peer wiring (3CP):** one proposal per peer chain (Eth/Base/OP) — `setPeer` + **inbound AND outbound rate limits** + **4-of-4 DVN@45 + enforced options + pinned message libraries** for the new EID. Without the DVN config the inbound side falls back to the chain's **1-DVN default** — always include it. **Rate limits are mandatory on EVERY peer including the L1 adapter** — `EtherFiOFTAdapterUpgradeable` *and* `EtherfiOFTUpgradeable` both inherit `PairwiseRateLimiter`, and an **unset** pathway has limit 0 → `amountCanBeSent == 0` → every bridge in/out of that pathway reverts (`Out/InboundRateLimitExceeded`) on day one. (This bit #574: `make-3cp-folder.mjs` had a `chainId == 1` guard that skipped L1 rate limits on the false premise "L1 adapter has none" — removed. Never special-case mainnet for rate limits.) **Pin the libraries too** (`setSendLibrary` / `setReceiveLibrary` to the 302 libs): a pathway left on the LayerZero **default** lib silently follows a LZ default-library rotation with no governance action on our side. `node tools/make-3cp-folder.mjs --type peer --chain <chainKey> --peer <eth|base|optimism> --rpc <peerRpc> --out <3CP>`. **`--rpc` is required for the lib pin** — the tool reads `isDefaultSendLibrary`/`getReceiveLibrary` off a live fork and emits a pin **only where the pathway is still on the default** (a blind pin reverts `LZ_SameValue`; see gotchas). Routing auto-detected: Safe-owned → direct; timelock-owned (L1) → schedule+execute pair. The tool runs a **canonical-address lint** before writing (see "Further hardening") and refuses to emit a proposal that touches a non-canonical address.
+9. **Reverse-peer wiring (3CP):** one proposal per peer chain (Eth/Base/OP) — `setPeer` + **inbound AND outbound rate limits** + **4-of-4 DVN@45 + enforced options + pinned message libraries** for the new EID. Without the DVN config the inbound side falls back to the chain's **1-DVN default** — always include it. **Rate limits are mandatory on EVERY peer including the L1 adapter** — `EtherFiOFTAdapterUpgradeable` *and* `EtherfiOFTUpgradeable` both inherit `PairwiseRateLimiter`, and an **unset** pathway has limit 0 → `amountCanBeSent == 0` → every bridge in/out of that pathway reverts (`Out/InboundRateLimitExceeded`) on day one. (This bit #574: `make-3cp-folder.mjs` had a `chainId == 1` guard that skipped L1 rate limits on the false premise "L1 adapter has none" — removed. Never special-case mainnet for rate limits.) **Pin the libraries too** (`setSendLibrary` / `setReceiveLibrary` to the 302 libs): a pathway left on the LayerZero **default** lib silently follows a LZ default-library rotation with no governance action on our side. `node tools/make-3cp-folder.mjs --type peer --chain <chainKey> --peer <eth|base|optimism> --rpc <peerRpc> --out <3CP>`. **`--rpc` is required for the lib pin** — the tool reads `isDefaultSendLibrary`/`getReceiveLibrary` off a live fork and emits a pin **only where the pathway is still on the default** (a blind pin reverts `LZ_SameValue`; see gotchas). Routing auto-detected: Safe-owned → direct; timelock-owned → schedule+execute pair. **As of
+STAKE-1551 every live peer is timelock-owned and timelock-delegated, so every leg is a
+schedule+execute pair and nothing about a wiring 3CP is instant.** Verified on-chain 2026-09-14:
+ethereum `0xcD425f44…` **2 days**, base and op `0x851Dd540…` **3 days**; the controller Safe holds
+proposer/executor/canceller but not admin, so it cannot shorten a delay. **Budget from the
+schedule transaction, not the signing: a new chain's pathways go live `max(peer minDelay)` after
+the last leg is scheduled — currently 3 days.** An earlier version of this line said L1 was the
+only timelock chain, which stopped being true when ownership moved off the Safes. The tool runs a **canonical-address lint** before writing (see "Further hardening") and refuses to emit a proposal that touches a non-canonical address.
    **Prove it end-to-end before signing — replay the EXACT proposal bytes, then bridge.** Don't just reconstruct the intended config; load the literal Safe-tx JSONs from `queued/<N>/` and *execute them the way they'll execute in production*, on a fork of **every chain in the batch**, then bridge on that same post-execution fork. This is the only check that proves "once this 3CP lands, all pathways work" — a missing rate limit, a mis-encoded DVN blob, a wrong delegate, etc. surface as a revert here, never in the safe-tx hash. The end-to-end test (`test/RobinhoodRoundTrip.t.sol::testProposalEndToEnd_AllChains`) does, per chain:
    - **Replay the proposed transactions** pranked as the JSON's `safeAddress`: direct-Safe chains → call each `tx.to`/`tx.data` (equals the MultiSend execution); **timelock chains → `scheduleBatch`, `vm.warp(block.timestamp + minDelay + 1)`, then `executeBatch`** — so the delay path itself is exercised.
    - **Then bridge both ways on the same fork:** a real `send` (outbound → `_debit`/outbound limit) **and** an endpoint-impersonated `lzReceive` (inbound → `_credit`/inbound limit), each asserted to succeed, plus an over-limit amount asserted to revert.
@@ -253,9 +293,13 @@ in the drift monitor, not a view call.
   known-default**, not a silent gap.
 - **Drift monitor (cron)** + **cross-chain supply invariant** (`Σ L2 totalSupply == L1 locked`) —
   the point-in-time `verify-deployment` report is the seed; make it `--all` + JSON and schedule it.
-- **Onboarding unprotected-window invariant:** the new chain's *own* receive DVN is set at deploy
-  (`01_OFTConfigure`) but its libraries/executor are **not** pinned there yet — wire no peer to a
-  new chain before its receive side is on the 4-DVN config, and pin its own libs in a follow-up.
+- ~~**Onboarding unprotected-window invariant:** pin the new chain's own libs in a follow-up.~~
+  **Done — libraries are now pinned in `01_OFTConfigure` (step 5b), before the handoff.** The
+  lesson worth keeping: this sat in *this* pending list for two onboardings while step 9 pinned
+  only the peer side, so it read as a future improvement rather than a missing step. **A control
+  that belongs in the flow goes in the flow.** Anything left here should be something genuinely
+  not yet decided, not a known gap waiting for someone to notice. Retrofit for an already-deployed
+  chain: `make-3cp-folder.mjs --type lib-pin --chain <key> --rpc <url>` (timelock-routed).
 - **Emergency runbook:** pauser-EOA liveness/drill; canceller (Safe) can cancel a malicious
   scheduled op inside the 48h window; document `endpoint.skip/nilify/burn/clear` for a stuck or
   poisoned inbound message.

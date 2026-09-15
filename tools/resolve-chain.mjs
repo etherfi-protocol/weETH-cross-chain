@@ -21,11 +21,22 @@ export function resolveDvns(chain, providers, retiredProviders = []) {
     throw new Error(`retired DVN provider requested: ${asked.join(", ")} — policy is P2P, not Canary`);
   }
 
-  // DVN addresses are keys; metadata values hold canonicalName/name
+  // DVN addresses are keys; metadata values hold canonicalName/name.
+  // A provider can hold several addresses on one chain and LayerZero keeps the retired ones in
+  // the metadata behind `deprecated`. Object order is not significance order — on arc the
+  // deprecated LayerZero Labs DVN enumerates FIRST — so a plain find() silently pins a DVN that
+  // no longer attests, and the pathway requires 4-of-4 from a set that can never reach 4.
   const addresses = providers.map((name) => {
-    const pair = Object.entries(dvns).find(([, v]) => nameOf(v) === name);
-    if (!pair) throw new Error(`missing DVN provider: ${name}`);
-    return pair[0].toLowerCase();
+    const live = Object.entries(dvns).filter(([, v]) => nameOf(v) === name && !v.deprecated);
+    if (!live.length) {
+      const anyDeprecated = Object.entries(dvns).some(([, v]) => nameOf(v) === name);
+      throw new Error(
+        anyDeprecated
+          ? `DVN provider ${name} is deprecated on ${chain.chainKey || "this chain"} — no live address`
+          : `missing DVN provider: ${name}`
+      );
+    }
+    return live[0][0].toLowerCase();
   });
   return addresses.sort((a, b) => (BigInt(a) < BigInt(b) ? -1 : 1));
 }

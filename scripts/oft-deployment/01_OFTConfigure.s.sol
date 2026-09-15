@@ -45,6 +45,7 @@ contract DeployOFTScript is Script, L2Constants {
         configureRateLimits();
         configurePeer();
         configureEnforcedOptions();
+        configureLibraries();
         configureDVN();
 
         vm.stopBroadcast();
@@ -152,6 +153,34 @@ contract DeployOFTScript is Script, L2Constants {
     }
 
     // Configures the deployment chain's DVN for the given destination chain
+    /// @notice Pin the send/receive message libraries for every peer pathway.
+    /// @dev Runs here, before 03 hands ownership to the timelock, because the deployer is still
+    ///      the LZ delegate — the same authority `setConfig` uses above. Left to a follow-up it
+    ///      costs a timelock-routed 3CP per chain, and until that lands the pathway rides the
+    ///      LayerZero DEFAULT library: DVN config is stored per library, so a default-library
+    ///      rotation would move the pathway to a library carrying none of the 4-of-4 config.
+    ///      Skips any pathway already pinned — re-pinning reverts LZ_SameValue.
+    function configureLibraries() internal {
+        console.log("Pinning message libraries...");
+        if (DEPLOYMENT_PEER_EIDS.length > 0) {
+            for (uint256 i = 0; i < DEPLOYMENT_PEER_EIDS.length; i++) _pinLibraries(DEPLOYMENT_PEER_EIDS[i]);
+        } else {
+            _pinLibraries(L1_EID);
+            for (uint256 i = 0; i < L2s.length; i++) _pinLibraries(L2s[i].L2_EID);
+        }
+    }
+
+    function _pinLibraries(uint32 dstEid) public {
+        IMessageLibManager mgr = IMessageLibManager(DEPLOYMENT_LZ_ENDPOINT);
+        if (mgr.isDefaultSendLibrary(oftDeployment.proxyAddress, dstEid)) {
+            mgr.setSendLibrary(oftDeployment.proxyAddress, dstEid, DEPLOYMENT_SEND_LIB_302);
+        }
+        (, bool receiveIsDefault) = mgr.getReceiveLibrary(oftDeployment.proxyAddress, dstEid);
+        if (receiveIsDefault) {
+            mgr.setReceiveLibrary(oftDeployment.proxyAddress, dstEid, DEPLOYMENT_RECEIVE_LIB_302, 0);
+        }
+    }
+
     function _setDVN(uint32 dstEid) public {
         SetConfigParam[] memory params = new SetConfigParam[](1);
         // DEPLOYMENT_DVNS is pre-sorted ascending by _loadTarget() — no runtime sort needed.

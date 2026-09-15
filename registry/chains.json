@@ -56,9 +56,10 @@
     "OFT": "0x5A7fACB970D094B6C7FF1df0eA68D99E6e73CBFF",
     "OFT_IMPL": "0x70d7E0C93D8443325550Ba3F71576F5f346b8aA9",
     "PROXY_ADMIN": "0x632304Edc891Afed1a7bDe9A40b19F1c393ad5F3",
-    "CONTROLLER_SAFE": "0x764682c769CcB119349d92f1B63ee1c03d6AECFf",
+    "CONTROLLER_SAFE": "0x7a00657a45420044bc526B90Ad667aFfaee0A868",
     "TIMELOCK": "0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6",
-    "RPC_URL": "https://optimism-rpc.publicnode.com"
+    "RPC_URL": "https://optimism-rpc.publicnode.com",
+    "_controllerSafeNote": "Canonical Safe holds PROPOSER/EXECUTOR on the op timelock. The legacy 0x764682c769CcB119349d92f1B63ee1c03d6AECFf holds neither and is still the native-minting Safe; do not reuse it for OFT-mesh proposals."
   },
   "bnb": {
     "NAME": "bnb",
@@ -443,5 +444,49 @@
     "CONTROLLER_SAFE": "0x7a00657a45420044bc526B90Ad667aFfaee0A868",
     "TIMELOCK": "0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6",
     "RPC_ENV": "ROBINHOOD_MAINNET_RPC_URL"
+  },
+  "arc": {
+    "NAME": "arc",
+    "CHAIN_ID": "5042",
+    "L2_EID": 30417,
+    "L2_ENDPOINT": "0x6f475642a6e85809b1c36fa62763669b1b48dd5b",
+    "SEND_302": "0xc39161c743d0307eb9bcc9fef03eeb9dc4802de7",
+    "RECEIVE_302": "0xe1844c5d63a9543023008d332bd3d2e6f1fe1043",
+    "EXECUTOR": "0x4208d6e27538189bb48e603d6123a94b8abe0a0b",
+    "LZ_DVN": [
+      "0x69df29c29afcc8d1a0ee563a27827427f89ef698",
+      "0x9e0e95ede70f680f74480b510ff9f45c70e3da80",
+      "0xa2447e5b58d357c49bf74b50b14421e6a100e525",
+      "0xd36246c322ee102a2203bca9cafb84c179d306f6"
+    ],
+    "LIMIT": "5000000000000000000000",
+    "WINDOW": 14400,
+    "confirmations": 45,
+    "peerEids": [
+      30101,
+      30184,
+      30111
+    ],
+    "peerOfts": [
+      "0xcd2eb13D6831d4602D80E5db9230A57596CDCA63",
+      "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+      "0x5A7fACB970D094B6C7FF1df0eA68D99E6e73CBFF"
+    ],
+    "peerLimits": [
+      1e+21,
+      1e+21,
+      1e+21
+    ],
+    "peerWindows": [
+      14400,
+      14400,
+      14400
+    ],
+    "OFT": "0xA3D68b74bF0528fdD07263c60d6488749044914b",
+    "OFT_IMPL": "0x08DB0DB9b5F2dcbBFDc26FF411FB2026e81DA748",
+    "PROXY_ADMIN": "0x373ea3AEC25eB652ACa38504254eCD5459da6d19",
+    "CONTROLLER_SAFE": "0x7a00657a45420044bc526B90Ad667aFfaee0A868",
+    "TIMELOCK": "0x851Dd540f4D2Ec78120De0a0cc87B21EdE5Df5C6",
+    "RPC_ENV": "ARC_MAINNET_RPC_URL"
   }
 }
