@@ -21,7 +21,8 @@
     "plasma": "0x2465ee263149a18d61c9224244c61a5871dc0473",
     "ink": "0x1e4ce74ccf5498b19900649d9196e64bab592451",
     "monad": "0x493626c5d852b9b187a9eb709d0b0978a3877238",
-    "robinhood": "0x8d77d35604a9f37f488e41d1d916b2a0088f82dd"
+    "robinhood": "0x8d77d35604a9f37f488e41d1d916b2a0088f82dd",
+    "arc": "0xacde1f22eeab249d3ca6ba8805c8fee9f52a16e7"
   },
   "requiredDVNCount": 4,
   "optionalDVNCount": 0,

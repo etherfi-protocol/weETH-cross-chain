@@ -6,6 +6,7 @@
 // Types (--type):
 //   handoff         (default) new chain: setDelegate + transferOwnership -> timelock
 //   safe-migration  new chain's controller Safe: 2-of-5 -> 4-of-7 (self-calls)
+//   lib-pin         new chain's OWN send/receive libs -> the 302 libs (timelock-routed)
 //   peer            existing peer chain accepts the new chain: setPeer (+ rate
 //                   limits on L2s). Routed automatically: direct-Safe when the
 //                   peer OFT is Safe-owned, timelock schedule+execute when it is
@@ -20,7 +21,7 @@
 //   node tools/make-3cp-folder.mjs --type peer --chain <newKey> --peer <peerKey> --rpc <peerRpc> [--out repo]
 //
 // Defaults: --out $CP3_REPO or ../../3CP-secure ; multisend auto-resolved from the Safe's
-// version via --rpc (MultiSendCallOnly, e.g. 0xA1dabEF3… for 1.3.0). Single-tx leaves are
+// version via --rpc (read from safe-deployments). Single-tx leaves are
 // hashed as a direct call (operation 0) — no MultiSend. Override with --multisend.
 
 import {readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync} from "node:fs";
@@ -29,12 +30,6 @@ import {fileURLToPath} from "node:url";
 import {execFileSync} from "node:child_process";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-// MultiSendCallOnly 1.3.0 — the contract Safe{Wallet} actually wraps batches with, so the
-// generated safeTxHash matches what signers sign. Two canonical deployments exist; the app
-// uses whichever is deployed on the chain (resolveMultiSend picks it from --rpc). Do NOT use
-// the plain MultiSend 0xA238CBeb… — it allows sub-call delegatecall and yields a different hash.
-const MULTISEND_CALL_ONLY = "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B"; // eip155 / Safe Singleton Factory
-const MULTISEND_CALL_ONLY_CANONICAL = "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D"; // Nick-factory variant
 const GH_REPO = process.env.CP3_GH_REPO || "etherfi-protocol/3CP-secure";
 const ZERO32 = "0x" + "0".repeat(64);
 const DEFAULT_DELAY = 172800; // 2 days, fallback if timelock minDelay is unreadable
@@ -65,20 +60,39 @@ const hasCode = (addr, rpc) => {
     return false;
   }
 };
-// MultiSendCallOnly per Safe version — Safe{Wallet} wraps a batch with the MultiSendCallOnly
-// matching THIS Safe's version, so the generated safeTxHash equals what signers sign. Read
-// VERSION() off the Safe, then pick the candidate that's actually deployed on the chain.
-const MSCO_BY_VERSION = {
-  "1.3.0": ["0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B", "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D"],
-  "1.4.1": ["0x9641d764fc13c8B624c04430C7356C1C7C8102e2"],
-};
+const SAFE_DEPLOYMENTS = "https://raw.githubusercontent.com/safe-global/safe-deployments/main/src/assets";
 const safeVersion = (safe, rpc) => (callView(safe, "VERSION()(string)", rpc) || "").replace(/"/g, "").trim();
-const resolveMultiSend = (safe, rpc) => {
-  if (!rpc) return MULTISEND_CALL_ONLY;
-  const candidates = MSCO_BY_VERSION[safeVersion(safe, rpc)] || [MULTISEND_CALL_ONLY, MULTISEND_CALL_ONLY_CANONICAL];
-  for (const c of candidates) if (hasCode(c, rpc)) return c;
-  return candidates[0];
-};
+
+// Version off the Safe, address from safe-deployments networkAddresses[chainId] first entry —
+// what Safe{Wallet} uses. Never probe for code: both 1.3.0 variants are deployed on most chains
+// and the order differs per chain, so a probe silently picks a MultiSend no signer's hash matches.
+const mscoCache = new Map();
+async function resolveMultiSend(safe, rpc, chainId) {
+  if (!rpc) throw new Error("--rpc is required to resolve MultiSend (Safe VERSION() is read on-chain)");
+  const version = safeVersion(safe, rpc);
+  if (!version) throw new Error(`could not read VERSION() from Safe ${safe}`);
+  const key = `${version}:${chainId}`;
+  if (mscoCache.has(key)) return mscoCache.get(key);
+  const r = await fetch(`${SAFE_DEPLOYMENTS}/v${version}/multi_send_call_only.json`);
+  if (!r.ok) throw new Error(`safe-deployments has no multi_send_call_only for Safe v${version} (HTTP ${r.status})`);
+  const j = await r.json();
+  const entry = j.networkAddresses?.[String(chainId)];
+  const type = Array.isArray(entry) ? entry[0] : entry;
+  const addr = j.deployments?.[type]?.address;
+  if (!addr) throw new Error(`no MultiSendCallOnly for chainId ${chainId} at Safe v${version}`);
+  mscoCache.set(key, addr);
+  return addr;
+}
+
+// safe_hashes.sh keys its domain data on its own network names, not our registry keys. Read them
+// out of the script itself so the emitted verify command cannot drift from the tool that runs it.
+function safeHashesNetwork(outRepo, chainId) {
+  let src;
+  try { src = readFileSync(resolve(outRepo, "safe_hashes.sh"), "utf8"); } catch { return null; }
+  const block = src.match(/declare -A -r CHAIN_IDS=\(([\s\S]*?)\n\)/)?.[1] || "";
+  for (const m of block.matchAll(/\["([a-z0-9-]+)"\]="(\d+)"/g)) if (m[2] === String(chainId)) return m[1];
+  return null;
+}
 
 function loadRegistry() {
   return JSON.parse(readFileSync(resolve(REPO_ROOT, "registry/chains.json"), "utf8"));
@@ -148,6 +162,68 @@ function isDefaultReceiveLib(endpoint, oapp, eid, rpc) {
   } catch {
     return false;
   }
+}
+
+// A new chain's OWN send/receive libraries stay on the LayerZero default after deploy —
+// 01_OFTConfigure sets its DVNs but never pins its libs, and the reverse-peer 3CP only pins the
+// peer side. DVN config is stored per library, so a LZ default-library rotation moves the
+// outbound pathway to a library that carries none of it. Pins the new chain's own side.
+function buildLibPin(c, args) {
+  const endpoint = c.L2_ENDPOINT.toLowerCase();
+  const oft = c.OFT.toLowerCase();
+  const eids = c.peerEids || [];
+  if (!eids.length) {
+    console.error(`error: ${c.NAME} has no peerEids in the registry — nothing to pin`);
+    process.exit(1);
+  }
+  if (!args.rpc) {
+    console.error("error: --rpc is required; pins must be generated from live state or they revert LZ_SameValue");
+    process.exit(1);
+  }
+
+  const calls = [];
+  for (const eid of eids) {
+    if (isDefaultSendLib(endpoint, oft, String(eid), args.rpc)) {
+      calls.push({to: endpoint, value: "0", data: calldata("setSendLibrary(address,uint32,address)", oft, String(eid), c.SEND_302), desc: `setSendLibrary(${eid}, SEND_302)`});
+    }
+    if (isDefaultReceiveLib(endpoint, oft, String(eid), args.rpc)) {
+      calls.push({to: endpoint, value: "0", data: calldata("setReceiveLibrary(address,uint32,address,uint256)", oft, String(eid), c.RECEIVE_302, "0"), desc: `setReceiveLibrary(${eid}, RECEIVE_302, grace 0)`});
+    }
+  }
+  if (!calls.length) {
+    console.error(`error: every ${c.NAME} pathway is already pinned — nothing to emit`);
+    process.exit(1);
+  }
+  return wrapTimelock(c, calls, `${c.NAME}: pin own message libraries`, args);
+}
+
+// Wrap owner/delegate-gated calls in the chain's timelock schedule+execute pair, submitted by its
+// controller Safe. Shared by the peer and lib-pin builders.
+function wrapTimelock(c, inner, label, args) {
+  const tl = c.TIMELOCK.toLowerCase();
+  const delay = (args.rpc && Number(callView(c.TIMELOCK, "getMinDelay()(uint256)", args.rpc))) || DEFAULT_DELAY;
+  const targets = `[${inner.map((x) => x.to).join(",")}]`;
+  const values = `[${inner.map(() => "0").join(",")}]`;
+  const datas = `[${inner.map((x) => x.data).join(",")}]`;
+  const lines = inner.map((x, i) => `   - ${i + 1}. ${x.desc}`);
+  return [
+    {
+      label: `${label} (schedule, delay ${delay}s)`,
+      safe: c.CONTROLLER_SAFE,
+      chainId: String(c.CHAIN_ID),
+      transactions: [{to: tl, value: "0", data: calldata("scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)", targets, values, datas, ZERO32, ZERO32, String(delay))}],
+      lines: [`1. scheduleBatch(delay=${delay}s) on timelock ${tl}, batching:`, ...lines],
+      note: `Execute after the ${delay}s delay with the matching execute proposal.`,
+    },
+    {
+      label: `${label} (execute)`,
+      safe: c.CONTROLLER_SAFE,
+      chainId: String(c.CHAIN_ID),
+      transactions: [{to: tl, value: "0", data: calldata("executeBatch(address[],uint256[],bytes[],bytes32,bytes32)", targets, values, datas, ZERO32, ZERO32)}],
+      lines: [`1. executeBatch() on timelock ${tl}, batching:`, ...lines],
+      note: "Submit only after the schedule proposal has cleared the timelock delay.",
+    },
+  ];
 }
 
 function peerInnerCalls(nc, peer, rpc) {
@@ -227,6 +303,28 @@ function buildPeer(nc, peer, policy, args) {
 
   // timelock-owned: schedule + execute, submitted by the controlling Safe.
   const tl = peer.TIMELOCK.toLowerCase();
+
+  // The registry's CONTROLLER_SAFE can lag a Safe migration — op still named the legacy
+  // 0x764682c7 Safe long after the timelock roles moved to the canonical one. A proposal signed
+  // by a Safe without PROPOSER reverts at scheduleBatch, and nothing earlier catches it: the
+  // JSON is well formed, the calldata is right and the Safe tx hash is valid. Fail closed.
+  if (args.rpc) {
+    const proposer = callView(peer.TIMELOCK, "PROPOSER_ROLE()(bytes32)", args.rpc);
+    const executor = callView(peer.TIMELOCK, "EXECUTOR_ROLE()(bytes32)", args.rpc);
+    for (const [role, hash] of [["PROPOSER", proposer], ["EXECUTOR", executor]]) {
+      if (!hash) continue;
+      const held = callView(peer.TIMELOCK, "hasRole(bytes32,address)(bool)", args.rpc, hash, peer.CONTROLLER_SAFE);
+      if (held !== "true") {
+        console.error(
+          `error: ${peer.NAME} CONTROLLER_SAFE ${peer.CONTROLLER_SAFE} does not hold ${role} on timelock ${peer.TIMELOCK}.\n` +
+          `       A proposal from this Safe would revert at ${role === "PROPOSER" ? "scheduleBatch" : "executeBatch"}.\n` +
+          `       Fix registry/chains.json ${peer.NAME}.CONTROLLER_SAFE to the Safe that actually holds the role.`
+        );
+        process.exit(1);
+      }
+    }
+  }
+
   const delay = (args.rpc && Number(callView(peer.TIMELOCK, "getMinDelay()(uint256)", args.rpc))) || DEFAULT_DELAY;
   const targets = `[${inner.map((c) => c.to).join(",")}]`;
   const values = `[${inner.map(() => "0").join(",")}]`;
@@ -332,9 +430,9 @@ function leafSuffix(label, idx) {
 // wrong timelock reads as plausible calldata to a human reviewer; this fails the build
 // instead. Sources of truth: registry/chains.json (per-chain) + policy.json (canonical).
 const isAddr = (a) => /^0x[0-9a-fA-F]{40}$/.test(a || "");
-function assertCanonical(type, chain, peerC, proposals, policy) {
+function assertCanonical(type, chain, peerC, proposals, policy, knownMultiSends = []) {
   const errs = [];
-  const msco = new Set(Object.values(MSCO_BY_VERSION).flat().map((a) => a.toLowerCase()));
+  const msco = new Set(knownMultiSends.map((a) => a.toLowerCase()));
   const known = new Set();
   for (const k of [chain, peerC]) {
     if (!k) continue;
@@ -376,7 +474,7 @@ function assertCanonical(type, chain, peerC, proposals, policy) {
   }
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2));
   const type = args.type || "handoff";
   const reg = loadRegistry();
@@ -387,6 +485,7 @@ function main() {
   let peerC = null;
   if (type === "handoff") proposals = buildHandoff(c);
   else if (type === "safe-migration") proposals = buildSafeMigration(c, policy);
+  else if (type === "lib-pin") proposals = buildLibPin(c, args);
   else if (type === "peer") {
     if (!args.peer) {
       console.error("error: --peer <peerKey> is required for --type peer");
@@ -395,7 +494,7 @@ function main() {
     peerC = requireChain(reg, args.peer);
     proposals = buildPeer(c, peerC, policy, args);
   } else {
-    console.error(`error: unknown --type "${type}" (handoff | safe-migration | peer)`);
+    console.error(`error: unknown --type "${type}" (handoff | safe-migration | peer | lib-pin)`);
     process.exit(1);
   }
   // Refuse to write a proposal that touches a non-canonical address (wrong peer, stray DVN,
@@ -419,13 +518,29 @@ function main() {
   const subdir = args.subdir;
   if (subdir) while (claimed.has(id) && args.id === undefined) id++;
 
-  proposals.forEach((p, k) => {
+  // A schedule+execute pair executes as two sequential Safe txns, so the second must sit one
+  // nonce above the first. Reading nonce() per proposal gives both the SAME nonce, and since the
+  // nonce is a signed field, that yields two txns competing for one slot: executing either voids
+  // the other, and the published execute hash can never be signed. Count uses per Safe instead.
+  const nonceOffset = new Map();
+  for (const [k, p] of proposals.entries()) {
     if (!subdir) { while (claimed.has(id)) id++; claimed.add(id); }
-    const nonce =
+    const safeKey = p.safe.toLowerCase();
+    const used = nonceOffset.get(safeKey) || 0;
+    // --nonces 0,2 assigns explicit, possibly non-consecutive slots — needed when another
+    // proposal on the same Safe has to execute between a schedule and its execute.
+    const explicit = args.nonces ? args.nonces.split(",").map(Number) : null;
+    if (explicit && explicit.length <= used) {
+      console.error(`error: --nonces has ${explicit.length} entries but this run emits more proposals`);
+      process.exit(1);
+    }
+    const base =
       args.nonce !== undefined ? Number(args.nonce) : args.rpc ? readSafeNonce(p.safe, args.rpc) : 0;
+    const nonce = explicit ? explicit[used] : base + used;
+    nonceOffset.set(safeKey, used + 1);
     // Per-Safe MultiSendCallOnly (version-matched) for multi-call leaves; single-tx leaves
     // are hashed as a direct call (operation 0) by renderMd regardless.
-    const multisend = args.multisend || resolveMultiSend(p.safe, args.rpc);
+    const multisend = args.multisend || (await resolveMultiSend(p.safe, args.rpc, p.chainId));
     const bundle = {chainId: p.chainId, safeAddress: p.safe.toLowerCase(), meta: {txBuilderVersion: "1.16.5"}, transactions: p.transactions};
     const leaf = subdir
       ? (proposals.length > 1 ? `${subdir}-${leafSuffix(p.label, k)}` : subdir)
@@ -436,7 +551,7 @@ function main() {
     writeFileSync(resolve(folder, `${leaf}.json`), JSON.stringify(bundle, null, 2) + "\n");
     // peer proposals live on the PEER chain, not the new chain — use the peer key
     // for the verify --network (else it emits the wrong/unknown network).
-    const netKey = type === "peer" ? args.peer : args.chain;
+    const netKey = safeHashesNetwork(outRepo, p.chainId) || (type === "peer" ? args.peer : args.chain);
     writeFileSync(resolve(folder, `${leaf}.md`), renderMd(p, id, nonce, multisend, netKey, relJson));
 
     console.log(`#${id}${subdir ? `/${leaf}` : ""}  ${p.label}`);
@@ -447,8 +562,8 @@ function main() {
       for (const t of conflicts) console.log(`        - ${t}`);
     }
     if (!subdir) id++;
-  });
+  }
   if (!ghOk) console.log("WARN: gh unavailable — folder ids from local queued/ only; check open PRs manually.");
 }
 
-main();
+main().catch((e) => { console.error(`error: ${e.message}`); process.exit(1); });
