@@ -32,6 +32,12 @@ if (!ADDR || !CONTRACT || !EXPLORER) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Arc's Blockscout sits behind Cloudflare, which answers 403 `cf-mitigated: challenge` to anything
+// that does not carry the key as an `x-api-key` header. The etherscan-compatible `apikey` form field
+// and query param authenticate to Blockscout itself, but never reach it — Cloudflare rejects first.
+// Send both: the header to get past the CDN, the field for the explorer.
+const AUTH = APIKEY ? { "x-api-key": APIKEY } : {};
+
 // Blockscout wants the long solc version. The artifact carries it; `forge build --json` does not
 // once the build is warm, and the short form is rejected.
 function compilerVersion() {
@@ -55,7 +61,7 @@ function fullyQualified(stdJson) {
 }
 
 async function isVerified() {
-  const r = await fetch(`${EXPLORER}?module=contract&action=getsourcecode&address=${ADDR}`);
+  const r = await fetch(`${EXPLORER}?module=contract&action=getsourcecode&address=${ADDR}`, { headers: AUTH });
   if (!r.ok) return false;
   const j = await r.json().catch(() => ({}));
   const res = Array.isArray(j.result) ? j.result[0] : j.result;
@@ -86,7 +92,7 @@ async function main() {
   });
   const r = await fetch(`${EXPLORER}?module=contract&action=verifysourcecode`, {
     method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
+    headers: { "content-type": "application/x-www-form-urlencoded", ...AUTH },
     body,
   });
   const text = await r.text();
@@ -99,7 +105,7 @@ async function main() {
   console.log(`guid ${sub.result} — polling every ${POLL_MS}ms`);
   for (let i = 0; i < 30; i++) {
     await sleep(POLL_MS);
-    const p = await fetch(`${EXPLORER}?module=contract&action=checkverifystatus&guid=${sub.result}&apikey=${APIKEY}`);
+    const p = await fetch(`${EXPLORER}?module=contract&action=checkverifystatus&guid=${sub.result}&apikey=${APIKEY}`, { headers: AUTH });
     const j = await p.json().catch(() => ({}));
     const msg = `${j.result || j.message || ""}`;
     if (/pending|queue/i.test(msg)) { console.log(`  …${msg}`); continue; }
