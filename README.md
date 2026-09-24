@@ -80,13 +80,6 @@ The build uses Solidity 0.8.22. Fork tests need the chain RPC URLs in `.env`.
 - [Native minting upgrade timelock](NATIVE-MINTING-UPGRADE-TIMELOCK.md): move native-minting
   upgrade authority from the controller Safe to the upgrade timelock.
 
-## 📄 License
-
-ether.fi is open-source and licensed under the [MIT License](LICENSE).
-
-Vendored third-party interfaces keep the licenses of the projects they came from, as marked by
-the SPDX header in each file. That covers `interfaces/IStargate.sol` (BUSL-1.1).
-
 ---
 
 <p align="center">Built with ❤️ by the ether.fi team</p>
