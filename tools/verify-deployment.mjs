@@ -155,6 +155,16 @@ function checkDeployment(c, rpc, policy) {
     `cast storage ${c.OFT} ${ADMIN_SLOT} --rpc-url $RPC`));
   return {title: "1. Deployment & addresses", rows};
 }
+function applyRoleEvent(holders, log, grantedTopic, revokedTopic, roleTopics) {
+  const topic0 = String(log.topics?.[0] || "").toLowerCase();
+  const role = String(log.topics?.[1] || "").toLowerCase();
+  const account = log.topics?.[2] ? "0x" + String(log.topics[2]).slice(-40).toLowerCase() : null;
+  if (!roleTopics[role] || !account) return;
+  const set = holders.get(role);
+  if (topic0 === grantedTopic) set.add(account);
+  else if (topic0 === revokedTopic) set.delete(account);
+}
+
 function scanRoleHolders(timelock, rpc, fromBlock = "0x0") {
   const roleTopics = Object.fromEntries(Object.entries(ROLES).map(([name, id]) => [id.toLowerCase(), name]));
   const grantedTopic = cast(["keccak", "RoleGranted(bytes32,address,address)"]).toLowerCase();
@@ -175,15 +185,7 @@ function scanRoleHolders(timelock, rpc, fromBlock = "0x0") {
     try {
       const raw = cast(["rpc", "eth_getLogs", filter, "--rpc-url", rpc]);
       const logs = JSON.parse(raw);
-      for (const log of logs) {
-        const topic0 = String(log.topics?.[0] || "").toLowerCase();
-        const role = String(log.topics?.[1] || "").toLowerCase();
-        const account = log.topics?.[2] ? "0x" + String(log.topics[2]).slice(-40).toLowerCase() : null;
-        if (!roleTopics[role] || !account) continue;
-        const set = holders.get(role);
-        if (topic0 === grantedTopic) set.add(account);
-        else if (topic0 === revokedTopic) set.delete(account);
-      }
+      for (const log of logs) applyRoleEvent(holders, log, grantedTopic, revokedTopic, roleTopics);
       start = end + 1n;
     } catch (err) {
       if (span <= 1000n) throw err;
@@ -416,6 +418,6 @@ function main() {
   console.log(`  ${pass} pass / ${fail} fail / ${manual} manual across ${allRows.length} checks`);
 }
 
-export {scanRoleHolders};
+export {applyRoleEvent, scanRoleHolders};
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();
