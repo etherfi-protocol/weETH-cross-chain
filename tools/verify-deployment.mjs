@@ -155,7 +155,7 @@ function checkDeployment(c, rpc, policy) {
     `cast storage ${c.OFT} ${ADMIN_SLOT} --rpc-url $RPC`));
   return {title: "1. Deployment & addresses", rows};
 }
-async function scanRoleHolders(timelock, rpc, fromBlock = "0x0") {
+function scanRoleHolders(timelock, rpc, fromBlock = "0x0") {
   const roleTopics = Object.fromEntries(Object.entries(ROLES).map(([name, id]) => [id.toLowerCase(), name]));
   const grantedTopic = cast(["keccak", "RoleGranted(bytes32,address,address)"]).toLowerCase();
   const revokedTopic = cast(["keccak", "RoleRevoked(bytes32,address,address)"]).toLowerCase();
