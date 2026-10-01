@@ -416,4 +416,6 @@ function main() {
   console.log(`  ${pass} pass / ${fail} fail / ${manual} manual across ${allRows.length} checks`);
 }
 
-main();
+export {scanRoleHolders};
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();
