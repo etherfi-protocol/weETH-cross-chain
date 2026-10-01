@@ -241,7 +241,7 @@ function checkTimelock(c, rpc, policy, chainConfig) {
     `cast call ${c.TIMELOCK} 'hasRole(bytes32,address)(bool)' <PROPOSER|EXECUTOR|CANCELLER> ${deployer} --rpc-url $RPC`));
   const scanFrom = process.env.ROLE_SCAN_FROM_BLOCK || chainConfig.TIMELOCK_DEPLOY_BLOCK || "0x0";
   try {
-    const holders = scanRoleHolders(tl, rpc, scanFrom);
+    const holders = scanRoleHolders(c.TIMELOCK, rpc, scanFrom);
     for (const [roleName, accounts] of Object.entries(holders)) {
       const unexpected = accounts.filter((a) => a !== safe.toLowerCase());
       r.push(row(`${roleName} role holders`, "controller Safe only", unexpected.length ? unexpected.join(", ") : "controller Safe only",
