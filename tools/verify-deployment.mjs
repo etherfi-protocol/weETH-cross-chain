@@ -155,6 +155,46 @@ function checkDeployment(c, rpc, policy) {
     `cast storage ${c.OFT} ${ADMIN_SLOT} --rpc-url $RPC`));
   return {title: "1. Deployment & addresses", rows};
 }
+function applyRoleEvent(holders, log, grantedTopic, revokedTopic, roleTopics) {
+  const topic0 = String(log.topics?.[0] || "").toLowerCase();
+  const role = String(log.topics?.[1] || "").toLowerCase();
+  const account = log.topics?.[2] ? "0x" + String(log.topics[2]).slice(-40).toLowerCase() : null;
+  if (!roleTopics[role] || !account) return;
+  const set = holders.get(role);
+  if (topic0 === grantedTopic) set.add(account);
+  else if (topic0 === revokedTopic) set.delete(account);
+}
+
+function scanRoleHolders(timelock, rpc, fromBlock = "0x0") {
+  const roleTopics = Object.fromEntries(Object.entries(ROLES).map(([name, id]) => [id.toLowerCase(), name]));
+  const grantedTopic = cast(["keccak", "RoleGranted(bytes32,address,address)"]).toLowerCase();
+  const revokedTopic = cast(["keccak", "RoleRevoked(bytes32,address,address)"]).toLowerCase();
+  const latest = BigInt(cast(["rpc", "eth_blockNumber", "--rpc-url", rpc]));
+  let start = BigInt(fromBlock);
+  let span = 100000n;
+  const holders = new Map(Object.keys(ROLES).map((id) => [id.toLowerCase(), new Set()]));
+  while (start <= latest) {
+    let end = start + span - 1n;
+    if (end > latest) end = latest;
+    const filter = JSON.stringify({
+      address: [timelock],
+      fromBlock: "0x" + start.toString(16),
+      toBlock: "0x" + end.toString(16),
+      topics: [[grantedTopic, revokedTopic]],
+    });
+    try {
+      const raw = cast(["rpc", "eth_getLogs", filter, "--rpc-url", rpc]);
+      const logs = JSON.parse(raw);
+      for (const log of logs) applyRoleEvent(holders, log, grantedTopic, revokedTopic, roleTopics);
+      start = end + 1n;
+    } catch (err) {
+      if (span <= 1000n) throw err;
+      span /= 2n;
+    }
+  }
+  return Object.fromEntries([...holders.entries()].map(([id, set]) => [roleTopics[id], [...set].sort()]));
+}
+
 const loadSlot = (addr, slot, rpc) => {
   try {
     return cast(["storage", addr, slot, "--rpc-url", rpc]);
@@ -181,7 +221,7 @@ function checkAuthority(c, rpc) {
   return {title: "2. Ownership & authority (all config rights → timelock)", rows: r};
 }
 
-function checkTimelock(c, rpc, policy) {
+function checkTimelock(c, rpc, policy, chainConfig) {
   const r = [];
   const safe = c.CONTROLLER_SAFE;
   const delay = word(call(c.TIMELOCK, "getMinDelay()(uint256)", rpc));
@@ -192,17 +232,25 @@ function checkTimelock(c, rpc, policy) {
     r.push(row(`Safe holds ${name}_ROLE`, "true", has, has === "true" ? true : has === "false" ? false : null,
       `cast call ${c.TIMELOCK} 'hasRole(bytes32,address)(bool)' ${id} ${safe} --rpc-url $RPC`));
   }
-  // Backdoor spot-check: the deployer EOA must hold NONE of the timelock roles. (EtherFiTimelock
-  // is plain AccessControl, not Enumerable — `getRoleMember` reverts — so detecting *unknown*
-  // extra holders needs a RoleGranted event scan in the drift monitor; this catches the most
-  // likely leftover: the deployer never renounced.)
+  // Backdoor spot-check: the deployer EOA must hold NONE of the timelock roles.
+  // Full holder enumeration is performed below from RoleGranted/RoleRevoked events.
   const deployer = policy.canonical.deployer;
   let held = false;
   for (const id of Object.values(ROLES)) if (word(call(c.TIMELOCK, "hasRole(bytes32,address)(bool)", rpc, id, deployer)) === "true") held = true;
   r.push(row("deployer EOA holds NO timelock role", "false (no backdoor)", held ? "HOLDS A ROLE" : "none", held ? false : true,
     `cast call ${c.TIMELOCK} 'hasRole(bytes32,address)(bool)' <PROPOSER|EXECUTOR|CANCELLER> ${deployer} --rpc-url $RPC`));
-  r.push(row("full extra-holder audit (RoleGranted scan)", "no unexpected grants", "scan off-chain", null,
-    `# timelock is non-enumerable — scan RoleGranted/RoleRevoked logs in the drift monitor`));
+  const scanFrom = process.env.ROLE_SCAN_FROM_BLOCK || chainConfig.TIMELOCK_DEPLOY_BLOCK || "0x0";
+  try {
+    const holders = scanRoleHolders(c.TIMELOCK, rpc, scanFrom);
+    for (const [roleName, accounts] of Object.entries(holders)) {
+      const unexpected = accounts.filter((a) => a !== safe.toLowerCase());
+      r.push(row(`${roleName} role holders`, "controller Safe only", unexpected.length ? unexpected.join(", ") : "controller Safe only",
+        unexpected.length === 0, `ROLE_SCAN_FROM_BLOCK=${scanFrom} node tools/verify-deployment.mjs --chain ${c.NAME}`));
+    }
+  } catch (err) {
+    r.push(row("full extra-holder audit (RoleGranted/RoleRevoked scan)", "no unexpected grants", "scan failed", null,
+      "Set ROLE_SCAN_FROM_BLOCK if the RPC cannot serve a full historical log range"));
+  }
   return {title: "3. Timelock roles (controller Safe = proposer/executor/canceller)", rows: r};
 }
 
@@ -299,7 +347,7 @@ function main() {
   const sections = [
     checkDeployment(c, rpc, policy),
     checkAuthority(c, rpc),
-    checkTimelock(c, rpc, policy),
+    checkTimelock(c, rpc, policy, c),
     checkSafe(c, rpc, policy),
   ];
   // Target-side pathways
@@ -370,4 +418,6 @@ function main() {
   console.log(`  ${pass} pass / ${fail} fail / ${manual} manual across ${allRows.length} checks`);
 }
 
-main();
+export {applyRoleEvent, scanRoleHolders};
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();
