@@ -3,9 +3,6 @@ src = "contracts"
 evm_version = "shanghai"
 out = "out"
 libs = ["node_modules", "lib"]
-# Only remappings.txt applies. The auto-generated `@layerzerolabs/=` entry made the VS Code
-# Solidity extension (last matching remapping wins) load the npm package's contracts-upgradeable
-# instead of the layerzero-v2 fork, which duplicated OpenZeppelin's Initializable.
 auto_detect_remappings = false
 test = "test"
 fs_permissions = [
