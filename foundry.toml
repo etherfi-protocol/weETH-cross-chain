@@ -3,6 +3,7 @@ src = "contracts"
 evm_version = "shanghai"
 out = "out"
 libs = ["node_modules", "lib"]
+auto_detect_remappings = false
 test = "test"
 fs_permissions = [
     { access = "read-write", path = "./" },
