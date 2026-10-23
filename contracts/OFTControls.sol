@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import {CreditRedirectBaseUpgradeable} from "@layerzerolabs/utils-upgradeable-evm-contracts/contracts/credit-redirect/CreditRedirectBaseUpgradeable.sol";
+import {AllowlistBaseUpgradeable} from "@layerzerolabs/utils-upgradeable-evm-contracts/contracts/allowlist/AllowlistBaseUpgradeable.sol";
+import {FeeConfigBaseUpgradeable} from "@layerzerolabs/utils-upgradeable-evm-contracts/contracts/fee-config/FeeConfigBaseUpgradeable.sol";
 import {FeeHandlerBaseUpgradeable} from "@layerzerolabs/utils-upgradeable-evm-contracts/contracts/fee-accounting/FeeHandlerBaseUpgradeable.sol";
 import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
 import {PausableUntil} from "./PausableUntil.sol";
@@ -12,23 +13,21 @@ import {PausableUntil} from "./PausableUntil.sol";
  * so an upgrade changes no behavior until governance turns a control on:
  * - Time-bound pause that expires on its own, for guardian use.
  * - Per-lane pause (one peer chain) next to the existing global pause.
- * - Blacklist and whitelist modes, with the same enum, structs, events and errors as the LayerZero allowlist
- *   module. It uses plain mappings instead of that module's enumerable sets to keep the OFT under the
- *   24 KB contract size limit, so there are no on-chain list getters; read the events instead. Mode defaults
- *   to Open.
- * - One bridge fee in bps with a hard cap, paid to a fee deposit address (LayerZero fee handler module).
- *   The fee applies to every lane; the LayerZero per-lane fee config is left out to save contract size.
+ * - Blacklist and whitelist modes (LayerZero allowlist module). Mode defaults to Open.
+ * - Bridge fee in bps with a hard cap, default and per lane (LayerZero fee config and fee handler modules).
  * - Credit redirect: bridged tokens for a blocked recipient go to an escrow, so the LayerZero message
- *   still executes instead of getting stuck.
- * - Tighten-only rate limit changes for a manager role.
+ *   still executes instead of getting stuck. The escrow is one address in namespaced storage. The LayerZero
+ *   credit redirect module is not used: it adds an external allowlist lookup that this contract's own
+ *   allowlist makes redundant, and that costs about 560 bytes of the 24,576 byte size limit.
  * All new state lives in namespaced (ERC-7201) storage. The only sequential slots stay the two
  * PairwiseRateLimiter mappings.
  */
 abstract contract OFTControls is
     PairwiseRateLimiter,
     PausableUntil,
-    FeeHandlerBaseUpgradeable,
-    CreditRedirectBaseUpgradeable
+    AllowlistBaseUpgradeable,
+    FeeConfigBaseUpgradeable,
+    FeeHandlerBaseUpgradeable
 {
     /// @dev Roles the controls need. Each concrete contract maps these to its own role system.
     enum ControlRole {
@@ -36,43 +35,11 @@ abstract contract OFTControls is
         UNPAUSER,
         PAUSER_UNTIL,
         BLACKLISTER,
-        WHITELISTER,
-        RATE_LIMIT_MANAGER
+        WHITELISTER
     }
 
     /// @notice Highest bridge fee governance can set (1%).
     uint16 public constant MAX_FEE_BPS = 100;
-
-    enum AllowlistMode {
-        Open,
-        Blacklist,
-        Whitelist
-    }
-
-    struct SetAllowlistParam {
-        address user;
-        bool isEnabled;
-    }
-
-    /// @custom:storage-location erc7201:etherfi.storage.OFTControls.Allowlist
-    struct AllowlistStorage {
-        AllowlistMode mode;
-        mapping(address user => bool blacklisted) blacklisted;
-        mapping(address user => bool whitelisted) whitelisted;
-    }
-
-    // keccak256(abi.encode(uint256(keccak256("etherfi.storage.OFTControls.Allowlist")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant ALLOWLIST_STORAGE_LOCATION =
-        0x65f04c6afe7b0d38b1d515c4e8141be1860627d15e40cdc3df2d372028aaa100;
-
-    /// @custom:storage-location erc7201:etherfi.storage.OFTControls.Fee
-    struct FeeStorage {
-        uint16 feeBps;
-    }
-
-    // keccak256(abi.encode(uint256(keccak256("etherfi.storage.OFTControls.Fee")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant FEE_STORAGE_LOCATION =
-        0x5c1a238c6547369c944e98340402a9a1e9f3c5b9ae8e4bb341dd8d21df2acb00;
 
     /// @custom:storage-location erc7201:etherfi.storage.OFTControls.LanePause
     struct LanePauseStorage {
@@ -83,33 +50,31 @@ abstract contract OFTControls is
     bytes32 private constant LANE_PAUSE_STORAGE_LOCATION =
         0xf5e07c24aa97361d9e28da9bb4acbbff4c757b8632cfb9a116efef5271709000;
 
+    /// @custom:storage-location erc7201:etherfi.storage.OFTControls.Escrow
+    struct EscrowStorage {
+        address escrow;
+    }
+
+    // keccak256(abi.encode(uint256(keccak256("etherfi.storage.OFTControls.Escrow")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 private constant ESCROW_STORAGE_LOCATION =
+        0xf2658147a7b10195249e4f8aa0b3228ff5a4c05adc743b486607e14ef4c5fb00;
+
     event LanePauseSet(uint32 indexed eid, bool paused);
-    event DefaultFeeBpsSet(uint16 feeBps);
-    event AllowlistModeUpdated(AllowlistMode newMode);
-    event BlacklistUpdated(address indexed user, bool isBlacklisted);
-    event WhitelistUpdated(address indexed user, bool isWhitelisted);
+    event EscrowSet(address indexed escrow);
+    /// @dev Same signature as the LayerZero ICreditRedirect event.
+    event CreditRedirected(address indexed from, address indexed to, uint256 amountLD);
 
     error LanePaused(uint32 eid);
-    error ModeAlreadySet(AllowlistMode mode);
-    error AllowlistStateIdempotent(address user, bool isEnabled);
-    error NotAllowlisted(address user, AllowlistMode mode);
     error EscrowNotSet();
     error FeeDepositNotSet();
     error FeeTooHigh(uint16 feeBps);
-    error RateLimitNotTightening(uint32 peerEid);
     error PauseUntilDurationNotSet();
-    error UnauthorizedInitializer();
 
     /// @dev Reverts unless the caller is the contract owner.
     function _checkControlOwner() internal view virtual;
 
     /// @dev Reverts unless the caller holds `role` in the concrete contract's role system.
     function _checkControlRole(ControlRole role) internal view virtual;
-
-    function __OFTControls_init(address feeDeposit_, uint256 pauseUntilDuration_) internal onlyInitializing {
-        _setFeeDeposit(feeDeposit_);
-        _setPauseUntilDuration(pauseUntilDuration_);
-    }
 
     // ---------------------------------------------------------------------------------------------
     // Pause
@@ -139,67 +104,44 @@ abstract contract OFTControls is
         return _getLanePauseStorage().paused[eid];
     }
 
-    function pauseLanes(uint32[] calldata eids) external {
-        _checkControlRole(ControlRole.PAUSER);
-        _setLanesPaused(eids, true);
-    }
-
-    function unpauseLanes(uint32[] calldata eids) external {
-        _checkControlRole(ControlRole.UNPAUSER);
-        _setLanesPaused(eids, false);
+    /// @notice Pauses a lane with the PAUSER role, unpauses it with the UNPAUSER role.
+    function setLanePaused(uint32 eid, bool paused) external {
+        _checkControlRole(paused ? ControlRole.PAUSER : ControlRole.UNPAUSER);
+        _getLanePauseStorage().paused[eid] = paused;
+        emit LanePauseSet(eid, paused);
     }
 
     // ---------------------------------------------------------------------------------------------
     // Allowlist (blacklist / whitelist) and credit redirect
     // ---------------------------------------------------------------------------------------------
 
-    function allowlistMode() public view returns (AllowlistMode) {
-        return _getAllowlistStorage().mode;
-    }
-
-    function isBlacklisted(address _user) public view returns (bool) {
-        return _getAllowlistStorage().blacklisted[_user];
-    }
-
-    function isWhitelisted(address _user) public view returns (bool) {
-        return _getAllowlistStorage().whitelisted[_user];
-    }
-
-    function isAllowlisted(address _user) public view returns (bool) {
-        AllowlistStorage storage $ = _getAllowlistStorage();
-        if ($.mode == AllowlistMode.Open) return true;
-        if ($.mode == AllowlistMode.Blacklist) return !$.blacklisted[_user];
-        return $.whitelisted[_user];
-    }
-
     function setAllowlistMode(AllowlistMode _mode) external {
         _checkControlOwner();
-        AllowlistStorage storage $ = _getAllowlistStorage();
-        if ($.mode == _mode) revert ModeAlreadySet(_mode);
-        if (_mode != AllowlistMode.Open && creditRedirectConfig().escrow == address(0)) revert EscrowNotSet();
-        $.mode = _mode;
-        emit AllowlistModeUpdated(_mode);
+        if (_mode != AllowlistMode.Open && escrow() == address(0)) revert EscrowNotSet();
+        _setAllowlistMode(_mode);
     }
 
     function setBlacklisted(SetAllowlistParam[] calldata _params) external {
         _checkControlRole(ControlRole.BLACKLISTER);
-        _updateAllowlist(_getAllowlistStorage().blacklisted, _params, true);
+        _setBlacklisted(_params);
     }
 
     function setWhitelisted(SetAllowlistParam[] calldata _params) external {
         _checkControlRole(ControlRole.WHITELISTER);
-        _updateAllowlist(_getAllowlistStorage().whitelisted, _params, false);
+        _setWhitelisted(_params);
     }
 
-    /**
-     * @notice Sets where bridged tokens go when the recipient is blocked. `allowlist` must be this contract
-     * (or zero together with `escrow`). The escrow cannot be cleared while the allowlist is enforced.
-     */
-    function setCreditRedirectConfig(CreditRedirectConfig calldata _config) external {
+    function escrow() public view returns (address) {
+        return _getEscrowStorage().escrow;
+    }
+
+    /// @notice Sets where bridged tokens go when the recipient is blocked. It cannot be cleared while the
+    /// allowlist is enforced.
+    function setEscrow(address _escrow) external {
         _checkControlOwner();
-        if (_config.escrow == address(0) && allowlistMode() != AllowlistMode.Open) revert EscrowNotSet();
-        if (_config.allowlist != address(0) && _config.allowlist != address(this)) revert InvalidCreditRedirectConfig();
-        _setCreditRedirectConfig(_config);
+        if (_escrow == address(0) && allowlistMode() != AllowlistMode.Open) revert EscrowNotSet();
+        _getEscrowStorage().escrow = _escrow;
+        emit EscrowSet(_escrow);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -211,36 +153,17 @@ abstract contract OFTControls is
         _setFeeDeposit(_feeDeposit);
     }
 
-    function defaultFeeBps() public view returns (uint16) {
-        return _getFeeStorage().feeBps;
-    }
-
-    /// @notice Fee taken from `_amount` when bridging to or from `_eid`. The fee is the same on every lane.
-    function getFee(uint256, uint256 _amount) public view returns (uint256) {
-        return (_amount * defaultFeeBps()) / 10_000;
-    }
-
     function setDefaultFeeBps(uint16 _feeBps) external {
         _checkControlOwner();
-        if (_feeBps > MAX_FEE_BPS) revert FeeTooHigh(_feeBps);
-        if (_feeBps != 0 && feeDeposit() == address(0)) revert FeeDepositNotSet();
-        _getFeeStorage().feeBps = _feeBps;
-        emit DefaultFeeBpsSet(_feeBps);
+        _checkFeeBps(_feeBps);
+        _setDefaultFeeBps(_feeBps);
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // Rate limits: tighten-only for the manager role. The owner keeps the full setters.
-    // ---------------------------------------------------------------------------------------------
-
-    /// @notice Lowers limits only. Fails if a config raises the limit/window rate or enables a peer.
-    function tightenRateLimits(RateLimitConfig[] calldata _rateLimitConfigs, bool _outbound) external {
-        _checkControlRole(ControlRole.RATE_LIMIT_MANAGER);
-        for (uint256 i = 0; i < _rateLimitConfigs.length; i++) {
-            RateLimitConfig calldata config = _rateLimitConfigs[i];
-            _requireTightening(_outbound ? outboundRateLimits[config.peerEid] : inboundRateLimits[config.peerEid], config);
-        }
-        if (_outbound) _setOutboundRateLimits(_rateLimitConfigs);
-        else _setInboundRateLimits(_rateLimitConfigs);
+    /// @notice Sets the fee for one lane, keyed by peer endpoint id. A disabled entry falls back to the default.
+    function setFeeBps(uint256 _id, uint16 _feeBps, bool _enabled) external {
+        _checkControlOwner();
+        _checkFeeBps(_feeBps);
+        _setFeeBps(_id, _feeBps, _enabled);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -275,33 +198,21 @@ abstract contract OFTControls is
         return ((_amountSentLD - fee) / _dustUnit) * _dustUnit; // rounds down to the shared-decimals unit
     }
 
-    /// @dev Credit redirect uses this contract's own allowlist, not an external one.
-    function _isAllowlisted(address _user) internal view virtual override returns (bool) {
-        return isAllowlisted(_user);
+    /// @dev Where `_amountLD` for `_to` should go: `_to` itself, or the escrow when `_to` is blocked.
+    function _redirectCredit(address _to, uint256 _amountLD) internal returns (address) {
+        if (isAllowlisted(_to)) return _to;
+        address escrow_ = escrow();
+        emit CreditRedirected(_to, escrow_, _amountLD);
+        return escrow_;
     }
 
     // ---------------------------------------------------------------------------------------------
     // Internal
     // ---------------------------------------------------------------------------------------------
 
-    function _updateAllowlist(
-        mapping(address user => bool listed) storage _list,
-        SetAllowlistParam[] calldata _params,
-        bool _blacklist
-    ) private {
-        for (uint256 i = 0; i < _params.length; i++) {
-            SetAllowlistParam calldata param = _params[i];
-            // forge-lint: disable-next-line(require-revert-in-loop)
-            if (_list[param.user] == param.isEnabled) revert AllowlistStateIdempotent(param.user, param.isEnabled);
-            _list[param.user] = param.isEnabled;
-            if (_blacklist) emit BlacklistUpdated(param.user, param.isEnabled);
-            else emit WhitelistUpdated(param.user, param.isEnabled);
-        }
-    }
-
-    function _getAllowlistStorage() private pure returns (AllowlistStorage storage $) {
+    function _getEscrowStorage() private pure returns (EscrowStorage storage $) {
         assembly {
-            $.slot := ALLOWLIST_STORAGE_LOCATION
+            $.slot := ESCROW_STORAGE_LOCATION
         }
     }
 
@@ -311,25 +222,8 @@ abstract contract OFTControls is
         }
     }
 
-    function _setLanesPaused(uint32[] calldata _eids, bool _paused) private {
-        LanePauseStorage storage $ = _getLanePauseStorage();
-        for (uint256 i = 0; i < _eids.length; i++) {
-            $.paused[_eids[i]] = _paused;
-            emit LanePauseSet(_eids[i], _paused);
-        }
-    }
-
-    function _getFeeStorage() private pure returns (FeeStorage storage $) {
-        assembly {
-            $.slot := FEE_STORAGE_LOCATION
-        }
-    }
-
-    /// @dev New rate (limit / window) must not exceed the current rate. An unconfigured peer cannot be enabled.
-    function _requireTightening(RateLimit storage _current, RateLimitConfig calldata _new) private view {
-        if (_current.window == 0 || _new.window == 0 || _new.limit * _current.window > _current.limit * _new.window) {
-            // forge-lint: disable-next-line(require-revert-in-loop)
-            revert RateLimitNotTightening(_new.peerEid);
-        }
+    function _checkFeeBps(uint16 _feeBps) private view {
+        if (_feeBps > MAX_FEE_BPS) revert FeeTooHigh(_feeBps);
+        if (_feeBps != 0 && feeDeposit() == address(0)) revert FeeDepositNotSet();
     }
 }

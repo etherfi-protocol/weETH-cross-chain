@@ -2,8 +2,6 @@
 pragma solidity ^0.8.22;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ERC1967Utils} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {EnumerableRoles} from "solady/src/auth/EnumerableRoles.sol";
@@ -24,8 +22,7 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgra
     uint256 public constant UNPAUSER_ROLE = 3;
     uint256 internal constant BLACKLISTER_ROLE = 4;
     uint256 internal constant WHITELISTER_ROLE = 5;
-    uint256 internal constant RATE_LIMIT_MANAGER_ROLE = 6;
-    uint256 internal constant PAUSER_UNTIL_ROLE = 7;
+    uint256 internal constant PAUSER_UNTIL_ROLE = 6;
 
     event FundsRecovered(address indexed from, address indexed to, uint256 amount);
 
@@ -48,17 +45,6 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgra
     function initialize(string memory name, string memory symbol, address owner) external virtual initializer {
         __OFT_init(name, symbol, owner);
         __Ownable_init(owner);
-    }
-
-    /**
-     * @dev Turns on the OFTControls storage. Call it in the same transaction as the upgrade
-     * (`ProxyAdmin.upgradeAndCall`) or from the owner.
-     * @param feeDeposit_ Address that receives bridge fees once a fee is set
-     * @param pauseUntilDuration_ Length of a guardian pause, between 8 hours and 3 days
-     */
-    function initializeControls(address feeDeposit_, uint256 pauseUntilDuration_) external reinitializer(3) {
-        if (msg.sender != owner() && msg.sender != ERC1967Utils.getAdmin()) revert UnauthorizedInitializer();
-        __OFTControls_init(feeDeposit_, pauseUntilDuration_);
     }
 
     function _debitView(
@@ -105,17 +91,14 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgra
         _mint(_account, _amount);
     }
 
-    function transfer(address to, uint256 value) public virtual override(ERC20Upgradeable, IERC20) returns (bool) {
-        _requireAllowlisted(msg.sender);
-        _requireAllowlisted(to);
-        return super.transfer(to, value);
-    }
-
-    function transferFrom(address from, address to, uint256 value) public virtual override(ERC20Upgradeable, IERC20) returns (bool) {
-        _requireAllowlisted(msg.sender);
-        _requireAllowlisted(from);
-        _requireAllowlisted(to);
-        return super.transferFrom(from, to, value);
+    /// @dev Holder-to-holder transfers need both sides allowlisted. Mint and burn skip the check: the paths
+    /// that mint or burn (`mint`, `_debit`, `_credit`) check the allowlist themselves.
+    function _update(address from, address to, uint256 value) internal virtual override {
+        if (from != address(0) && to != address(0)) {
+            _requireAllowlisted(from);
+            _requireAllowlisted(to);
+        }
+        super._update(from, to, value);
     }
 
     /**
@@ -124,7 +107,9 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgra
      */
     function recoverFunds(address _from, address _to, uint256 _amount) external onlyOwner() {
         if (allowlistMode() != AllowlistMode.Blacklist || !isBlacklisted(_from)) revert CannotRecoverFrom(_from);
-        _transfer(_from, _to, _amount);
+        if (_to == address(0)) revert ERC20InvalidReceiver(address(0));
+        // skips the allowlist check in this contract's _update, which would block a blacklisted sender
+        ERC20Upgradeable._update(_from, _to, _amount);
         emit FundsRecovered(_from, _to, _amount);
     }
     
@@ -164,8 +149,7 @@ contract EtherfiOFTUpgradeable is OFTUpgradeable, EnumerableRoles, PausableUpgra
         else if (role == ControlRole.UNPAUSER) id = UNPAUSER_ROLE;
         else if (role == ControlRole.PAUSER_UNTIL) id = PAUSER_UNTIL_ROLE;
         else if (role == ControlRole.BLACKLISTER) id = BLACKLISTER_ROLE;
-        else if (role == ControlRole.WHITELISTER) id = WHITELISTER_ROLE;
-        else id = RATE_LIMIT_MANAGER_ROLE;
+        else id = WHITELISTER_ROLE;
         if (!hasRole(msg.sender, id)) revert EnumerableRolesUnauthorized();
     }
 

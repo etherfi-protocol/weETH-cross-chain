@@ -6,14 +6,13 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ERC1967Utils} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
-import {ICreditRedirect} from "@layerzerolabs/utils-evm-contracts/contracts/interfaces/ICreditRedirect.sol";
+import {IAllowlist} from "@layerzerolabs/utils-evm-contracts/contracts/interfaces/IAllowlist.sol";
 import {SendParam, OFTReceipt, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/interfaces/IOFT.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/OAppUpgradeable.sol";
 
 import {EtherfiOFTUpgradeable} from "../contracts/EtherfiOFTUpgradeable.sol";
 import {EtherfiOFTAdapterUpgradeable} from "../contracts/EtherFiOFTAdapterUpgradeable.sol";
 import {OFTControls} from "../contracts/OFTControls.sol";
-import {PairwiseRateLimiter} from "../contracts/PairwiseRateLimiter.sol";
 
 interface IOFTCommon {
     function owner() external view returns (address);
@@ -49,7 +48,6 @@ contract OFTControlsUpgradeForkTest is Test {
     address user2 = makeAddr("user2");
     address guardian = makeAddr("guardian");
     address blacklister = makeAddr("blacklister");
-    address rateManager = makeAddr("rateManager");
     address pauser = makeAddr("pauser");
     address unpauser = makeAddr("unpauser");
     address minter = makeAddr("minter");
@@ -127,7 +125,7 @@ contract OFTControlsUpgradeForkTest is Test {
         ProxyAdmin(c.proxyAdmin).upgradeAndCall(
             ITransparentUpgradeableProxy(c.oft),
             newImpl,
-            abi.encodeWithSignature("initializeControls(address,uint256)", feeDeposit, 1 days)
+            ""
         );
     }
 
@@ -178,11 +176,12 @@ contract OFTControlsUpgradeForkTest is Test {
 
     function _controlsAreOffByDefault(Target memory c) internal view {
         OFTControls oft = OFTControls(c.oft);
-        assertEq(uint8(oft.allowlistMode()), uint8(OFTControls.AllowlistMode.Open), "allowlist not open");
+        assertEq(uint8(oft.allowlistMode()), uint8(IAllowlist.AllowlistMode.Open), "allowlist not open");
         assertEq(oft.defaultFeeBps(), 0, "fee not zero");
-        assertEq(oft.feeDeposit(), feeDeposit, "fee deposit");
+        assertEq(oft.feeDeposit(), address(0), "fee deposit");
+        assertEq(oft.escrow(), address(0), "escrow");
         assertEq(oft.pausedUntil(), 0, "pausedUntil");
-        assertEq(oft.pauseUntilDuration(), 1 days, "duration");
+        assertEq(oft.pauseUntilDuration(), 0, "duration");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -251,16 +250,18 @@ contract OFTControlsUpgradeForkTest is Test {
 
     function _controlsWorkOnRealState(Target memory c, uint32 peerEid) internal {
         // roles: the legacy chains start with empty roles after the upgrade, so grant what each check needs
-        _grant(c, guardian, 7, keccak256("PAUSER_UNTIL_ROLE"));
+        _grant(c, guardian, 6, keccak256("PAUSER_UNTIL_ROLE"));
         _grant(c, blacklister, 4, keccak256("BLACKLISTER_ROLE"));
-        _grant(c, rateManager, 6, keccak256("RATE_LIMIT_MANAGER_ROLE"));
+        vm.startPrank(IOFTCommon(c.oft).owner());
+        OFTControls(c.oft).setFeeDeposit(feeDeposit);
+        OFTControls(c.oft).setPauseUntilDuration(1 days);
+        vm.stopPrank();
         _grant(c, pauser, 2, keccak256("PAUSER_ROLE"));
         _grant(c, unpauser, 3, keccak256("UNPAUSER_ROLE"));
 
         _feeWorks(c, peerEid);
         _blacklistWorks(c, peerEid);
         _pausesWork(c, peerEid);
-        _rateManagerCanOnlyTighten(c, peerEid);
     }
 
     /// @dev The destination receives the post-fee amount and the fee deposit gets the difference.
@@ -285,11 +286,11 @@ contract OFTControlsUpgradeForkTest is Test {
 
         _fund(c, user2, 3 ether);
         vm.startPrank(owner);
-        oft.setCreditRedirectConfig(ICreditRedirect.CreditRedirectConfig(c.oft, escrow));
-        oft.setAllowlistMode(OFTControls.AllowlistMode.Blacklist);
+        oft.setEscrow(escrow);
+        oft.setAllowlistMode(IAllowlist.AllowlistMode.Blacklist);
         vm.stopPrank();
-        OFTControls.SetAllowlistParam[] memory params = new OFTControls.SetAllowlistParam[](1);
-        params[0] = OFTControls.SetAllowlistParam(user2, true);
+        IAllowlist.SetAllowlistParam[] memory params = new IAllowlist.SetAllowlistParam[](1);
+        params[0] = IAllowlist.SetAllowlistParam(user2, true);
         vm.prank(blacklister);
         oft.setBlacklisted(params);
 
@@ -309,7 +310,7 @@ contract OFTControlsUpgradeForkTest is Test {
 
         // back to open: the same holder can bridge again, so the revert above came from the blacklist
         vm.prank(owner);
-        oft.setAllowlistMode(OFTControls.AllowlistMode.Open);
+        oft.setAllowlistMode(IAllowlist.AllowlistMode.Open);
         if (c.adapter) _send(c, user2, peerEid, 0.1 ether);
     }
 
@@ -324,32 +325,12 @@ contract OFTControlsUpgradeForkTest is Test {
         vm.warp(until + 1);
         _send(c, user, peerEid, 0.1 ether);
 
-        uint32[] memory eids = new uint32[](1);
-        eids[0] = peerEid;
         vm.prank(pauser);
-        oft.pauseLanes(eids);
+        oft.setLanePaused(peerEid, true);
         _expectSendReverts(c, user, peerEid);
         vm.prank(unpauser);
-        oft.unpauseLanes(eids);
+        oft.setLanePaused(peerEid, false);
         _send(c, user, peerEid, 0.1 ether);
-    }
-
-    function _rateManagerCanOnlyTighten(Target memory c, uint32 peerEid) internal {
-        OFTControls oft = OFTControls(c.oft);
-        (, , uint256 limit, uint256 window) = oft.outboundRateLimits(peerEid);
-
-        PairwiseRateLimiter.RateLimitConfig[] memory lower = new PairwiseRateLimiter.RateLimitConfig[](1);
-        lower[0] = PairwiseRateLimiter.RateLimitConfig(peerEid, limit / 2, window);
-        vm.prank(rateManager);
-        oft.tightenRateLimits(lower, true);
-        (, , uint256 newLimit, ) = oft.outboundRateLimits(peerEid);
-        assertEq(newLimit, limit / 2, "limit lowered");
-
-        PairwiseRateLimiter.RateLimitConfig[] memory higher = new PairwiseRateLimiter.RateLimitConfig[](1);
-        higher[0] = PairwiseRateLimiter.RateLimitConfig(peerEid, limit * 2, window);
-        vm.prank(rateManager);
-        vm.expectRevert(abi.encodeWithSelector(OFTControls.RateLimitNotTightening.selector, peerEid));
-        oft.tightenRateLimits(higher, true);
     }
 
     function _expectSendReverts(Target memory c, address from, uint32 dstEid) internal {

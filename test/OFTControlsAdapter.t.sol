@@ -6,7 +6,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {ICreditRedirect} from "@layerzerolabs/utils-evm-contracts/contracts/interfaces/ICreditRedirect.sol";
+import {IAllowlist} from "@layerzerolabs/utils-evm-contracts/contracts/interfaces/IAllowlist.sol";
 import {SendParam, OFTReceipt, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/interfaces/IOFT.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oapp/OAppUpgradeable.sol";
 
@@ -38,7 +38,6 @@ contract OFTControlsAdapterTest is Test {
     address unpauser = makeAddr("unpauser");
     address guardian = makeAddr("guardian");
     address blacklister = makeAddr("blacklister");
-    address rateManager = makeAddr("rateManager");
     address feeDeposit = makeAddr("feeDeposit");
     address escrow = makeAddr("escrow");
     address user = makeAddr("user");
@@ -59,7 +58,8 @@ contract OFTControlsAdapterTest is Test {
         limits[0] = PairwiseRateLimiter.RateLimitConfig(PEER_EID, LIMIT, WINDOW);
 
         vm.startPrank(owner);
-        adapter.initializeControls(feeDeposit, 1 days);
+        adapter.setFeeDeposit(feeDeposit);
+        adapter.setPauseUntilDuration(1 days);
         adapter.setPeer(PEER_EID, peer);
         adapter.setOutboundRateLimits(limits);
         adapter.setInboundRateLimits(limits);
@@ -67,7 +67,6 @@ contract OFTControlsAdapterTest is Test {
         adapter.grantRole(adapter.UNPAUSER_ROLE(), unpauser);
         adapter.grantRole(adapter.PAUSER_UNTIL_ROLE(), guardian);
         adapter.grantRole(adapter.BLACKLISTER_ROLE(), blacklister);
-        adapter.grantRole(adapter.RATE_LIMIT_MANAGER_ROLE(), rateManager);
         vm.stopPrank();
 
         weETH.mint(user, 1000 ether);
@@ -101,14 +100,14 @@ contract OFTControlsAdapterTest is Test {
 
     function _enableBlacklistMode() internal {
         vm.startPrank(owner);
-        adapter.setCreditRedirectConfig(ICreditRedirect.CreditRedirectConfig(address(adapter), escrow));
-        adapter.setAllowlistMode(OFTControls.AllowlistMode.Blacklist);
+        adapter.setEscrow(escrow);
+        adapter.setAllowlistMode(IAllowlist.AllowlistMode.Blacklist);
         vm.stopPrank();
     }
 
     function _blacklist(address account) internal {
-        OFTControls.SetAllowlistParam[] memory params = new OFTControls.SetAllowlistParam[](1);
-        params[0] = OFTControls.SetAllowlistParam(account, true);
+        IAllowlist.SetAllowlistParam[] memory params = new IAllowlist.SetAllowlistParam[](1);
+        params[0] = IAllowlist.SetAllowlistParam(account, true);
         vm.prank(blacklister);
         adapter.setBlacklisted(params);
     }
@@ -157,8 +156,8 @@ contract OFTControlsAdapterTest is Test {
     }
 
     function test_Roles_UseAccessControl() public {
-        OFTControls.SetAllowlistParam[] memory params = new OFTControls.SetAllowlistParam[](1);
-        params[0] = OFTControls.SetAllowlistParam(user, true);
+        IAllowlist.SetAllowlistParam[] memory params = new IAllowlist.SetAllowlistParam[](1);
+        params[0] = IAllowlist.SetAllowlistParam(user, true);
         bytes32 role = adapter.BLACKLISTER_ROLE();
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, user, role));
@@ -197,10 +196,8 @@ contract OFTControlsAdapterTest is Test {
     }
 
     function test_LanePause_BlocksOnlyThatLane() public {
-        uint32[] memory eids = new uint32[](1);
-        eids[0] = PEER_EID;
         vm.prank(pauser);
-        adapter.pauseLanes(eids);
+        adapter.setLanePaused(PEER_EID, true);
 
         vm.expectRevert(abi.encodeWithSelector(OFTControls.LanePaused.selector, PEER_EID));
         this.sendExternal(user, 1 ether);
@@ -208,38 +205,8 @@ contract OFTControlsAdapterTest is Test {
         this.receiveExternal(user2, 1 ether);
 
         vm.prank(unpauser);
-        adapter.unpauseLanes(eids);
+        adapter.setLanePaused(PEER_EID, false);
         _send(user, 1 ether, 1 ether);
     }
 
-    function test_Tighten_ManagerCanLowerButNotRaise() public {
-        PairwiseRateLimiter.RateLimitConfig[] memory lower = new PairwiseRateLimiter.RateLimitConfig[](1);
-        lower[0] = PairwiseRateLimiter.RateLimitConfig(PEER_EID, LIMIT / 2, WINDOW);
-        PairwiseRateLimiter.RateLimitConfig[] memory higher = new PairwiseRateLimiter.RateLimitConfig[](1);
-        higher[0] = PairwiseRateLimiter.RateLimitConfig(PEER_EID, LIMIT * 2, WINDOW);
-
-        vm.startPrank(rateManager);
-        adapter.tightenRateLimits(lower, true);
-        vm.expectRevert(abi.encodeWithSelector(OFTControls.RateLimitNotTightening.selector, PEER_EID));
-        adapter.tightenRateLimits(higher, true);
-        vm.stopPrank();
-
-        (, , uint256 limit, ) = adapter.outboundRateLimits(PEER_EID);
-        assertEq(limit, LIMIT / 2);
-    }
-
-    function test_InitializeControls_OnlyOnceAndNotForStrangers() public {
-        vm.prank(owner);
-        vm.expectRevert();
-        adapter.initializeControls(feeDeposit, 1 days);
-
-        EtherfiOFTAdapterUpgradeable impl = new EtherfiOFTAdapterUpgradeable(address(weETH), address(endpoint));
-        EtherfiOFTAdapterUpgradeable fresh = EtherfiOFTAdapterUpgradeable(address(new ERC1967Proxy(
-            address(impl),
-            abi.encodeCall(EtherfiOFTAdapterUpgradeable.initialize, (owner, owner))
-        )));
-        vm.prank(user);
-        vm.expectRevert(OFTControls.UnauthorizedInitializer.selector);
-        fresh.initializeControls(user, 1 days);
-    }
 }
