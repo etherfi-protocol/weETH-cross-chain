@@ -90,18 +90,7 @@ abstract contract PairwiseRateLimiter {
      * - `window`: Defines the duration of the rate limiting window.
      */
     function _setOutboundRateLimits(RateLimitConfig[] memory _rateLimitConfigs) internal virtual {
-        unchecked {
-            for (uint256 i = 0; i < _rateLimitConfigs.length; i++) {
-                RateLimit storage rl = outboundRateLimits[_rateLimitConfigs[i].peerEid];
-
-                // @dev Ensure we checkpoint the existing rate limit as to not retroactively apply the new decay rate.
-                _checkAndUpdateOutboundRateLimit(_rateLimitConfigs[i].peerEid, 0);
-
-                // @dev Does NOT reset the amountInFlight/lastUpdated of an existing rate limit.
-                rl.limit = _rateLimitConfigs[i].limit;
-                rl.window = _rateLimitConfigs[i].window;
-            }
-        }
+        _writeRateLimits(outboundRateLimits, _rateLimitConfigs);
         emit OutboundRateLimitsChanged(_rateLimitConfigs);
     }
 
@@ -113,19 +102,26 @@ abstract contract PairwiseRateLimiter {
      * - `window`: Defines the duration of the rate limiting window.
      */
     function _setInboundRateLimits(RateLimitConfig[] memory _rateLimitConfigs) internal virtual {
+        _writeRateLimits(inboundRateLimits, _rateLimitConfigs);
+        emit InboundRateLimitsChanged(_rateLimitConfigs);
+    }
+
+    function _writeRateLimits(
+        mapping(uint32 eid => RateLimit limit) storage _limits,
+        RateLimitConfig[] memory _rateLimitConfigs
+    ) private {
         unchecked {
             for (uint256 i = 0; i < _rateLimitConfigs.length; i++) {
-                RateLimit storage rl = inboundRateLimits[_rateLimitConfigs[i].peerEid];
+                RateLimit storage rl = _limits[_rateLimitConfigs[i].peerEid];
 
                 // @dev Ensure we checkpoint the existing rate limit as to not retroactively apply the new decay rate.
-                _checkAndUpdateInboundRateLimit(_rateLimitConfigs[i].peerEid, 0);
+                _consume(rl, 0);
 
                 // @dev Does NOT reset the amountInFlight/lastUpdated of an existing rate limit.
                 rl.limit = _rateLimitConfigs[i].limit;
                 rl.window = _rateLimitConfigs[i].window;
             }
         }
-        emit InboundRateLimitsChanged(_rateLimitConfigs);
     }
 
     /**
@@ -165,19 +161,7 @@ abstract contract PairwiseRateLimiter {
      */
     function _checkAndUpdateOutboundRateLimit(uint32 _dstEid, uint256 _amount) internal virtual {
         // @dev By default dstEid that have not been explicitly set will return amountCanBeSent == 0.
-        RateLimit storage rl = outboundRateLimits[_dstEid];
-
-        (uint256 currentAmountInFlight, uint256 amountCanBeSent) = _amountCanBeSent(
-            rl.amountInFlight,
-            rl.lastUpdated,
-            rl.limit,
-            rl.window
-        );
-        if (_amount > amountCanBeSent) revert OutboundRateLimitExceeded();
-
-        // @dev Update the storage to contain the new amount and current timestamp.
-        rl.amountInFlight = currentAmountInFlight + _amount;
-        rl.lastUpdated = block.timestamp;
+        if (!_consume(outboundRateLimits[_dstEid], _amount)) revert OutboundRateLimitExceeded();
     }
 
     /**
@@ -188,19 +172,26 @@ abstract contract PairwiseRateLimiter {
      * @param _amount The amount to check for rate limit constraints.
      */
     function _checkAndUpdateInboundRateLimit(uint32 _srcEid, uint256 _amount) internal virtual {
-        // @dev By default dstEid that have not been explicitly set will return amountCanBeSent == 0.
-        RateLimit storage rl = inboundRateLimits[_srcEid];
+        // @dev By default srcEid that have not been explicitly set will return amountCanBeReceived == 0.
+        if (!_consume(inboundRateLimits[_srcEid], _amount)) revert InboundRateLimitExceeded();
+    }
 
+    /**
+     * @dev Takes `_amount` from the rate limit if it fits. Updates amountInFlight and lastUpdated on success
+     * and returns false, leaving storage unchanged, when the amount exceeds what can be sent.
+     */
+    function _consume(RateLimit storage rl, uint256 _amount) private returns (bool) {
         (uint256 currentAmountInFlight, uint256 amountCanBeSent) = _amountCanBeSent(
             rl.amountInFlight,
             rl.lastUpdated,
             rl.limit,
             rl.window
         );
-        if (_amount > amountCanBeSent) revert InboundRateLimitExceeded();
+        if (_amount > amountCanBeSent) return false;
 
         // @dev Update the storage to contain the new amount and current timestamp.
         rl.amountInFlight = currentAmountInFlight + _amount;
         rl.lastUpdated = block.timestamp;
+        return true;
     }
 }
