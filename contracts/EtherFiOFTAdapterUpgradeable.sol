@@ -1,14 +1,23 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.22;
 
 import {OFTAdapterUpgradeable} from "@layerzerolabs/lz-evm-oapp-v2/contracts-upgradeable/oft/OFTAdapterUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {PairwiseRateLimiter} from "./PairwiseRateLimiter.sol";
+import {ERC1967Utils} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {OFTControls} from "./OFTControls.sol";
 
-contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpgradeable, PausableUpgradeable, PairwiseRateLimiter {
+contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpgradeable, PausableUpgradeable, OFTControls {
+    using SafeERC20 for IERC20;
+
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UNPAUSER_ROLE = keccak256("UNPAUSER_ROLE");
+    bytes32 public constant BLACKLISTER_ROLE = keccak256("BLACKLISTER_ROLE");
+    bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");
+    bytes32 public constant RATE_LIMIT_MANAGER_ROLE = keccak256("RATE_LIMIT_MANAGER_ROLE");
+    bytes32 public constant PAUSER_UNTIL_ROLE = keccak256("PAUSER_UNTIL_ROLE");
 
     /**
      * @dev Constructor for EtherfiOFTAdapterUpgradeable
@@ -31,13 +40,36 @@ contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     }
 
+    /**
+     * @dev Turns on the OFTControls storage. Call it in the same transaction as the upgrade
+     * (`ProxyAdmin.upgradeAndCall`) or from the owner.
+     * @param _feeDeposit Address that receives bridge fees once a fee is set
+     * @param _pauseUntilDuration Length of a guardian pause, between 8 hours and 3 days
+     */
+    function initializeControls(address _feeDeposit, uint256 _pauseUntilDuration) external reinitializer(3) {
+        if (msg.sender != owner() && msg.sender != ERC1967Utils.getAdmin()) revert UnauthorizedInitializer();
+        __OFTControls_init(_feeDeposit, _pauseUntilDuration);
+    }
+
+    function _debitView(
+        uint256 _amountLD,
+        uint256 _minAmountLD,
+        uint32 _dstEid
+    ) internal view virtual override returns (uint256 amountSentLD, uint256 amountReceivedLD) {
+        amountSentLD = _removeDust(_amountLD);
+        amountReceivedLD = _amountAfterFee(_dstEid, amountSentLD, decimalConversionRate);
+        if (amountReceivedLD < _minAmountLD) revert SlippageExceeded(amountReceivedLD, _minAmountLD);
+    }
+
     function _debit(
         uint256 _amountLD,
         uint256 _minAmountLD,
         uint32 _dstEid
     ) internal virtual override whenNotPaused() returns (uint256 amountSentLD, uint256 amountReceivedLD) {
+        _checkOutbound(_dstEid, msg.sender);
         _checkAndUpdateOutboundRateLimit(_dstEid, _amountLD);
-        return super._debit(_amountLD, _minAmountLD, _dstEid);
+        (amountSentLD, amountReceivedLD) = super._debit(_amountLD, _minAmountLD, _dstEid);
+        if (amountSentLD > amountReceivedLD) innerToken.safeTransfer(feeDeposit(), amountSentLD - amountReceivedLD);
     }
 
     function _credit(
@@ -45,8 +77,11 @@ contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
         uint256 _amountLD,
         uint32 _srcEid
     ) internal virtual override whenNotPaused() returns (uint256 amountReceivedLD) {
+        _checkInbound(_srcEid);
         _checkAndUpdateInboundRateLimit(_srcEid, _amountLD);
-        return super._credit(_to, _amountLD, 0);
+        address recipient = _redirectCredit(_to, _amountLD);
+        super._credit(recipient, _amountLD, 0);
+        return recipient == _to ? _amountLD : 0;
     }
 
     function setOutboundRateLimits(RateLimitConfig[] calldata _rateLimitConfigs) external onlyOwner() {
@@ -78,5 +113,18 @@ contract EtherfiOFTAdapterUpgradeable is OFTAdapterUpgradeable, AccessControlUpg
      */
     function revokeRole(bytes32 role, address account) public override onlyOwner() {
         _revokeRole(role, account);
+    }
+
+    function _checkControlOwner() internal view virtual override {
+        _checkOwner();
+    }
+
+    function _checkControlRole(ControlRole role) internal view virtual override {
+        if (role == ControlRole.PAUSER) _checkRole(PAUSER_ROLE);
+        else if (role == ControlRole.UNPAUSER) _checkRole(UNPAUSER_ROLE);
+        else if (role == ControlRole.PAUSER_UNTIL) _checkRole(PAUSER_UNTIL_ROLE);
+        else if (role == ControlRole.BLACKLISTER) _checkRole(BLACKLISTER_ROLE);
+        else if (role == ControlRole.WHITELISTER) _checkRole(WHITELISTER_ROLE);
+        else _checkRole(RATE_LIMIT_MANAGER_ROLE);
     }
 }
