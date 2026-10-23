@@ -17,15 +17,25 @@
   resolved "https://registry.yarnpkg.com/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.3.44.tgz#63c967dcb6aeaa4275fa51c6976b27133f9c16ff"
   integrity sha512-oNtwl4HGCogFVOr45T3FfrkB0/CRW2eGAEScBw/FY/6mlncnS4dqlvrCJ3SFlK17cu1w9q0ztD3NzS9sUrb7vw==
 
-"@openzeppelin/contracts-upgradeable@^5.0.2":
+"@layerzerolabs/utils-evm-contracts@1.2.84":
+  version "1.2.84"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/utils-evm-contracts/-/utils-evm-contracts-1.2.84.tgz#53b12699ace0df2ae2a36b8172818d787ea93f33"
+  integrity sha512-ZkS97YlkYbepAUtukCcv8/rg8/ZtGwakp7rsAWrkrrBV81y3diLCxS3Ved/rKQP/B6grJRcvFcj9r4RNU2MBzg==
+
+"@layerzerolabs/utils-upgradeable-evm-contracts@1.2.84":
+  version "1.2.84"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/utils-upgradeable-evm-contracts/-/utils-upgradeable-evm-contracts-1.2.84.tgz#78f98d3de5ac4cc907469b53e4515304c0b00862"
+  integrity sha512-NIkdfEDqC6WPVfcCT9yhP7j2/0GTJGXnaQY72NSVHNtsOoGXEZ7H2KMf9b1dEam89b/Zx79V++nydYeMIHjz7g==
+
+"@openzeppelin/contracts-upgradeable@5.0.2":
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-5.0.2.tgz#3e5321a2ecdd0b206064356798c21225b6ec7105"
   integrity sha512-0MmkHSHiW2NRFiT9/r5Lu4eJq5UJ4/tzlOgYXNAIj/ONkQTVnz22pLxDvp4C4uZ9he7ZFvGn3Driptn1/iU7tQ==
 
-"@openzeppelin/contracts@^5.0.1":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.0.2.tgz#b1d03075e49290d06570b2fd42154d76c2a5d210"
-  integrity sha512-ytPc6eLGcHHnapAZ9S+5qsdomhjo6QBHTDRRBFfTxXIpsicMhVPouPgmUPebZZZGX7vt9USA+Z+0M0dSVtSUEA==
+"@openzeppelin/contracts@5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.0.1.tgz#93da90fc209a0a4ff09c1deb037fbb35e4020890"
+  integrity sha512-yQJaT5HDp9hYOOp4jTYxMsR02gdFZFXhewX5HW9Jo4fsqSVqqyIO/xTHdWDaKX5a3pv1txmf076Lziz+sO7L1w==
 
 "ds-test@github:dapphub/ds-test":
   version "1.0.0"
