@@ -10,13 +10,15 @@
     "@layerzerolabs/lz-evm-messagelib-v2": "^2.1.27",
     "@layerzerolabs/lz-evm-oapp-v2": "^2.1.18",
     "@layerzerolabs/lz-evm-protocol-v2": "^2.1.27",
+    "@layerzerolabs/utils-evm-contracts": "1.2.84",
+    "@layerzerolabs/utils-upgradeable-evm-contracts": "1.2.84",
     "solidity-bytes-utils": "^0.8.2",
     "solady": "github:Vectorized/solady",
     "layerzero-v2": "github:JorgeAtPaladin/LayerZero-v2#21ad027cf323c323619566d2c9d1f2fa404f021f"
   },
   "resolutions": {
-    "@openzeppelin/contracts-upgradeable": "5.0.2",
-    "@openzeppelin/contracts": "5.0.1"
+    "@openzeppelin/contracts-upgradeable": "5.3.0",
+    "@openzeppelin/contracts": "5.3.0"
   },
   "scripts": {
     "build": "yarn install && forge install && forge build",
@@ -24,7 +26,7 @@
     "test:policy": "node --test \"tools/*.test.mjs\""
   },
   "overrides": {
-    "@openzeppelin/contracts-upgradeable": "5.0.2",
-    "@openzeppelin/contracts": "5.0.1"
+    "@openzeppelin/contracts-upgradeable": "5.3.0",
+    "@openzeppelin/contracts": "5.3.0"
   }
 }

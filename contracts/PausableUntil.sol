@@ -44,21 +44,21 @@ abstract contract PausableUntil {
     }
 
     function _requireNotPausedUntil() internal view {
-        uint256 pausedUntil = _getPausableUntilStorage().pausedUntil;
-        if (pausedUntil >= block.timestamp) revert ContractPausedUntil(pausedUntil);
+        uint256 until = _getPausableUntilStorage().pausedUntil;
+        if (until >= block.timestamp) revert ContractPausedUntil(until);
     }
 
     function _requirePausedUntil() internal view {
-        uint256 pausedUntil = _getPausableUntilStorage().pausedUntil;
-        if (pausedUntil < block.timestamp) revert ContractNotPausedUntil();
+        uint256 until = _getPausableUntilStorage().pausedUntil;
+        if (until < block.timestamp) revert ContractNotPausedUntil();
     }
 
     function _pauseUntil() internal {
         _requireNotPausedUntil();
         PausableUntilStorage storage $ = _getPausableUntilStorage();
-        uint256 pauseUntilDuration = $.pauseUntilDuration;
-        if ($.lastPauseTimestamp[msg.sender] + pauseUntilDuration + PAUSER_UNTIL_COOLDOWN > block.timestamp) revert PauserCooldownStillActive();
-        $.pausedUntil = block.timestamp + pauseUntilDuration;
+        uint256 duration = $.pauseUntilDuration;
+        if ($.lastPauseTimestamp[msg.sender] + duration + PAUSER_UNTIL_COOLDOWN > block.timestamp) revert PauserCooldownStillActive();
+        $.pausedUntil = block.timestamp + duration;
         $.lastPauseTimestamp[msg.sender] = block.timestamp;
         emit PausedUntil($.pausedUntil);
     }

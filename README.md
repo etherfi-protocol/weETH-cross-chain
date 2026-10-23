@@ -16,6 +16,7 @@ in the adapter.
 |------|------|-----------|
 | OFT | `contracts/` | `EtherfiOFTUpgradeable` (L2 token), `EtherFiOFTAdapterUpgradeable` (mainnet lockbox) |
 | Rate limiting | `contracts/` | `PairwiseRateLimiter`, `PausableUntil` |
+| OFT controls | `contracts/` | `OFTControls` (guardian pause, lane pause, allowlist, bridge fee, credit redirect) |
 | Governance | `contracts/` | `EtherFiTimelock` |
 | Native minting | `contracts/native-minting/` | `EtherfiL1SyncPoolETH`, `EtherfiL2ExchangeRateProvider`, `BucketRateLimiter`, `DummyTokenUpgradeable` |
 | L2 sync pools | `contracts/native-minting/l2-syncpools/` | OP Stack, Scroll, and Hydra (Berachain) sync pools |
@@ -79,6 +80,8 @@ The build uses Solidity 0.8.22. Fork tests need the chain RPC URLs in `.env`.
   single registry entry.
 - [Native minting upgrade timelock](NATIVE-MINTING-UPGRADE-TIMELOCK.md): move native-minting
   upgrade authority from the controller Safe to the upgrade timelock.
+- [weETH OFT controls upgrade](OFT-CONTROLS-UPGRADE.md): what the new OFT and adapter
+  implementation adds, who can use each control, and how to roll it out.
 
 ---
 
